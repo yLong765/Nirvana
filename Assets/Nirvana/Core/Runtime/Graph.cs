@@ -28,6 +28,7 @@ namespace Nirvana
         {
             var newNode = Node.Create(this, pos);
             allNodes.Add(newNode);
+            newNode.ID = allNodes.Count;
             return newNode;
         }
     }

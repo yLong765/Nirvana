@@ -14,11 +14,22 @@ namespace Nirvana
         [SerializeField] private Graph _graph;
         [SerializeField] private Vector2 _position;
         [SerializeField] private Vector2 _size;
-    
-        public int ID => _id;
+
+        public int ID
+        {
+            get => _id;
+            set => _id = value;
+        }
+
         public string title => _title;
         public string Introduction => _introduction;
         public Graph graph => _graph;
+
+        public Vector2 position
+        {
+            get => _position;
+            set => _position = value;
+        }
 
         public Rect rect
         {
@@ -40,10 +51,15 @@ namespace Nirvana
             _position = pos;
             _size = MIN_SIZE;
         }
-        
+
         public static Node Create(Graph graph, Vector2 pos)
         {
             return new Node(graph, pos);
         }
+
+#if UNITY_EDITOR
+        
+        public bool isSelected => Editor.GraphUtils.activeNodes.Contains(this);
+#endif
     }
 }

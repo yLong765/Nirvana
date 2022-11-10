@@ -6,20 +6,39 @@ using UnityEditor;
 
 namespace Nirvana.Editor
 {
-    public class NodeEditor : EditorWindow
+    public class NodeEditor
     {
         public static void DrawNodeGUI(Node node)
         {
-            node.rect = GUILayout.Window(node.ID, node.rect, id =>
-            {
-                DrawNodeWindowGUI(id, node.rect);
-            }, string.Empty, GUILayout.MinWidth(Node.MIN_SIZE.x), GUILayout.MinHeight(Node.MIN_SIZE.y));
+            node.rect = GUILayout.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, string.Empty,
+                GUILayout.MinWidth(Node.MIN_SIZE.x), GUILayout.MinHeight(Node.MIN_SIZE.y));
         }
 
-        private static void DrawNodeWindowGUI(int id, Rect windowRect)
+        private static void DrawNodeWindowGUI(int id, Node node)
         {
-            GUI.Box(windowRect, string.Empty);
+            GUI.Box(node.rect, string.Empty);
             GUILayout.Label("title");
+
+            var e = Event.current;
+
+            if (e.type == EventType.MouseDown)
+            {
+                if (e.button == 0)
+                {
+                    GraphUtils.activeNodes = null;
+                    GraphUtils.AddActiveNode(node);
+                }
+            }
+
+            if (e.type == EventType.MouseDrag)
+            {
+                var activeNodes = GraphUtils.activeNodes;
+                for (int i = 0; i < activeNodes.Count; i++)
+                {
+                    activeNodes[i].position += e.delta;
+                }
+                e.Use();
+            }
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Nirvana.Editor
                 e.Use();
             }
 
-            if (e.type == EventType.MouseDrag)
+            if (e.button == 2 && e.type == EventType.MouseDrag)
             {
                 _offset += e.delta;
                 e.Use();
