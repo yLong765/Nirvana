@@ -11,26 +11,20 @@ namespace Nirvana.Editor
     {
         public static void DrawNodeGUI(Node node)
         {
-            GUI.color = Color.white.SetRGB(0.3f);
-
-            node.rect = GUILayout.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, string.Empty, Styles.nodeWindow,
+            node.rect = EditorUtils.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, ColorUtils.gray21, Styles.normalBG,
                 GUILayout.MinWidth(Node.MIN_SIZE.x), GUILayout.MinHeight(Node.MIN_SIZE.y));
-            
-            GUI.color = Color.white;
 
             if (node.isSelected)
             {
-                GUI.color = Color.green;
-                GUI.Box(node.rect, string.Empty, Styles.nodeWindowHeightLine);
-                GUI.color = Color.white;
+                EditorUtils.DrawBox(node.rect, ColorUtils.mediumPurple, Styles.windowHeightLine);
             }
         }
 
         private static void DrawNodeWindowGUI(int id, Node node)
         {
-            GUILayout.BeginHorizontal(Styles.nodeWindowTitleBg);
-            GUILayout.Label(node.title, Styles.nodeWindowTitle);
-            GUILayout.EndHorizontal();
+            var titleHeight = Styles.windowTitle.CalcSize(node.titleContent).y + 3;
+            EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.darkOrang2, Styles.normalBG);
+            GUILayout.Label(node.title, Styles.windowTitle);
 
             var e = Event.current;
             if (e.type == EventType.MouseDown)
@@ -40,15 +34,17 @@ namespace Nirvana.Editor
                     GraphUtils.activeNodes = null;
                     GraphUtils.AddActiveNode(node);
                 }
+
+                e.Use();
             }
 
             if (e.type == EventType.MouseDrag)
             {
-                var activeNodes = GraphUtils.activeNodes;
-                for (int i = 0; i < activeNodes.Count; i++)
+                foreach (var t in GraphUtils.activeNodes)
                 {
-                    activeNodes[i].position += e.delta;
+                    t.position += e.delta;
                 }
+
                 e.Use();
             }
         }

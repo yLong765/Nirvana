@@ -3,71 +3,105 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public static class Styles
+namespace Nirvana.Editor
 {
-    private static GUIStyle _nodeWindow;
-    public static GUIStyle nodeWindow
+    public static class Styles
     {
-        get
+        private static GUIStyle _normalBG;
+        public static GUIStyle normalBG
         {
-            if (_nodeWindow == null)
+            get
             {
-                _nodeWindow = new GUIStyle();
-                _nodeWindow.normal.background = Texture2D.whiteTexture;
-                _nodeWindow.padding = new RectOffset(0, 0, 0, 0);
+                if (_normalBG == null)
+                {
+                    _normalBG = new GUIStyle();
+                    _normalBG.normal.background = Texture2D.whiteTexture;
+                }
+
+                return _normalBG;
             }
-
-            return _nodeWindow;
         }
-    }
 
-    private static GUIStyle _nodeWindowTitle;
-    public static GUIStyle nodeWindowTitle
-    {
-        get
+        private static GUIStyle _windowTitle;
+        public static GUIStyle windowTitle
         {
-            if (_nodeWindowTitle == null)
+            get
             {
-                _nodeWindowTitle = new GUIStyle(EditorStyles.boldLabel);
-                _nodeWindowTitle.fontSize = 14;
-                _nodeWindowTitle.alignment = TextAnchor.UpperCenter;
+                if (_windowTitle == null)
+                {
+                    _windowTitle = new GUIStyle(EditorStyles.boldLabel);
+                    _windowTitle.fontSize = 14;
+                    _windowTitle.alignment = TextAnchor.UpperCenter;
+                    _windowTitle.normal.textColor = Color.black;
+                }
+
+                return _windowTitle;
             }
-
-            return _nodeWindowTitle;
         }
-    }
 
-    private static GUIStyle _nodeWindowTitleBG;
-    public static GUIStyle nodeWindowTitleBg
-    {
-        get
+        private static GUIStyle _windowHeightLine;
+        public static GUIStyle windowHeightLine
         {
-            if (_nodeWindowTitleBG == null)
+            get
             {
-                _nodeWindowTitleBG = new GUIStyle();
-                _nodeWindowTitleBG.normal.background = Texture2D.normalTexture;
-                _nodeWindowTitleBG.margin = new RectOffset(1, 1, 1, 0);
+                if (_windowHeightLine == null)
+                {
+                    _windowHeightLine = new GUIStyle();
+                    _windowHeightLine.normal.background = Texture2D.whiteTexture;
+                    _windowHeightLine.overflow = new RectOffset(2, 2, 2, 1);
+                }
+
+                return _windowHeightLine;
             }
-
-            return _nodeWindowTitleBG;
         }
-    }
 
-    private static GUIStyle _nodeWindowHeightLine;
-    public static GUIStyle nodeWindowHeightLine
-    {
-        get
+        private static GUIStyle _menuTitle;
+        public static GUIStyle menuTitle
         {
-            if (_nodeWindowHeightLine == null)
+            get
             {
-                _nodeWindowHeightLine = new GUIStyle();
-                _nodeWindowHeightLine.normal.background = Texture2D.whiteTexture;
-                _nodeWindowHeightLine.border = new RectOffset(10, 10, 10, 10);
-                _nodeWindowHeightLine.overflow = new RectOffset(2, 2, 2, 2);
+                if (_menuTitle == null)
+                {
+                    _menuTitle = new GUIStyle(EditorStyles.label);
+                    _menuTitle.fontSize = 14;
+                    _menuTitle.fontStyle = FontStyle.Bold;
+                    _menuTitle.alignment = TextAnchor.MiddleCenter;
+                }
+
+                return _menuTitle;
             }
-
-            return _nodeWindowHeightLine;
         }
-    }
 
+        private static GUIStyle _toolbarLeftButton;
+        public static GUIStyle toolbarLeftButton
+        {
+            get
+            {
+                if (_toolbarLeftButton == null)
+                {
+                    _toolbarLeftButton = new GUIStyle(EditorStyles.toolbarButton);
+                    _toolbarLeftButton.alignment = TextAnchor.MiddleLeft;
+                }
+
+                return _toolbarLeftButton;
+            }
+        }
+        
+        private static GUIStyle _toolbarSearchField;
+        public static GUIStyle toolbarSearchTextField
+        {
+            get
+            {
+                if (_toolbarSearchField == null)
+                {
+                    _toolbarSearchField ??= new GUIStyle("ToolbarSeachTextField");
+                    _toolbarSearchField.margin.left = 5;
+                }
+
+                return _toolbarSearchField;
+            }
+        }
+        private static GUIStyle _toolbarSearchButton;
+        public static GUIStyle toolbarSearchCancelButton => _toolbarSearchButton ??= new GUIStyle("ToolbarSeachCancelButton");
+    }
 }

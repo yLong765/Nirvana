@@ -27,12 +27,13 @@ namespace Nirvana.Editor
             this.data = data;
         }
     }
-    
+
     public class GenericMenuPopup : PopupWindowContent
     {
         private List<GenericMenuItem> _items = new List<GenericMenuItem>();
         private string _title;
         private Vector2 _scrollPos;
+        private string _search;
 
         public GenericMenuPopup(string title)
         {
@@ -65,21 +66,28 @@ namespace Nirvana.Editor
             {
                 item.onClick2?.Invoke(item.data);
             }
+
             editorWindow.Close();
         }
 
         public override void OnGUI(Rect rect)
         {
-            GUILayout.Label(_title, EditorStyles.boldLabel);
+            var titleHeight = Styles.menuTitle.CalcSize(new GUIContent(_title)).y + 3;
+            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray19, Styles.normalBG);
+            GUILayout.Label(_title, Styles.menuTitle);
+            _search = EditorUtils.SearchField(_search);
             _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
-            for (int i = 0; i < _items.Count; i++)
+            foreach (var item in _items)
             {
-                var item = _items[i];
-                if (GUILayout.Button(item.name, EditorStyles.toolbarButton))
+                if (string.IsNullOrEmpty(_search) || item.name.Contains(_search))
                 {
-                    OnClick(item);
+                    if (GUILayout.Button(item.name, Styles.toolbarLeftButton))
+                    {
+                        OnClick(item);
+                    }
                 }
             }
+
             GUILayout.EndScrollView();
         }
     }

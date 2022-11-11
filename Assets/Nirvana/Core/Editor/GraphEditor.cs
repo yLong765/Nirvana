@@ -32,9 +32,12 @@ namespace Nirvana.Editor
             _graphRect = new(0, 0, position.width, position.height);
             e = Event.current;
             
+            EditorUtils.DrawBox(_graphRect, ColorUtils.gray13, Styles.normalBG);
+            
             DrawGrid(_graphRect, _offset);
             
             GUI.BeginClip(_graphRect, _offset, default, false);
+            
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();

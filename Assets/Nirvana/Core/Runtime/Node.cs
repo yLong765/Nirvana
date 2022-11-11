@@ -15,6 +15,8 @@ namespace Nirvana
         [SerializeField] private Vector2 _position;
         [SerializeField] private Vector2 _size;
 
+        private GUIContent _titleContent;
+
         public int ID
         {
             get => _id;
@@ -26,6 +28,8 @@ namespace Nirvana
             get => _title;
             set => _title = value;
         }
+
+        public GUIContent titleContent => _titleContent ??= new GUIContent(title);
         public string Introduction => _introduction;
         public Graph graph => _graph;
 
