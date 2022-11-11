@@ -21,7 +21,11 @@ namespace Nirvana
             set => _id = value;
         }
 
-        public string title => _title;
+        public string title
+        {
+            get => _title;
+            set => _title = value;
+        }
         public string Introduction => _introduction;
         public Graph graph => _graph;
 

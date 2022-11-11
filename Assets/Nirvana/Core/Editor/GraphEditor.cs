@@ -16,7 +16,10 @@ namespace Nirvana.Editor
 
         private Vector2 _offset;
         private Rect _graphRect;
+        private Event e;
         
+        private Vector2 mousePosInGraph => e.mousePosition - _offset;
+
         public Graph currentGraph { get; private set; }
 
         private void OnEnable()
@@ -27,36 +30,68 @@ namespace Nirvana.Editor
         private void OnGUI()
         {
             _graphRect = new(0, 0, position.width, position.height);
+            e = Event.current;
             
             DrawGrid(_graphRect, _offset);
-
+            
             GUI.BeginClip(_graphRect, _offset, default, false);
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();
+            
+            if (e.type == EventType.MouseDown && e.button == 0 && _graphRect.Contains(mousePosInGraph)) {
+                if ( e.clickCount == 1 ) {
+                    GraphUtils.activeNodes = null;
+                    e.Use();
+                }
+            }
+            
             GUI.EndClip();
-
-            var e = Event.current;
-
-            if (e.button == 1 && e.type == EventType.MouseDown)
+            
+            
+            if (e.type == EventType.MouseDown)
             {
-                GenericMenu menu = new GenericMenu();
-                menu.AddItem(new GUIContent("测试"), false, () =>
+                if (e.button == 1)
                 {
-                    currentGraph.AddNode(e.mousePosition - _offset);
-                });
-                menu.AddItem(new GUIContent("鼠标位置"), false, () =>
-                {
-                    Debug.Log(e.mousePosition);
-                });
-                menu.ShowAsContext();
-                e.Use();
+                    GenericMenuPopup menu = new GenericMenuPopup("Fields");
+                    menu.AddItem("测试", () => { currentGraph.AddNode(mousePosInGraph); });
+                    menu.AddItem("鼠标位置", () => { Debug.Log(e.mousePosition); });
+                    menu.Show();
+                    e.Use();
+                }
             }
 
             if (e.button == 2 && e.type == EventType.MouseDrag)
             {
                 _offset += e.delta;
                 e.Use();
+            }
+
+            if (GUIUtility.keyboardControl == 0)
+            {
+                if (e.type == EventType.ValidateCommand)
+                {
+                    if (e.commandName == "Copy" || e.commandName == "Cut" || e.commandName == "Paste" || e.commandName == "SoftDelete" ||
+                        e.commandName == "Delete" || e.commandName == "Duplicate")
+                    {
+                        e.Use();
+                    }
+                }
+
+                if (e.type == EventType.ExecuteCommand)
+                {
+                    if (e.commandName == "SoftDelete" || e.commandName == "Delete")
+                    {
+                        foreach (var node in GraphUtils.activeNodes.ToArray())
+                        {
+                            currentGraph.RemoveNode(node);
+                        }
+
+                        GraphUtils.activeNodes = null;
+                    }
+
+                    e.Use();
+                }
             }
         }
 

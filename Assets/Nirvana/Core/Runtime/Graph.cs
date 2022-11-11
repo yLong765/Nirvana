@@ -29,7 +29,16 @@ namespace Nirvana
             var newNode = Node.Create(this, pos);
             allNodes.Add(newNode);
             newNode.ID = allNodes.Count;
+            newNode.title = "Is A Title";
             return newNode;
+        }
+
+        public void RemoveNode(Node node)
+        {
+            if (_nodes.Contains(node))
+            {
+                _nodes.Remove(node);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NodeCanvas.Editor;
 using UnityEngine;
 using UnityEditor;
 
@@ -10,17 +11,28 @@ namespace Nirvana.Editor
     {
         public static void DrawNodeGUI(Node node)
         {
-            node.rect = GUILayout.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, string.Empty,
+            GUI.color = Color.white.SetRGB(0.3f);
+
+            node.rect = GUILayout.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, string.Empty, Styles.nodeWindow,
                 GUILayout.MinWidth(Node.MIN_SIZE.x), GUILayout.MinHeight(Node.MIN_SIZE.y));
+            
+            GUI.color = Color.white;
+
+            if (node.isSelected)
+            {
+                GUI.color = Color.green;
+                GUI.Box(node.rect, string.Empty, Styles.nodeWindowHeightLine);
+                GUI.color = Color.white;
+            }
         }
 
         private static void DrawNodeWindowGUI(int id, Node node)
         {
-            GUI.Box(node.rect, string.Empty);
-            GUILayout.Label("title");
+            GUILayout.BeginHorizontal(Styles.nodeWindowTitleBg);
+            GUILayout.Label(node.title, Styles.nodeWindowTitle);
+            GUILayout.EndHorizontal();
 
             var e = Event.current;
-
             if (e.type == EventType.MouseDown)
             {
                 if (e.button == 0)
