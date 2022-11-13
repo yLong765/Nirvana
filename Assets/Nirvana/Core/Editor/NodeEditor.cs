@@ -18,18 +18,20 @@ namespace Nirvana.Editor
             {
                 EditorUtils.DrawBox(node.rect, ColorUtils.mediumPurple, Styles.windowHeightLine);
             }
+            
+            DrawTag(node);
         }
 
         private static void DrawNodeWindowGUI(int id, Node node)
         {
-            var titleHeight = Styles.windowTitle.CalcSize(node.titleContent).y + 3;
-            EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.darkOrang2, Styles.normalBG);
+            var titleHeight = Styles.CalcSize(Styles.windowTitle, node.title).y;
+            EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
             GUILayout.Label(node.title, Styles.windowTitle);
 
             var e = Event.current;
-            if (e.type == EventType.MouseDown)
+            if (e.type == EventType.MouseDown && e.button != 2)
             {
-                if (e.button == 0)
+                //if (e.button == 0 || e.button == 1)
                 {
                     GraphUtils.activeNodes = null;
                     GraphUtils.AddActiveNode(node);
@@ -46,6 +48,30 @@ namespace Nirvana.Editor
                 }
 
                 e.Use();
+            }
+
+            if (e.type == EventType.MouseUp && e.button == 1)
+            {
+                GenericMenu menu = new GenericMenu();
+                menu.AddItem(new GUIContent("Delete"), false, () =>
+                {
+                    node.graph.RemoveNode(node);
+                    GraphUtils.activeNodes = null;
+                });
+                menu.ShowAsContext();
+                
+                e.Use();
+            }
+        }
+
+        private static void DrawTag(Node node)
+        {
+            if (!string.IsNullOrEmpty(node.tag))
+            {
+                var tagText = "Tag:" + node.tag;
+                var tagHeight = Styles.CalcHeight(Styles.tagText, tagText, node.rect.width);
+                var footRect = new Rect(node.rect.x, node.rect.y + node.rect.height, node.rect.width, tagHeight);
+                GUI.Box(footRect, tagText, Styles.tagText);
             }
         }
     }

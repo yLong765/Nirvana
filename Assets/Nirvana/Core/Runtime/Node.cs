@@ -10,12 +10,10 @@ namespace Nirvana
     {
         [SerializeField] private int _id;
         [SerializeField] private string _title;
-        [SerializeField] private string _introduction;
+        [SerializeField] private string _tag;
         [SerializeField] private Graph _graph;
         [SerializeField] private Vector2 _position;
         [SerializeField] private Vector2 _size;
-
-        private GUIContent _titleContent;
 
         public int ID
         {
@@ -29,8 +27,11 @@ namespace Nirvana
             set => _title = value;
         }
 
-        public GUIContent titleContent => _titleContent ??= new GUIContent(title);
-        public string Introduction => _introduction;
+        public string tag
+        {
+            get => _tag;
+            set => _tag = value;
+        }
         public Graph graph => _graph;
 
         public Vector2 position
@@ -53,21 +54,21 @@ namespace Nirvana
 
         public static Vector2 MIN_SIZE = new(80, 50);
 
-        public Node(Graph graph, Vector2 pos)
+        public Node(Graph graph, Type type, Vector2 pos)
         {
             _graph = graph;
+            _title = type.Name;
             _position = pos;
             _size = MIN_SIZE;
         }
 
-        public static Node Create(Graph graph, Vector2 pos)
+        public static Node Create(Graph graph, Type type, Vector2 pos)
         {
-            return new Node(graph, pos);
+            return new Node(graph, type, pos);
         }
 
 #if UNITY_EDITOR
-        
-        public bool isSelected => Editor.GraphUtils.activeNodes.Contains(this);
+        public bool isSelected => GraphUtils.activeNodes.Contains(this);
 #endif
     }
 }

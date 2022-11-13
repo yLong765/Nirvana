@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Nirvana.Editor
+namespace Nirvana
 {
     public static class GraphUtils
     {
+        public static bool allowClick = true;
+        
         private static List<WeakReference<Node>> _activeNodes = new List<WeakReference<Node>>();
 
         public static List<Node> activeNodes

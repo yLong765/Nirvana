@@ -7,6 +7,18 @@ namespace Nirvana.Editor
 {
     public static class Styles
     {
+        public static Vector2 CalcSize(GUIStyle style, string value)
+        {
+            var size = style.CalcSize(new GUIContent(value));
+            size.y += 3f;
+            return size;
+        }
+
+        public static float CalcHeight(GUIStyle style, string value, float width)
+        {
+            return style.CalcHeight(new GUIContent(value), width);
+        }
+        
         private static GUIStyle _normalBG;
         public static GUIStyle normalBG
         {
@@ -32,7 +44,8 @@ namespace Nirvana.Editor
                     _windowTitle = new GUIStyle(EditorStyles.boldLabel);
                     _windowTitle.fontSize = 14;
                     _windowTitle.alignment = TextAnchor.UpperCenter;
-                    _windowTitle.normal.textColor = Color.black;
+                    _windowTitle.normal.textColor = ColorUtils.darkOrang2;
+                    _windowTitle.hover.textColor = ColorUtils.darkOrang2;
                 }
 
                 return _windowTitle;
@@ -69,6 +82,92 @@ namespace Nirvana.Editor
                 }
 
                 return _menuTitle;
+            }
+        }
+
+        private static GUIStyle _tagText;
+        public static GUIStyle tagText
+        {
+            get
+            {
+                if (_tagText == null)
+                {
+                    _tagText = new GUIStyle(EditorStyles.label);
+                    _tagText.normal.textColor = ColorUtils.gray51;
+                    _tagText.hover.textColor = ColorUtils.gray51;
+                    _tagText.fontSize = 10;
+                    _tagText.wordWrap = true;
+                }
+
+                return _tagText;
+            }
+        }
+
+        private static GUIStyle _inspectorTitle;
+        public static GUIStyle inspectorTitle
+        {
+            get
+            {
+                if (_inspectorTitle == null)
+                {
+                    _inspectorTitle = new GUIStyle(EditorStyles.label);
+                    _inspectorTitle.fontSize = 16;
+                    _inspectorTitle.fontStyle = FontStyle.Bold;
+                    _inspectorTitle.normal.textColor = ColorUtils.darkOrang2;
+                    _inspectorTitle.hover.textColor = ColorUtils.darkOrang2;
+                    _inspectorTitle.alignment = TextAnchor.MiddleCenter;
+                }
+
+                return _inspectorTitle;
+            }
+        }
+
+        private static GUIStyle _symbolText;
+        public static GUIStyle symbolText
+        {
+            get
+            {
+                if (_symbolText == null)
+                {
+                    _symbolText = new GUIStyle(EditorStyles.label);
+                    _symbolText.fontSize = 20;
+                    _symbolText.fontStyle = FontStyle.Bold;
+                    _symbolText.alignment = TextAnchor.MiddleLeft;
+                    _symbolText.padding.left = 4;
+                }
+
+                return _symbolText;
+            }
+        }
+
+        private static GUIStyle _graphTitle;
+        public static GUIStyle graphTitle
+        {
+            get
+            {
+                if (_graphTitle == null)
+                {
+                    _graphTitle = new GUIStyle(EditorStyles.label);
+                    _graphTitle.fontSize = 14;
+                    _graphTitle.alignment = TextAnchor.MiddleCenter;
+                }
+
+                return _graphTitle;
+            }
+        }
+        
+        private static GUIStyle _defaultLabel;
+        public static GUIStyle defaultLabel {
+            get
+            {
+                if ( _defaultLabel == null ) {
+                    _defaultLabel = new GUIStyle(EditorStyles.label);
+                    _defaultLabel.normal.textColor = ColorUtils.gray51;
+                    _defaultLabel.fontSize = 11;
+                    _defaultLabel.alignment = TextAnchor.MiddleLeft;
+                    _defaultLabel.padding.left = 6;
+                }
+                return _defaultLabel;
             }
         }
 

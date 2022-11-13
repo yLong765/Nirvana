@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace Nirvana.Editor
         private List<GenericMenuItem> _items = new List<GenericMenuItem>();
         private string _title;
         private Vector2 _scrollPos;
-        private string _search;
+        private string _search = string.Empty;
 
         public GenericMenuPopup(string title)
         {
@@ -72,14 +73,16 @@ namespace Nirvana.Editor
 
         public override void OnGUI(Rect rect)
         {
-            var titleHeight = Styles.menuTitle.CalcSize(new GUIContent(_title)).y + 3;
+            var titleHeight = Styles.CalcSize(Styles.menuTitle, _title).y;
             EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray19, Styles.normalBG);
             GUILayout.Label(_title, Styles.menuTitle);
             _search = EditorUtils.SearchField(_search);
+            var searchLow = _search.ToLower();
+            
             _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
             foreach (var item in _items)
             {
-                if (string.IsNullOrEmpty(_search) || item.name.Contains(_search))
+                if (string.IsNullOrEmpty(searchLow) || item.name.ToLower().Contains(searchLow))
                 {
                     if (GUILayout.Button(item.name, Styles.toolbarLeftButton))
                     {

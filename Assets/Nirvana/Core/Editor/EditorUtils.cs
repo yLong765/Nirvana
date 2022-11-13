@@ -22,7 +22,6 @@ namespace Nirvana.Editor
             return newRect;
         }
 
-        private static string search = string.Empty;
         public static string SearchField(string search)
         {
             GUILayout.BeginHorizontal();
@@ -35,6 +34,13 @@ namespace Nirvana.Editor
 
             GUILayout.EndHorizontal();
             return search;
+        }
+        
+        public static void DefaultTextField(string check, string defaultText) {
+            if ( string.IsNullOrEmpty(check) ) {
+                var lastRect = GUILayoutUtility.GetLastRect();
+                GUI.Label(lastRect, defaultText, Styles.defaultLabel);
+            }
         }
     }
 }
