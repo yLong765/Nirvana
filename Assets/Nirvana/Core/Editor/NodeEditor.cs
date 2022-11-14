@@ -29,38 +29,42 @@ namespace Nirvana.Editor
             GUILayout.Label(node.title, Styles.windowTitle);
 
             var e = Event.current;
-            if (e.type == EventType.MouseDown && e.button != 2)
+            if (GraphUtils.allowClick)
             {
-                //if (e.button == 0 || e.button == 1)
+                if (e.type == EventType.MouseDown && e.button != 2)
                 {
-                    GraphUtils.activeNodes = null;
-                    GraphUtils.AddActiveNode(node);
+                    //if (e.button == 0 || e.button == 1)
+                    {
+                        GraphUtils.activeNodes = null;
+                        GraphUtils.AddActiveNode(node);
+                        GUIUtility.keyboardControl = 0;
+                    }
+
+                    e.Use();
                 }
 
-                e.Use();
-            }
-
-            if (e.type == EventType.MouseDrag)
-            {
-                foreach (var t in GraphUtils.activeNodes)
+                if (e.type == EventType.MouseDrag)
                 {
-                    t.position += e.delta;
+                    foreach (var t in GraphUtils.activeNodes)
+                    {
+                        t.position += e.delta;
+                    }
+
+                    e.Use();
                 }
 
-                e.Use();
-            }
-
-            if (e.type == EventType.MouseUp && e.button == 1)
-            {
-                GenericMenu menu = new GenericMenu();
-                menu.AddItem(new GUIContent("Delete"), false, () =>
+                if (e.type == EventType.MouseUp && e.button == 1)
                 {
-                    node.graph.RemoveNode(node);
-                    GraphUtils.activeNodes = null;
-                });
-                menu.ShowAsContext();
-                
-                e.Use();
+                    GenericMenu menu = new GenericMenu();
+                    menu.AddItem(new GUIContent("Delete"), false, () =>
+                    {
+                        node.graph.RemoveNode(node);
+                        GraphUtils.activeNodes = null;
+                    });
+                    menu.ShowAsContext();
+
+                    e.Use();
+                }
             }
         }
 

@@ -44,8 +44,8 @@ namespace Nirvana.Editor
                     _windowTitle = new GUIStyle(EditorStyles.boldLabel);
                     _windowTitle.fontSize = 14;
                     _windowTitle.alignment = TextAnchor.UpperCenter;
-                    _windowTitle.normal.textColor = ColorUtils.darkOrang2;
-                    _windowTitle.hover.textColor = ColorUtils.darkOrang2;
+                    _windowTitle.normal.textColor = ColorUtils.orange1;
+                    _windowTitle.hover.textColor = ColorUtils.orange1;
                 }
 
                 return _windowTitle;
@@ -103,22 +103,22 @@ namespace Nirvana.Editor
             }
         }
 
-        private static GUIStyle _inspectorTitle;
-        public static GUIStyle inspectorTitle
+        private static GUIStyle _panelTitle;
+        public static GUIStyle panelTitle
         {
             get
             {
-                if (_inspectorTitle == null)
+                if (_panelTitle == null)
                 {
-                    _inspectorTitle = new GUIStyle(EditorStyles.label);
-                    _inspectorTitle.fontSize = 16;
-                    _inspectorTitle.fontStyle = FontStyle.Bold;
-                    _inspectorTitle.normal.textColor = ColorUtils.darkOrang2;
-                    _inspectorTitle.hover.textColor = ColorUtils.darkOrang2;
-                    _inspectorTitle.alignment = TextAnchor.MiddleCenter;
+                    _panelTitle = new GUIStyle(EditorStyles.label);
+                    _panelTitle.fontSize = 16;
+                    _panelTitle.fontStyle = FontStyle.Bold;
+                    _panelTitle.normal.textColor = ColorUtils.orange1;
+                    _panelTitle.hover.textColor = ColorUtils.orange1;
+                    _panelTitle.alignment = TextAnchor.MiddleCenter;
                 }
 
-                return _inspectorTitle;
+                return _panelTitle;
             }
         }
 
@@ -134,6 +134,7 @@ namespace Nirvana.Editor
                     _symbolText.fontStyle = FontStyle.Bold;
                     _symbolText.alignment = TextAnchor.MiddleLeft;
                     _symbolText.padding.left = 4;
+                    _symbolText.padding.top = 3;
                 }
 
                 return _symbolText;

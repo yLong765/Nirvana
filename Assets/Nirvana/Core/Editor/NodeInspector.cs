@@ -9,37 +9,38 @@ namespace Nirvana.Editor
     public class NodeInspector : EditorWindow
     {
         private static NodeInspector window;
-        
-        private Node _currentNode;
-        public Node currentNode
-        {
-            set => _currentNode = value;
-        }
-        
+
         private void OnGUI()
         {
-            if (_currentNode == null)
-            { 
-                EditorGUILayout.HelpBox(new GUIContent("No select one node in graph!"));
-                return;
-            }
-            
-            GUILayout.Label(_currentNode.title, Styles.menuTitle);
-            _currentNode.tag = GUILayout.TextField(_currentNode.tag);
-            EditorUtils.DefaultTextField(_currentNode.tag, "Introduction...");
+            DrawGUI(position, GraphUtils.activeNodes.Count == 1 ? GraphUtils.activeNodes[0] : null);
         }
 
-        public static void DrawGUI(Node node)
+        public static void DrawGUI(Rect rect, Node node)
         {
-            if (window == null)
-            {
-                window = GetWindow<NodeInspector>();
-                window.titleContent = new GUIContent("Inspector");
-                window.Show();
+            if (node == null)
+            { 
+                EditorGUILayout.HelpBox("No select one node in graph!", MessageType.Info);
             }
-
-            window.currentNode = node;
-            window.Repaint();
+            else
+            {
+                var titleHeight = Styles.CalcSize(Styles.panelTitle, node.title).y;
+                EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
+                GUILayout.Label(node.title, Styles.panelTitle);
+                if (!GraphUtils.isInspectorPanel)
+                {
+                    var lastRect = GUILayoutUtility.GetLastRect().ModifyWitch(18);
+                    if (GUI.Button(lastRect, "◂", Styles.symbolText))
+                    {
+                        // Open InspectorGUI
+                        GraphUtils.isInspectorPanel = true;
+                    }
+                }
+                
+                GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 2, rect.xMax - 2, rect.yMax - 2));
+                node.tag = EditorGUILayout.TextField(node.tag);
+                EditorUtils.DefaultTextField(node.tag, "Tag...");
+                GUILayout.EndArea();
+            }
         }
     }
 }

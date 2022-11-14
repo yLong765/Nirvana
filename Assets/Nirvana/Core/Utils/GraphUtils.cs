@@ -8,7 +8,9 @@ namespace Nirvana
     public static class GraphUtils
     {
         public static bool allowClick = true;
-        
+        public static bool isInspectorPanel = false;
+        public static bool showBlackboardPanel = true;
+
         private static List<WeakReference<Node>> _activeNodes = new List<WeakReference<Node>>();
 
         public static List<Node> activeNodes

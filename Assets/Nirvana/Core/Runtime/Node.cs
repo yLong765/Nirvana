@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Nirvana
 {
     [Serializable]
-    public class Node
+    public class Node 
     {
         [SerializeField] private int _id;
         [SerializeField] private string _title;

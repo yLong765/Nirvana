@@ -13,7 +13,12 @@ namespace Nirvana
         [SerializeField] private Vector2 _offset;
         [SerializeField] private string _name;
         
-        public Blackboard blackboard => _blackboard;
+        public Blackboard blackboard
+        {
+            get => _blackboard;
+            set => _blackboard = value;
+        }
+
         public List<Node> allNodes => _nodes;
 
         public Vector2 offset
@@ -57,6 +62,11 @@ namespace Nirvana
             {
                 allNodes[i].ID = i;
             }
+        }
+
+        public void AddVariable()
+        {
+            
         }
     }
 }

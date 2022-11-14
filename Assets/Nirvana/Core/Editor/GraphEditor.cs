@@ -18,8 +18,9 @@ namespace Nirvana.Editor
         }
 
         private static Event e;
+        private static Vector2 realMousePosition;
+        private static Vector2 graphMousePosition;
         private static Rect graphRect;
-        private static Rect inspectorRect;
 
         private static Vector2 graphOffset
         {
@@ -37,57 +38,70 @@ namespace Nirvana.Editor
         private static float GRAPH_LEFT = 200;
         private static float GRAPH_RIGHT = 2;
         private static float GRAPH_BOTTOM = 2;
-        
+
         public static Graph currentGraph { get; private set; }
-        
+
         private static Vector2 MousePosToGraph(Vector2 mousePos)
         {
-            return mousePos - graphOffset;
+            var offset = mousePos - graphOffset;
+            offset.x -= GRAPH_LEFT;
+            offset.y -= GRAPH_TOP;
+            return offset;
         }
 
         private void OnEnable()
         {
+            
             currentGraph ??= new Graph();
             currentGraph.name = "Graph Canvas";
+            currentGraph.blackboard = new Blackboard();
+            
         }
 
         private void OnGUI()
         {
-            inspectorRect = Rect.MinMaxRect(2, GRAPH_TOP + 2, GRAPH_LEFT, position.height - GRAPH_BOTTOM);
             graphRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
+
             e = Event.current;
+            realMousePosition = e.mousePosition;
+            graphMousePosition = MousePosToGraph(realMousePosition);
 
             EditorUtils.DrawBox(graphRect, ColorUtils.gray13, Styles.normalBG);
             DrawGrid(graphRect, graphOffset);
             NodesWindowPrevEvent();
-            
+
             GUI.BeginClip(graphRect, graphOffset, default, false);
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();
             GUI.EndClip();
 
-            NodesWindowPostEvent(MousePosToGraph(e.mousePosition));
+            NodesWindowPostEvent();
             DrawToolbar(currentGraph);
+            var inspectorRect = Rect.MinMaxRect(0, GRAPH_TOP, GRAPH_LEFT, position.height);
             DrawInspector(inspectorRect);
+            var blackboardRect = DrawBlackboard();
+            GraphUtils.allowClick = graphRect.Contains(realMousePosition) && !inspectorRect.Contains(realMousePosition) &&
+                                    !blackboardRect.Contains(realMousePosition);
         }
 
         private static void NodesWindowPrevEvent()
         {
-            if (graphRect.Contains(MousePosToGraph(e.mousePosition)) && e.type == EventType.MouseDrag && e.button == 2)
+            if (GraphUtils.allowClick && e.type == EventType.MouseDrag && e.button == 2)
             {
                 graphOffset += e.delta;
                 e.Use();
             }
         }
 
-        private static void NodesWindowPostEvent(Vector2 mousePosInGraph)
+        private static void NodesWindowPostEvent()
         {
-            if (graphRect.Contains(MousePosToGraph(e.mousePosition)) && e.type == EventType.MouseDown)
+            if (GraphUtils.allowClick && e.type == EventType.MouseDown)
             {
                 if (e.button == 0)
                 {
-                    if ( e.clickCount == 1 ) {
+                    if (e.clickCount == 1)
+                    {
                         GraphUtils.activeNodes = null;
                         e.Use();
                     }
@@ -98,8 +112,9 @@ namespace Nirvana.Editor
                     var types = TypeUtils.GetChildTypes(typeof(object));
                     foreach (var t in types)
                     {
-                        menu.AddItem(t.Name, () => { currentGraph.AddNode(t, mousePosInGraph); });
+                        menu.AddItem(t.Name, () => { currentGraph.AddNode(t, graphMousePosition); });
                     }
+
                     menu.Show();
                     e.Use();
                 }
@@ -148,7 +163,7 @@ namespace Nirvana.Editor
                     Handles.DrawLine(new Vector3(x, rect.yMin), new Vector3(x, rect.yMax));
                 }
             }
-            
+
             var yMin = rect.yMin + offset.y % step;
             var yMax = rect.yMax;
             for (float y = yMin; y < yMax; y += step)
@@ -158,10 +173,10 @@ namespace Nirvana.Editor
                     Handles.DrawLine(new Vector3(rect.xMin, y), new Vector3(rect.xMax, y));
                 }
             }
-            
+
             Handles.color = Color.white;
         }
-        
+
         private static void DrawNodesGUI(Graph graph)
         {
             var allNodes = graph.allNodes;
@@ -177,50 +192,60 @@ namespace Nirvana.Editor
             if (GUILayout.Button("File", EditorStyles.toolbarButton, GUILayout.MaxWidth(50)))
             {
                 GenericMenu menu = new GenericMenu();
-                menu.AddItem(new GUIContent("Export Json"), false, () =>
-                {
-                    Debug.Log("Export Json");
-                });
+                menu.AddItem(new GUIContent("Export Json"), false, () => { Debug.Log("Export Json"); });
                 menu.ShowAsContext();
             }
+
             GUILayout.FlexibleSpace();
             GUILayout.Label(graph.name, Styles.graphTitle);
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Blackboard", EditorStyles.toolbarButton, GUILayout.MaxWidth(80)))
             {
-                
+                GraphUtils.showBlackboardPanel = !GraphUtils.showBlackboardPanel;
             }
+
             GUILayout.EndHorizontal();
         }
 
         private static void DrawInspector(Rect rect)
         {
-            //EditorUtils.DrawBox(rect, Color.blue, Styles.normalBG);
-            GUI.BeginClip(new Rect(0, 0, rect.width, rect.height));
-            GUILayout.BeginArea(new Rect(2, GRAPH_TOP + 2, rect.width - 2, rect.height - GRAPH_TOP - 2));
-            
-            var currentNode = GraphUtils.activeNodes.Count == 1 ? GraphUtils.activeNodes[0] : null;
-            if (currentNode == null)
-            { 
-                EditorGUILayout.HelpBox("No select one node in graph!", MessageType.Info);
-            }
-            else
-            {
-                var titleHeight = Styles.CalcSize(Styles.inspectorTitle, currentNode.title).y;
-                EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
-                GUILayout.Label(currentNode.title, Styles.inspectorTitle);
-                var lastRect = GUILayoutUtility.GetLastRect().ModifyWitch(18);
-                if (GUI.Button(lastRect, "◂", Styles.symbolText))
-                {
-                    // Open InspectorGUI
-                }
-                GUILayout.Space(4f);
-                currentNode.tag = GUILayout.TextField(currentNode.tag);
-                EditorUtils.DefaultTextField(currentNode.tag, "Tag...");
-            }
-
+            var clipRect = new Rect(0, GRAPH_TOP, rect.width, rect.height);
+            var areaRect = Rect.MinMaxRect(0, 2, rect.width, rect.height - GRAPH_BOTTOM - 2);
+            GUI.BeginClip(clipRect);
+            GUILayout.BeginArea(areaRect);
+            NodeInspector.DrawGUI(rect, GraphUtils.activeNodes.Count == 1 ? GraphUtils.activeNodes[0] : null);
             GUILayout.EndArea();
             GUI.EndClip();
+        }
+
+        private static Rect DrawBlackboard()
+        {
+            var rect = default(Rect);
+            if (currentGraph.blackboard == null) return rect;
+            if (!GraphUtils.showBlackboardPanel) return rect;
+
+            var blackboardWidth = 200f;
+            var blackboardHeight = 50f;
+            rect.x = graphRect.xMax - blackboardWidth;
+            rect.y = graphRect.y;
+            rect.width = blackboardWidth;
+            rect.height = blackboardHeight;
+            var areaRect = Rect.MinMaxRect(0, 2, rect.width - 2, rect.height);
+            GUI.BeginClip(rect);
+            GUILayout.BeginArea(areaRect);
+            EditorUtils.DrawBox(new Rect(0, 0, areaRect.width, areaRect.height), ColorUtils.gray21, Styles.normalBG);
+            var titleHeight = Styles.CalcSize(Styles.panelTitle, "Blackboard").y;
+            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
+            GUILayout.Label("Blackboard", Styles.panelTitle);
+            GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 2, areaRect.xMax - 2, areaRect.yMax - 2));
+            if (GUILayout.Button("Add Variable"))
+            {
+                currentGraph.AddVariable();
+            }
+            GUILayout.EndArea();
+            GUILayout.EndArea();
+            GUI.EndClip();
+            return rect;
         }
     }
 }

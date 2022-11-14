@@ -37,7 +37,7 @@ namespace Nirvana.Editor
         }
         
         public static void DefaultTextField(string check, string defaultText) {
-            if ( string.IsNullOrEmpty(check) ) {
+            if (string.IsNullOrEmpty(check)) {
                 var lastRect = GUILayoutUtility.GetLastRect();
                 GUI.Label(lastRect, defaultText, Styles.defaultLabel);
             }
