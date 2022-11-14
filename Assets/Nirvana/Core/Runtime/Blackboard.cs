@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Nirvana
@@ -10,7 +9,9 @@ namespace Nirvana
     public class Blackboard : ISerializer
     {
         private Dictionary<string, Variable> _variables = new Dictionary<string, Variable>();
-        
+
+        public Dictionary<string, Variable> variables => _variables;
+
         public void Serialize()
         {
             

@@ -10,7 +10,11 @@ namespace Nirvana
     {
         [SerializeField] private string _name;
 
-        public string name => _name;
+        public string name
+        {
+            get => _name;
+            set => _name = value;
+        }
 
         public object value
         {

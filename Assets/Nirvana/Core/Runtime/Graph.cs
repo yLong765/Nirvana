@@ -64,9 +64,13 @@ namespace Nirvana
             }
         }
 
-        public void AddVariable()
+        public Variable AddVariable(Type type, string varName)
         {
-            
+            var variableType = typeof(Variable<>).MakeGenericType(type);
+            var newVariable = (Variable)Activator.CreateInstance(variableType);
+            newVariable.name = varName;
+            blackboard.variables[varName] = newVariable;
+            return newVariable;
         }
     }
 }
