@@ -18,6 +18,7 @@ namespace Nirvana.Editor
                 {
                     _graph = new Graph();
                     _graph.name = "Graph Canvas";
+                    _graph.blackboard = new Blackboard();
                 }
 
                 return _graph;

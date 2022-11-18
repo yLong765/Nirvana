@@ -11,9 +11,10 @@ namespace Nirvana
         [SerializeField] private int _id;
         [SerializeField] private string _title;
         [SerializeField] private string _tag;
-        [SerializeField] private Graph _graph;
         [SerializeField] private Vector2 _position;
         [SerializeField] private Vector2 _size;
+        
+        [NonSerialized] private Graph _graph;
 
         public int ID
         {

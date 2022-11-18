@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Nirvana
 {
     [Serializable]
-    public class Graph : ISerializer
+    public class Graph
     {
         [SerializeField] private List<Node> _nodes = new List<Node>();
         [SerializeField] private Blackboard _blackboard;
@@ -16,7 +16,10 @@ namespace Nirvana
         public Blackboard blackboard
         {
             get => _blackboard;
-            set => _blackboard = value;
+            set
+            {
+                _blackboard = value;
+            }
         }
 
         public List<Node> allNodes => _nodes;
@@ -33,16 +36,6 @@ namespace Nirvana
             set => _name = value;
         }
 
-        public void Serialize()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Deserialize()
-        {
-            throw new System.NotImplementedException();
-        }
-        
         public Node AddNode(Type type, Vector2 pos)
         {
             var newNode = Node.Create(this, type, pos);
@@ -63,7 +56,7 @@ namespace Nirvana
                 allNodes[i].ID = i;
             }
         }
-
+        
         public Variable AddVariable(Type type, string varName)
         {
             var variableType = typeof(Variable<>).MakeGenericType(type);

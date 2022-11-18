@@ -27,9 +27,16 @@ namespace Nirvana
         public abstract void SetValue(object value);
     }
 
+    [Serializable]
     public class Variable<T> : Variable
     {
         [SerializeField] private T _value;
+
+        public new T value
+        {
+            get => _value;
+            set => _value = value;
+        }
 
         public override Type type => typeof(T);
 

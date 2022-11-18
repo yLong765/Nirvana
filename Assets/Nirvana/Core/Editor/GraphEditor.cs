@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -55,7 +56,7 @@ namespace Nirvana.Editor
         {
             this.data = data;
             currentGraph = data.graph;
-            currentGraph.blackboard = blackboard ?? new Blackboard();
+            if (blackboard != null) currentGraph.blackboard = blackboard;
         }
         
         [UnityEditor.Callbacks.OnOpenAsset(1)]
@@ -89,14 +90,15 @@ namespace Nirvana.Editor
         {
             current = this;
 
-            if (GraphUtils.isInspectorPanel)
-            {
-                NodeInspector.OpenWindow();
-            }
+            // if (GraphUtils.isInspectorPanel)
+            // {
+            //     NodeInspector.OpenWindow();
+            // }
         }
 
         private void OnGUI()
         {
+            
             CheckGraph();
             
             _graphRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
@@ -126,7 +128,6 @@ namespace Nirvana.Editor
 
         private void CheckGraph()
         {
-            
             if (currentGraph != data.graph)
             {
                 currentGraph = data.graph;
@@ -266,7 +267,7 @@ namespace Nirvana.Editor
             GUI.EndClip();
         }
 
-        private static float blackboardHeight = 50f;
+        private static float _blackboardHeight = 50f;
         
         private static Rect DrawBlackboard()
         {
@@ -274,49 +275,21 @@ namespace Nirvana.Editor
             if (currentGraph.blackboard == null) return rect;
             if (!GraphUtils.showBlackboardPanel) return rect;
 
-            var blackboardWidth = 200f;
+            var blackboardWidth = 300f;
             rect.x = _graphRect.xMax - blackboardWidth;
             rect.y = _graphRect.y;
             rect.width = blackboardWidth;
-            rect.height = blackboardHeight;
+            rect.height = _blackboardHeight;
             var areaRect = Rect.MinMaxRect(0, 2, rect.width - 2, rect.height);
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
-            EditorUtils.DrawBox(new Rect(0, 0, areaRect.width, areaRect.height), ColorUtils.gray21, Styles.normalBG);
-            var titleHeight = Styles.CalcSize(Styles.panelTitle, "Blackboard").y;
-            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
-            GUILayout.Label("Blackboard", Styles.panelTitle);
-            GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 2, areaRect.xMax - 2, areaRect.yMax - 2));
-            if (GUILayout.Button("Add Variable"))
-            {
-                var menu = new GenericMenuPopup("Fields");
-                var types = TypeUtils.GetChildTypes(typeof(object));
-                foreach (var t in types)
-                {
-                    menu.AddItem(t.Name, () => { currentGraph.AddVariable(t, t.Name); });
-                }
-
-                menu.Show();
-            }
-
-            var variables = currentGraph.blackboard.variables;
-            foreach (var pair in variables)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.TextField(pair.Key);
-                GUILayout.TextField(pair.Value.ToString());
-                GUILayout.EndHorizontal();
-            }
             
+            BlackboardInspector.DrawGUI(areaRect, currentGraph.blackboard);
+
             if (_e.type == EventType.Repaint) {
-                blackboardHeight = GUILayoutUtility.GetLastRect().yMax + 30;
+                _blackboardHeight = GUILayoutUtility.GetLastRect().yMax + 30;
             }
-            else
-            {
-                
-                //blackboardHeight = 50f;
-            }
-            
+
             GUILayout.EndArea();
             GUILayout.EndArea();
             GUI.EndClip();
