@@ -22,10 +22,38 @@ namespace Nirvana
             set => _id = value;
         }
 
+        private string FriendlyName(Type t)
+        {
+            var s = string.Empty;
+            if (t.IsGenericType) {
+                s = !string.IsNullOrEmpty(t.Namespace) ? t.Namespace + "." + t.Name : t.Name;
+                var args = t.GetGenericArguments();
+                if ( args.Length != 0 ) {
+
+                    s = s.Replace("`" + args.Length, "");
+
+                    s += "<";
+                    for ( var i = 0; i < args.Length; i++ ) {
+                        s += ( i == 0 ? "" : ", " ) + FriendlyName(args[i]);
+                    }
+                    s += ">";
+                }
+            }
+
+            return s;
+        }
+        
         public string title
         {
-            get => _title;
-            set => _title = value;
+            get
+            {
+                if (string.IsNullOrEmpty(_title))
+                {
+                    _title = FriendlyName(GetType());
+                }
+
+                return _title;
+            }
         }
 
         public string tag
@@ -55,10 +83,11 @@ namespace Nirvana
 
         public static Vector2 MIN_SIZE = new(80, 50);
 
+        public Node() { }
+        
         public Node(Graph graph, Type type, Vector2 pos)
         {
             _graph = graph;
-            _title = type.Name;
             _position = pos;
             _size = MIN_SIZE;
         }

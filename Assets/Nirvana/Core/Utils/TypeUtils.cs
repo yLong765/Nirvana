@@ -28,5 +28,20 @@ namespace Nirvana
         {
             return defaultTypes.Where(type.IsAssignableFrom).ToList();
         }
+
+        public static List<Type> GetSubClassTypes(Type type)
+        {
+            var result = new List<Type>();
+            var allTypes = type.Assembly.GetTypes();
+            foreach (var t in allTypes)
+            {
+                if (type.IsAssignableFrom(t) && t != type)
+                {
+                    result.Add(t);
+                }
+            }
+
+            return result;
+        }
     }
 }

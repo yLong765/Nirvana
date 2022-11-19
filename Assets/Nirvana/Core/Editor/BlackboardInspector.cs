@@ -13,6 +13,8 @@ namespace Nirvana.Editor
 
         public static void DrawGUI(Rect rect, Blackboard bb)
         {
+            EditorGUI.BeginChangeCheck();
+            
             EditorUtils.DrawBox(new Rect(0, 0, rect.width, rect.height), ColorUtils.gray21, Styles.normalBG);
             var titleHeight = Styles.CalcSize(Styles.panelTitle, "Blackboard").y;
             EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
@@ -24,7 +26,11 @@ namespace Nirvana.Editor
                 var types = TypeUtils.GetChildTypes(typeof(object));
                 foreach (var t in types)
                 {
-                    menu.AddItem(t.Name, () => { bb.AddVariable(t, t.Name); });
+                    menu.AddItem(t.Name, () =>
+                    {
+                        bb.AddVariable(t, t.Name);
+                        GraphUtils.willSetDirty = true;
+                    });
                 }
                 
                 menu.Show();
@@ -56,6 +62,11 @@ namespace Nirvana.Editor
                     Debug.LogError("To Dictionary Error!");
                 }
             }
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                GraphUtils.willSetDirty = true;
+            }
         }
         
         private static void DrawVariableItem(Blackboard bb, Variable variable)
@@ -66,6 +77,7 @@ namespace Nirvana.Editor
             if (GUILayout.Button("X", GUILayout.MaxWidth(20)))
             {
                 bb.variables.Remove(variable.name);
+                GraphUtils.willSetDirty = true;
             }
             GUILayout.EndHorizontal();
         }

@@ -98,7 +98,6 @@ namespace Nirvana.Editor
 
         private void OnGUI()
         {
-            
             CheckGraph();
             
             _graphRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
@@ -124,6 +123,12 @@ namespace Nirvana.Editor
             var blackboardRect = DrawBlackboard();
             GraphUtils.allowClick = _graphRect.Contains(_realMousePosition) && !inspectorRect.Contains(_realMousePosition) &&
                                     !blackboardRect.Contains(_realMousePosition);
+
+            if (GraphUtils.willSetDirty)
+            {
+                GraphUtils.willSetDirty = false;
+                if (data != null) EditorUtility.SetDirty(data);
+            }
         }
 
         private void CheckGraph()
@@ -158,10 +163,14 @@ namespace Nirvana.Editor
                 else if (_e.button == 1)
                 {
                     var menu = new GenericMenuPopup("Fields");
-                    var types = TypeUtils.GetChildTypes(typeof(object));
+                    var types = TypeUtils.GetSubClassTypes(typeof(Node));
                     foreach (var t in types)
                     {
-                        menu.AddItem(t.Name, () => { currentGraph.AddNode(t, _graphMousePosition); });
+                        menu.AddItem(t.Name, () =>
+                        {
+                            currentGraph.AddNode(t, _graphMousePosition);
+                            GraphUtils.willSetDirty = true;
+                        });
                     }
 
                     menu.Show();
@@ -188,7 +197,8 @@ namespace Nirvana.Editor
                         {
                             currentGraph.RemoveNode(node);
                         }
-
+                        
+                        GraphUtils.willSetDirty = true;
                         GraphUtils.activeNodes = null;
                     }
 

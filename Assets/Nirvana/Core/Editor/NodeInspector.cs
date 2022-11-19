@@ -32,6 +32,8 @@ namespace Nirvana.Editor
             }
             else
             {
+                EditorGUI.BeginChangeCheck();
+                
                 var titleHeight = Styles.CalcSize(Styles.panelTitle, node.title).y;
                 EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
                 GUILayout.Label(node.title, Styles.panelTitle);
@@ -50,6 +52,11 @@ namespace Nirvana.Editor
                 node.tag = EditorGUILayout.TextField(node.tag);
                 EditorUtils.DefaultTextField(node.tag, "Tag...");
                 GUILayout.EndArea();
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    GraphUtils.willSetDirty = true;
+                }
             }
         }
     }

@@ -7,6 +7,7 @@ namespace Nirvana
 {
     public static class GraphUtils
     {
+        public static bool willSetDirty = false;
         public static bool allowClick = true;
         public static bool isInspectorPanel = false;
         public static bool showBlackboardPanel = true;
