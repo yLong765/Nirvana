@@ -1,17 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Nirvana
 {
     [Serializable]
-    public class Graph
+    public class Graph : ISerializationCallbackReceiver
     {
-        [SerializeField] private List<Node> _nodes = new List<Node>();
+        [SerializeField] private string _serializedData;
         [SerializeField] private Blackboard _blackboard;
         [SerializeField] private Vector2 _offset;
         [SerializeField] private string _name;
+        
+        private List<Node> _nodes = new List<Node>();
         
         public Blackboard blackboard
         {
@@ -22,7 +25,7 @@ namespace Nirvana
             }
         }
 
-        public List<Node> allNodes => _nodes;
+        [JsonIgnore] public List<Node> allNodes => _nodes;
 
         public Vector2 offset
         {
@@ -64,6 +67,29 @@ namespace Nirvana
             newVariable.name = varName;
             blackboard.variables[varName] = newVariable;
             return newVariable;
+        }
+
+        public void OnBeforeSerialize()
+        {
+            var settings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
+            _serializedData = JsonConvert.SerializeObject(_nodes, Formatting.None, settings);
+        }
+
+        public void OnAfterDeserialize()
+        {
+            if (!string.IsNullOrEmpty(_serializedData))
+            {
+                var settings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
+                _nodes = JsonConvert.DeserializeObject<List<Node>>(_serializedData, settings);
+
+                if (_nodes == null) return;
+
+                for (int i = 0; i < _nodes.Count; i++)
+                {
+                    _nodes[i].ID = i;
+                    _nodes[i].graph = this;
+                }
+            }
         }
     }
 }

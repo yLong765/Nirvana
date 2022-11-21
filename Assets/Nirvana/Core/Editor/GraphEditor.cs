@@ -238,10 +238,9 @@ namespace Nirvana.Editor
 
         private static void DrawNodesGUI(Graph graph)
         {
-            var allNodes = graph.allNodes;
-            foreach (var node in allNodes)
+            foreach (var node in graph.allNodes)
             {
-                NodeEditor.DrawNodeGUI(node);
+                NodeWindow.DrawNodeGUI(node);
             }
         }
 

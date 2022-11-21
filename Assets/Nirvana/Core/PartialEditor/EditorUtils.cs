@@ -1,14 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using ParadoxNotion;
-using ParadoxNotion.Design;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 
-namespace Nirvana.Editor
+namespace Nirvana
 {
     public static class EditorUtils
     {
@@ -124,7 +121,7 @@ namespace Nirvana.Editor
                 }
             }
         }
-
+        
         public static object TypeField(string title, object value, Type t, params GUILayoutOption[] options)
         {
             return TypeField(new GUIContent(title), value, t, options);

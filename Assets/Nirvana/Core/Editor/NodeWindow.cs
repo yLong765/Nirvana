@@ -7,11 +7,11 @@ using UnityEditor;
 
 namespace Nirvana.Editor
 {
-    public class NodeEditor
+    public class NodeWindow
     {
         public static void DrawNodeGUI(Node node)
         {
-            node.rect = EditorUtils.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, ColorUtils.gray21, Styles.normalBG,
+            node.rect = EditorUtils.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, ColorUtils.gray21, Styles.windowBG,
                 GUILayout.MinWidth(Node.MIN_SIZE.x), GUILayout.MinHeight(Node.MIN_SIZE.y));
 
             if (node.isSelected)
@@ -27,6 +27,8 @@ namespace Nirvana.Editor
             var titleHeight = Styles.CalcSize(Styles.windowTitle, node.title).y;
             EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
             GUILayout.Label(node.title, Styles.windowTitle);
+            
+            node.DrawNodeGUI();
 
             var e = Event.current;
             if (GraphUtils.allowClick)

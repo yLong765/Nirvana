@@ -43,5 +43,35 @@ namespace Nirvana
 
             return result;
         }
+
+        public static T GetAttribute<T>(this Type type) where T : Attribute
+        {
+            var attributes = type.GetCustomAttributes(true);
+            var targetType = typeof(T);
+            foreach (Attribute attribute in attributes)
+            {
+                if (targetType.IsInstanceOfType(attribute))
+                {
+                    return attribute as T;
+                }
+            }
+            
+            return null;
+        }
+
+        public static T GetAttribute<T>(this FieldInfo info) where T : Attribute
+        {
+            var attributes = info.GetCustomAttributes();
+             var targetType = typeof(T);
+             foreach (Attribute attribute in attributes)
+             {
+                 if (targetType.IsInstanceOfType(attribute))
+                 {
+                     return attribute as T;
+                 }
+             }
+            
+             return null;
+        }
     }
 }

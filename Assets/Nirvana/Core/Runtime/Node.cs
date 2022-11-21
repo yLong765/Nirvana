@@ -1,55 +1,35 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Nirvana
 {
-    [Serializable]
-    public class Node 
+    public partial class Node 
     {
-        [SerializeField] private int _id;
-        [SerializeField] private string _title;
-        [SerializeField] private string _tag;
-        [SerializeField] private Vector2 _position;
-        [SerializeField] private Vector2 _size;
+        private int _id;
+        private string _title;
+        private string _tag;
+        private Vector2 _position;
+        private Vector2 _size;
+        private List<Link> _links = new List<Link>();
         
-        [NonSerialized] private Graph _graph;
+        private Graph _graph;
 
-        public int ID
+        [JsonIgnore] public int ID
         {
             get => _id;
             set => _id = value;
         }
 
-        private string FriendlyName(Type t)
-        {
-            var s = string.Empty;
-            if (t.IsGenericType) {
-                s = !string.IsNullOrEmpty(t.Namespace) ? t.Namespace + "." + t.Name : t.Name;
-                var args = t.GetGenericArguments();
-                if ( args.Length != 0 ) {
-
-                    s = s.Replace("`" + args.Length, "");
-
-                    s += "<";
-                    for ( var i = 0; i < args.Length; i++ ) {
-                        s += ( i == 0 ? "" : ", " ) + FriendlyName(args[i]);
-                    }
-                    s += ">";
-                }
-            }
-
-            return s;
-        }
-        
         public string title
         {
             get
             {
                 if (string.IsNullOrEmpty(_title))
                 {
-                    _title = FriendlyName(GetType());
+                    _title = GetType().Name;
                 }
 
                 return _title;
@@ -61,7 +41,12 @@ namespace Nirvana
             get => _tag;
             set => _tag = value;
         }
-        public Graph graph => _graph;
+
+        [JsonIgnore] public Graph graph
+        {
+            get => _graph;
+            set => _graph = value;
+        }
 
         public Vector2 position
         {
@@ -81,24 +66,16 @@ namespace Nirvana
             }
         }
 
-        public static Vector2 MIN_SIZE = new(80, 50);
+        public List<Link> allLinks => _links;
 
-        public Node() { }
-        
-        public Node(Graph graph, Type type, Vector2 pos)
-        {
-            _graph = graph;
-            _position = pos;
-            _size = MIN_SIZE;
-        }
+        [JsonIgnore] public static Vector2 MIN_SIZE = new(80, 50);
 
         public static Node Create(Graph graph, Type type, Vector2 pos)
         {
-            return new Node(graph, type, pos);
+            var newNode = (Node) Activator.CreateInstance(type);
+            newNode.graph = graph;
+            newNode.position = pos;
+            return newNode;
         }
-
-#if UNITY_EDITOR
-        public bool isSelected => GraphUtils.activeNodes.Contains(this);
-#endif
     }
 }

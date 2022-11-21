@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Nirvana;
 using UnityEngine;
 
-public class TestNode : Node
+public class TestNode : FlowNode
 {
-    public string testName;
-    public string GGName;
+    [InPort] public string testNamesadasdwe;
+    [OutPort] public string GGName;
 }
