@@ -15,7 +15,7 @@ namespace Nirvana.Editor
         private static Rect _graphRect;
 
         private static readonly float GRAPH_TOP = 21;
-        private static readonly float GRAPH_LEFT = 200;
+        private static readonly float GRAPH_LEFT = 2;
         private static readonly float GRAPH_RIGHT = 2;
         private static readonly float GRAPH_BOTTOM = 2;
         
@@ -98,28 +98,27 @@ namespace Nirvana.Editor
 
         private void OnGUI()
         {
-            CheckGraph();
-            
             _graphRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
+            
+            if (!CheckGraph()) return;
 
             _e = Event.current;
             _realMousePosition = _e.mousePosition;
             _graphMousePosition = MousePosToGraph(_realMousePosition);
 
-            EditorUtils.DrawBox(_graphRect, ColorUtils.gray13, Styles.normalBG);
+            EditorUtils.DrawBox(_graphRect, ColorUtils.gray13, StyleUtils.normalBG);
             DrawGrid(_graphRect, graphOffset);
             NodesWindowPrevEvent();
 
-            GUI.BeginClip(_graphRect, graphOffset, default, false);
+            //GUI.BeginClip(_graphRect, graphOffset, default, false);
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();
-            GUI.EndClip();
+            //GUI.EndClip();
             
             NodesWindowPostEvent();
             DrawToolbar(currentGraph);
-            var inspectorRect = Rect.MinMaxRect(0, GRAPH_TOP, GRAPH_LEFT, position.height);
-            DrawInspector(inspectorRect);
+            var inspectorRect = DrawInspector();
             var blackboardRect = DrawBlackboard();
             GraphUtils.allowClick = _graphRect.Contains(_realMousePosition) && !inspectorRect.Contains(_realMousePosition) &&
                                     !blackboardRect.Contains(_realMousePosition);
@@ -131,12 +130,23 @@ namespace Nirvana.Editor
             }
         }
 
-        private void CheckGraph()
+        private bool CheckGraph()
         {
+            if (data == null)
+            {
+                var graphCenter = _graphRect.center;
+                var size = StyleUtils.symbolText.CalcSize("Please Select One Graph Editor Data!");
+                var popup = new Rect(graphCenter.x - size.x / 2f, graphCenter.y - size.y / 2f, size.x, size.y);
+                EditorGUI.LabelField(popup, "Please Select One Graph Editor Data!", StyleUtils.symbolText);
+                return false;
+            }
+
             if (currentGraph != data.graph)
             {
                 currentGraph = data.graph;
             }
+
+            return true;
         }
 
         private static void NodesWindowPrevEvent()
@@ -162,7 +172,7 @@ namespace Nirvana.Editor
                 }
                 else if (_e.button == 1)
                 {
-                    var menu = new GenericMenuPopup("Fields");
+                    var menu = new GenericMenuPopup("Nodes");
                     var types = TypeUtils.GetSubClassTypes(typeof(Node));
                     foreach (var t in types)
                     {
@@ -255,7 +265,7 @@ namespace Nirvana.Editor
             }
 
             GUILayout.FlexibleSpace();
-            GUILayout.Label(graph.name, Styles.graphTitle);
+            GUILayout.Label(graph.name, StyleUtils.graphTitle);
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Blackboard", EditorStyles.toolbarButton, GUILayout.MaxWidth(80)))
             {
@@ -265,15 +275,32 @@ namespace Nirvana.Editor
             GUILayout.EndHorizontal();
         }
 
-        private static void DrawInspector(Rect rect)
+        private static float _nodeInspectorHeight = 200f;
+        
+        private static Rect DrawInspector()
         {
-            var clipRect = new Rect(0, GRAPH_TOP, rect.width, rect.height);
-            var areaRect = Rect.MinMaxRect(0, 2, rect.width, rect.height - GRAPH_BOTTOM - 2);
-            GUI.BeginClip(clipRect);
+            var rect = default(Rect);
+            if (GraphUtils.activeNodes.Count != 1) return rect;
+
+            var nodeInspectorWidth = 300f;
+            rect.x = _graphRect.xMin;
+            rect.y = _graphRect.y;
+            rect.width = nodeInspectorWidth;
+            rect.height = _nodeInspectorHeight;
+            var areaRect = Rect.MinMaxRect(2, 2, rect.width - 2, rect.height);
+            GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
-            NodeInspector.DrawGUI(rect, GraphUtils.activeNodes.Count == 1 ? GraphUtils.activeNodes[0] : null);
+            
+            NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes[0]);
+            
+            // if (_e.type == EventType.Repaint) {
+            //     _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 30;
+            // }
+            
             GUILayout.EndArea();
             GUI.EndClip();
+
+            return rect;
         }
 
         private static float _blackboardHeight = 50f;
@@ -302,6 +329,7 @@ namespace Nirvana.Editor
             GUILayout.EndArea();
             GUILayout.EndArea();
             GUI.EndClip();
+            
             return rect;
         }
     }

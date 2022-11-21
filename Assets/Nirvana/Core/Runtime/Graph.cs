@@ -56,7 +56,7 @@ namespace Nirvana
 
             for (int i = 0; i < allNodes.Count; i++)
             {
-                allNodes[i].ID = i;
+                allNodes[i].ID = i + 1;
             }
         }
         
@@ -86,7 +86,7 @@ namespace Nirvana
 
                 for (int i = 0; i < _nodes.Count; i++)
                 {
-                    _nodes[i].ID = i;
+                    _nodes[i].ID = i + 1;
                     _nodes[i].graph = this;
                 }
             }

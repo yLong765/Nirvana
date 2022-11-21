@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Newtonsoft.Json;
+using Nirvana.Attributes;
 using UnityEditor;
 using UnityEngine;
 
@@ -63,25 +64,25 @@ namespace Nirvana
         {
             GUILayout.BeginHorizontal();
             GUILayout.Space(8);
-            GUILayout.Label(name, Styles.inPortLabel);
+            GUILayout.Label(name, StyleUtils.inPortLabel);
             GUILayout.EndHorizontal();
             var lastRect = GUILayoutUtility.GetLastRect();
-            var width = Styles.CalcSize(Styles.portSymbol, "●").x;
+            var width = StyleUtils.portSymbol.CalcSize("●").x;
             lastRect.width = width;
-            EditorGUI.LabelField(lastRect, "●", Styles.portSymbol);
+            EditorGUI.LabelField(lastRect, "●", StyleUtils.portSymbol);
         }
 
         private void DrawOutPort(string name)
         {
             GUILayout.BeginHorizontal();
-            GUILayout.Label(name, Styles.outPortLabel);
+            GUILayout.Label(name, StyleUtils.outPortLabel);
             GUILayout.Space(13);
             GUILayout.EndHorizontal();
             var lastRect = GUILayoutUtility.GetLastRect();
-            var width = Styles.CalcSize(Styles.portSymbol, "●").x;
+            var width = StyleUtils.portSymbol.CalcSize("●").x;
             lastRect.x = lastRect.width - width;
             lastRect.width = width;
-            EditorGUI.LabelField(lastRect, "●", Styles.portSymbol);
+            EditorGUI.LabelField(lastRect, "●", StyleUtils.portSymbol);
         }
     }
 }

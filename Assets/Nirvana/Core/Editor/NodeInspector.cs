@@ -18,9 +18,10 @@ namespace Nirvana.Editor
             {
                 EditorGUI.BeginChangeCheck();
                 
-                var titleHeight = Styles.CalcSize(Styles.panelTitle, node.title).y;
-                EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
-                GUILayout.Label(node.title, Styles.panelTitle);
+                EditorUtils.DrawBox(new Rect(0, 0, rect.width, rect.width), ColorUtils.gray21, StyleUtils.normalBG);
+                var titleHeight = StyleUtils.panelTitle.CalcSize(node.title).y;
+                EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
+                GUILayout.Label(node.title, StyleUtils.panelTitle);
                 GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 4, rect.xMax - 2, rect.yMax - 2));
 
                 node.DrawInspectorGUI();

@@ -23,7 +23,7 @@ namespace Nirvana
             typeof(Vector4),
             typeof(Quaternion),
         };
-        
+
         public static List<Type> GetChildTypes(Type type)
         {
             return defaultTypes.Where(type.IsAssignableFrom).ToList();
@@ -44,9 +44,36 @@ namespace Nirvana
             return result;
         }
 
+        public static List<FieldInfo> GetAllFields(Type type)
+        {
+            return type.GetFields(BindingFlags.Public | BindingFlags.Instance).ToList();
+        }
+
+        #region Extend
+
         public static T GetAttribute<T>(this Type type) where T : Attribute
         {
+            return (T) type.GetAttribute(typeof(T));
+        }
+
+        public static Attribute GetAttribute(this Type type, Type attributeType)
+        {
             var attributes = type.GetCustomAttributes(true);
+            foreach (Attribute attribute in attributes)
+            {
+                var attType = attribute.GetType();
+                if (attributeType.IsAssignableFrom(attType))
+                {
+                    return attribute;
+                }
+            }
+
+            return null;
+        }
+        
+        public static T GetAttribute<T>(this FieldInfo info) where T : Attribute
+        {
+            var attributes = info.GetCustomAttributes();
             var targetType = typeof(T);
             foreach (Attribute attribute in attributes)
             {
@@ -59,19 +86,6 @@ namespace Nirvana
             return null;
         }
 
-        public static T GetAttribute<T>(this FieldInfo info) where T : Attribute
-        {
-            var attributes = info.GetCustomAttributes();
-             var targetType = typeof(T);
-             foreach (Attribute attribute in attributes)
-             {
-                 if (targetType.IsInstanceOfType(attribute))
-                 {
-                     return attribute as T;
-                 }
-             }
-            
-             return null;
-        }
+        #endregion
     }
 }

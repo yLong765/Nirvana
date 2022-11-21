@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Nirvana;
-using UnityEngine;
+using Nirvana.Attributes;
 
 public class TestNode : FlowNode
 {

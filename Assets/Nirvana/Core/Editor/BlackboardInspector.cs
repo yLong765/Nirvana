@@ -15,10 +15,10 @@ namespace Nirvana.Editor
         {
             EditorGUI.BeginChangeCheck();
             
-            EditorUtils.DrawBox(new Rect(0, 0, rect.width, rect.height), ColorUtils.gray21, Styles.normalBG);
-            var titleHeight = Styles.CalcSize(Styles.panelTitle, "Blackboard").y;
-            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
-            GUILayout.Label("Blackboard", Styles.panelTitle);
+            EditorUtils.DrawBox(new Rect(0, 0, rect.width, rect.height), ColorUtils.gray21, StyleUtils.normalBG);
+            var titleHeight = StyleUtils.panelTitle.CalcSize("Blackboard").y;
+            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
+            GUILayout.Label("Blackboard", StyleUtils.panelTitle);
             GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 2, rect.xMax - 2, rect.yMax - 2));
             if (GUILayout.Button("Add Variable"))
             {

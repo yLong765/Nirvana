@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using NodeCanvas.Editor;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 namespace Nirvana.Editor
 {
@@ -11,22 +9,24 @@ namespace Nirvana.Editor
     {
         public static void DrawNodeGUI(Node node)
         {
-            node.rect = EditorUtils.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, ColorUtils.gray21, Styles.windowBG,
-                GUILayout.MinWidth(Node.MIN_SIZE.x), GUILayout.MinHeight(Node.MIN_SIZE.y));
+            node.rect = EditorUtils.Window(0, node.rect, id =>
+            {
+                DrawNodeWindowGUI(id, node);
+            }, ColorUtils.gray21, StyleUtils.normalBG);
 
             if (node.isSelected)
             {
-                EditorUtils.DrawBox(node.rect, ColorUtils.mediumPurple, Styles.windowHeightLine);
+                EditorUtils.DrawBox(node.rect, ColorUtils.mediumPurple, StyleUtils.windowHeightLine);
             }
             
             DrawTag(node);
         }
-
+        
         private static void DrawNodeWindowGUI(int id, Node node)
         {
-            var titleHeight = Styles.CalcSize(Styles.windowTitle, node.title).y;
-            EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.gray17, Styles.normalBG);
-            GUILayout.Label(node.title, Styles.windowTitle);
+            var titleHeight = StyleUtils.windowTitle.CalcSize(node.title).y;
+            EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
+            GUILayout.Label(node.title, StyleUtils.windowTitle);
             
             node.DrawNodeGUI();
 
@@ -69,15 +69,15 @@ namespace Nirvana.Editor
                 }
             }
         }
-
+        
         private static void DrawTag(Node node)
         {
             if (!string.IsNullOrEmpty(node.tag))
             {
                 var tagText = "Tag:" + node.tag;
-                var tagHeight = Styles.CalcHeight(Styles.tagText, tagText, node.rect.width);
-                var footRect = new Rect(node.rect.x, node.rect.y + node.rect.height, node.rect.width, tagHeight);
-                GUI.Box(footRect, tagText, Styles.tagText);
+                var tagHeight = StyleUtils.tagText.CalcHeight(tagText, node.rect.width);
+                var footRect = new Rect(node.rect.x, node.rect.y - tagHeight - 2, node.rect.width, tagHeight);
+                GUI.Box(footRect, tagText, StyleUtils.tagText);
             }
         }
     }

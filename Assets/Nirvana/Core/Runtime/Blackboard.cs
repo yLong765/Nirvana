@@ -22,7 +22,7 @@ namespace Nirvana
 
         public void OnBeforeSerialize()
         {
-            _serializedData = JsonConvert.SerializeObject(_variables, Formatting.Indented, _settings);
+            _serializedData = JsonConvert.SerializeObject(_variables, Formatting.None, _settings);
         }
 
         public void OnAfterDeserialize()

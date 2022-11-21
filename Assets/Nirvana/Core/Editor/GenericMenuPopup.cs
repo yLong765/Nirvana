@@ -73,9 +73,9 @@ namespace Nirvana.Editor
 
         public override void OnGUI(Rect rect)
         {
-            var titleHeight = Styles.CalcSize(Styles.menuTitle, _title).y;
-            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray19, Styles.normalBG);
-            GUILayout.Label(_title, Styles.menuTitle);
+            var titleHeight = StyleUtils.menuTitle.CalcSize(_title).y;
+            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray19, StyleUtils.normalBG);
+            GUILayout.Label(_title, StyleUtils.menuTitle);
             _search = EditorUtils.SearchField(_search);
             var searchLow = _search.ToLower();
             
@@ -84,7 +84,7 @@ namespace Nirvana.Editor
             {
                 if (string.IsNullOrEmpty(searchLow) || item.name.ToLower().Contains(searchLow))
                 {
-                    if (GUILayout.Button(item.name, Styles.toolbarLeftButton))
+                    if (GUILayout.Button(item.name, StyleUtils.toolbarLeftButton))
                     {
                         OnClick(item);
                     }
