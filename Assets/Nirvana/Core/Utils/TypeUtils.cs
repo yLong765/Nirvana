@@ -44,13 +44,18 @@ namespace Nirvana
             return result;
         }
 
-        public static List<FieldInfo> GetAllFields(Type type)
-        {
-            return type.GetFields(BindingFlags.Public | BindingFlags.Instance).ToList();
-        }
+        // public static List<FieldInfo> GetAllFields(Type type)
+        // {
+        //     return type.GetFields(BindingFlags.Public | BindingFlags.Instance).ToList();
+        // }
 
         #region Extend
 
+        public static List<FieldInfo> GetAllFields(this Type type)
+        {
+            return type.GetFields(BindingFlags.Public | BindingFlags.Instance).ToList();
+        }
+        
         public static T GetAttribute<T>(this Type type) where T : Attribute
         {
             return (T) type.GetAttribute(typeof(T));
@@ -84,6 +89,18 @@ namespace Nirvana
             }
             
             return null;
+        }
+
+        public static bool HasAttribute<T>(this FieldInfo info) where T : Attribute
+        {
+            var att = info.GetAttribute<T>();
+            return att != null;
+        }
+
+        public static bool TryGetAttribute<T>(this FieldInfo info, out T attribute) where T : Attribute
+        {
+            attribute = info.GetAttribute<T>();
+            return attribute != null;
         }
 
         #endregion

@@ -13,7 +13,6 @@ namespace Nirvana
         private string _tag;
         private Vector2 _position;
         private Vector2 _size;
-        private List<Link> _links = new List<Link>();
         
         private Graph _graph;
 
@@ -66,15 +65,18 @@ namespace Nirvana
             }
         }
 
-        public List<Link> allLinks => _links;
-
         [JsonIgnore] public static Vector2 MIN_SIZE = new(80, 50);
+
+        public virtual void OnCreate() { }
+        
+        public virtual void OnRefresh() { }
 
         public static Node Create(Graph graph, Type type, Vector2 pos)
         {
             var newNode = (Node) Activator.CreateInstance(type);
             newNode.graph = graph;
             newNode.position = pos;
+            newNode.OnCreate();
             return newNode;
         }
     }

@@ -14,13 +14,8 @@ namespace Nirvana.Editor
         {
             get
             {
-                if (_graph == null)
-                {
-                    _graph = new Graph();
-                    _graph.name = "Graph Canvas";
-                    _graph.blackboard = new Blackboard();
-                }
-
+                _graph ??= new Graph();
+                _graph.title = name;
                 return _graph;
             }
         }

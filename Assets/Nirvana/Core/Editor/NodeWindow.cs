@@ -9,7 +9,7 @@ namespace Nirvana.Editor
     {
         public static void DrawNodeGUI(Node node)
         {
-            node.rect = EditorUtils.Window(0, node.rect, id =>
+            node.rect = EditorUtils.Window(node.ID, node.rect, id =>
             {
                 DrawNodeWindowGUI(id, node);
             }, ColorUtils.gray21, StyleUtils.normalBG);
@@ -20,6 +20,8 @@ namespace Nirvana.Editor
             }
             
             DrawTag(node);
+            
+            node.DrawLinkGUI();
         }
         
         private static void DrawNodeWindowGUI(int id, Node node)
@@ -28,7 +30,7 @@ namespace Nirvana.Editor
             EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
             GUILayout.Label(node.title, StyleUtils.windowTitle);
             
-            node.DrawNodeGUI();
+            node.DrawWindowGUI();
 
             var e = Event.current;
             if (GraphUtils.allowClick)
@@ -76,7 +78,7 @@ namespace Nirvana.Editor
             {
                 var tagText = "Tag:" + node.tag;
                 var tagHeight = StyleUtils.tagText.CalcHeight(tagText, node.rect.width);
-                var footRect = new Rect(node.rect.x, node.rect.y - tagHeight - 2, node.rect.width, tagHeight);
+                var footRect = new Rect(node.rect.x, node.rect.y - tagHeight - 3, node.rect.width, tagHeight);
                 GUI.Box(footRect, tagText, StyleUtils.tagText);
             }
         }

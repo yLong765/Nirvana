@@ -193,6 +193,10 @@ namespace Nirvana
                 if (_inPortLabel == null)
                 {
                     _inPortLabel = new GUIStyle(EditorStyles.label);
+                    _inPortLabel.margin.left = 0;
+                    _inPortLabel.padding.left = 0;
+                    _inPortLabel.margin.right = 0;
+                    _inPortLabel.padding.right = 0;
                     _inPortLabel.alignment = TextAnchor.MiddleLeft;
                 }
 
@@ -207,7 +211,11 @@ namespace Nirvana
             {
                 if (_outPortLabel == null)
                 {
-                    _outPortLabel = new GUIStyle();
+                    _outPortLabel = new GUIStyle(EditorStyles.label);
+                    _outPortLabel.margin.left = 0;
+                    _outPortLabel.padding.left = 0;
+                    _outPortLabel.margin.right = 0;
+                    _outPortLabel.padding.right = 0;
                     _outPortLabel.alignment = TextAnchor.MiddleRight;
                 }
 
@@ -223,6 +231,14 @@ namespace Nirvana
                 if (_portSymbol == null)
                 {
                     _portSymbol = new GUIStyle(EditorStyles.label);
+                    _portSymbol.margin.right = 0;
+                    _portSymbol.padding.right = 0;
+                    _portSymbol.margin.left = 0;
+                    _portSymbol.padding.left = 0;
+                    _portSymbol.overflow.left = 0;
+                    _portSymbol.overflow.right = 0;
+                    _portSymbol.border.left = 0;
+                    _portSymbol.border.right = 0;
                     _portSymbol.fontSize = 8;
                     _portSymbol.alignment = TextAnchor.MiddleCenter;
                 }

@@ -11,7 +11,7 @@ namespace Nirvana.Editor
         private static List<Variable> _tempVariablesList;
         private static readonly GUILayoutOption[] _options = {GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true), GUILayout.MinHeight(18)};
 
-        public static void DrawGUI(Rect rect, Blackboard bb)
+        public static void DrawGUI(Rect rect, BlackboardSource bbSource)
         {
             EditorGUI.BeginChangeCheck();
             
@@ -28,7 +28,7 @@ namespace Nirvana.Editor
                 {
                     menu.AddItem(t.Name, () =>
                     {
-                        bb.AddVariable(t, t.Name);
+                        bbSource.AddVariable(t, t.Name);
                         GraphUtils.willSetDirty = true;
                     });
                 }
@@ -44,18 +44,18 @@ namespace Nirvana.Editor
             GUI.color = Color.white;
             GUILayout.EndHorizontal();
 
-            if (_tempVariablesList == null || !_tempVariablesList.SequenceEqual(bb.variables.Values)) {
-                _tempVariablesList = bb.variables.Values.ToList();
+            if (_tempVariablesList == null || !_tempVariablesList.SequenceEqual(bbSource.variables.Values)) {
+                _tempVariablesList = bbSource.variables.Values.ToList();
             }
             EditorUtils.ReorderableList(_tempVariablesList, i =>
             {
-                DrawVariableItem(bb, _tempVariablesList[i]);
+                DrawVariableItem(bbSource, _tempVariablesList[i], i);
             });
             
             if ( GUI.changed || Event.current.rawType == EventType.MouseUp ) {
                 try
                 {
-                    bb.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);
+                    bbSource.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);
                 }
                 catch
                 {
@@ -69,14 +69,14 @@ namespace Nirvana.Editor
             }
         }
         
-        private static void DrawVariableItem(Blackboard bb, Variable variable)
+        private static void DrawVariableItem(BlackboardSource bbSource, Variable variable, int id)
         { 
             GUILayout.BeginHorizontal();
             variable.name = GUILayout.TextField(variable.name, _options);
             variable.value = EditorUtils.TypeField(GUIContent.none, variable.value, variable.type, _options);
             if (GUILayout.Button("X", GUILayout.MaxWidth(20)))
             {
-                bb.variables.Remove(variable.name);
+                _tempVariablesList.RemoveAt(id);
                 GraphUtils.willSetDirty = true;
             }
             GUILayout.EndHorizontal();

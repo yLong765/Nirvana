@@ -1,31 +1,32 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Nirvana
 {
     [Serializable]
-    public class Graph : ISerializationCallbackReceiver
+    public class Graph : ISerializationCallbackReceiver, ISerialize
     {
-        [SerializeField] private string _serializedData;
-        [SerializeField] private Blackboard _blackboard;
-        [SerializeField] private Vector2 _offset;
-        [SerializeField] private string _name;
-        
-        private List<Node> _nodes = new List<Node>();
-        
-        public Blackboard blackboard
+        private static JsonSerializerSettings _settings = new()
         {
-            get => _blackboard;
-            set
-            {
-                _blackboard = value;
-            }
+            TypeNameHandling = TypeNameHandling.All,
+            NullValueHandling = NullValueHandling.Ignore,
+        };
+        
+        [SerializeField] private string _serializedData;
+        [SerializeField] private Vector2 _offset;
+        private GraphSource _graphSource = new GraphSource();
+        
+        [JsonIgnore] public List<Node> allNodes => _graphSource.nodes;
+        
+        public BlackboardSource bbSource
+        {
+            get => _graphSource.bbSource;
+            set => _graphSource.bbSource = value;
         }
-
-        [JsonIgnore] public List<Node> allNodes => _nodes;
 
         public Vector2 offset
         {
@@ -33,10 +34,10 @@ namespace Nirvana
             set => _offset = value;
         }
 
-        public string name
+        public string title
         {
-            get => _name;
-            set => _name = value;
+            get => _graphSource.title;
+            set => _graphSource.title = value;
         }
 
         public Node AddNode(Type type, Vector2 pos)
@@ -49,9 +50,9 @@ namespace Nirvana
 
         public void RemoveNode(Node node)
         {
-            if (_nodes.Contains(node))
+            if (allNodes.Contains(node))
             {
-                _nodes.Remove(node);
+                allNodes.Remove(node);
             }
 
             for (int i = 0; i < allNodes.Count; i++)
@@ -65,30 +66,40 @@ namespace Nirvana
             var variableType = typeof(Variable<>).MakeGenericType(type);
             var newVariable = (Variable)Activator.CreateInstance(variableType);
             newVariable.name = varName;
-            blackboard.variables[varName] = newVariable;
+            bbSource.variables[varName] = newVariable;
             return newVariable;
         }
 
         public void OnBeforeSerialize()
         {
-            var settings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
-            _serializedData = JsonConvert.SerializeObject(_nodes, Formatting.None, settings);
+            _serializedData = Serialize();
         }
 
         public void OnAfterDeserialize()
         {
             if (!string.IsNullOrEmpty(_serializedData))
             {
-                var settings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
-                _nodes = JsonConvert.DeserializeObject<List<Node>>(_serializedData, settings);
+                Deserialize(_serializedData);
+            }
+            else
+            {
+                _graphSource = new GraphSource();
+            }
+        }
 
-                if (_nodes == null) return;
+        public string Serialize()
+        {
+            return JsonConvert.SerializeObject(_graphSource, Formatting.Indented, _settings);
+        }
 
-                for (int i = 0; i < _nodes.Count; i++)
-                {
-                    _nodes[i].ID = i + 1;
-                    _nodes[i].graph = this;
-                }
+        public void Deserialize(string json)
+        {
+            _graphSource = JsonConvert.DeserializeObject<GraphSource>(json, _settings) ?? new GraphSource();
+            for (int i = 0; i < _graphSource.nodes.Count; i++)
+            {
+                _graphSource.nodes[i].ID = i + 1;
+                _graphSource.nodes[i].graph = this;
+                _graphSource.nodes[i].OnRefresh();
             }
         }
     }

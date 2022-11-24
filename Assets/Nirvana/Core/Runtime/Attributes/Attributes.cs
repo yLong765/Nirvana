@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Nirvana.Attributes
+namespace Nirvana
 {
     public class NodeNameAttribute : Attribute
     {
@@ -32,10 +32,31 @@ namespace Nirvana.Attributes
     
     public class InPortAttribute : Attribute
     {
+        public string name;
+        public int order = 100;
         
+        public InPortAttribute() {}
+
+        public InPortAttribute(string name)
+        {
+            this.name = name;
+        }
     }
     
     public class OutPortAttribute : Attribute
+    {
+        public string name;
+        public int order = 100;
+        
+        public OutPortAttribute() {}
+
+        public OutPortAttribute(string name)
+        {
+            this.name = name;
+        }
+    }
+
+    public class IgnoreInNodeInspectorAttribute : Attribute
     {
         
     }

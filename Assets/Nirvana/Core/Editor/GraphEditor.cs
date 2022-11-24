@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -52,11 +53,11 @@ namespace Nirvana.Editor
         public static Graph currentGraph { get; private set; }
         public static GraphEditor current { get; private set; }
 
-        private void InitData(GraphEditorData data, Blackboard blackboard)
+        private void InitData(GraphEditorData data, BlackboardSource bbSource)
         {
             this.data = data;
             currentGraph = data.graph;
-            if (blackboard != null) currentGraph.blackboard = blackboard;
+            if (bbSource != null) currentGraph.bbSource = bbSource;
         }
         
         [UnityEditor.Callbacks.OnOpenAsset(1)]
@@ -69,9 +70,9 @@ namespace Nirvana.Editor
             return false;
         }
 
-        public static GraphEditor OpenWindow(GraphEditorData data = null, Blackboard blackboard = null) {
+        public static GraphEditor OpenWindow(GraphEditorData data = null, BlackboardSource bbSource = null) {
             var window = GetWindow<GraphEditor>();
-            window.InitData(data, blackboard);
+            window.InitData(data, bbSource);
             window.titleContent = new GUIContent("Graph Canvas");
             window.Focus();
             window.Show();
@@ -110,11 +111,11 @@ namespace Nirvana.Editor
             DrawGrid(_graphRect, graphOffset);
             NodesWindowPrevEvent();
 
-            //GUI.BeginClip(_graphRect, graphOffset, default, false);
+            GUI.BeginClip(_graphRect, graphOffset, default, false);
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();
-            //GUI.EndClip();
+            GUI.EndClip();
             
             NodesWindowPostEvent();
             DrawToolbar(currentGraph);
@@ -127,6 +128,7 @@ namespace Nirvana.Editor
             {
                 GraphUtils.willSetDirty = false;
                 if (data != null) EditorUtility.SetDirty(data);
+                Repaint();
             }
         }
 
@@ -260,12 +262,34 @@ namespace Nirvana.Editor
             if (GUILayout.Button("File", EditorStyles.toolbarButton, GUILayout.MaxWidth(50)))
             {
                 GenericMenu menu = new GenericMenu();
-                menu.AddItem(new GUIContent("Export Json"), false, () => { Debug.Log("Export Json"); });
+                menu.AddItem(new GUIContent("Export Json"), false, () =>
+                {
+                    var json = currentGraph.Serialize();
+                    var selectPath = EditorUtility.SaveFilePanel("Select Export Path", "Assets", currentGraph.title, "json");
+                    if (!string.IsNullOrEmpty(selectPath))
+                    {
+                        FileUtils.Write(selectPath, json);
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                    }
+                });
+                menu.AddItem(new GUIContent("Import Json"), false, () =>
+                {
+                    var selectPath = EditorUtility.OpenFilePanel("Select Import Json File", "Assets", "json");
+                    if (!string.IsNullOrEmpty(selectPath))
+                    {
+                        var json = FileUtils.Read(selectPath);
+                        currentGraph.Deserialize(json);
+                        currentGraph.offset = Vector2.zero;
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                    }
+                });
                 menu.ShowAsContext();
             }
 
             GUILayout.FlexibleSpace();
-            GUILayout.Label(graph.name, StyleUtils.graphTitle);
+            GUILayout.Label(graph.title, StyleUtils.graphTitle);
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Blackboard", EditorStyles.toolbarButton, GUILayout.MaxWidth(80)))
             {
@@ -308,7 +332,7 @@ namespace Nirvana.Editor
         private static Rect DrawBlackboard()
         {
             var rect = default(Rect);
-            if (currentGraph.blackboard == null) return rect;
+            if (currentGraph.bbSource == null) return rect;
             if (!GraphUtils.showBlackboardPanel) return rect;
 
             var blackboardWidth = 300f;
@@ -320,7 +344,7 @@ namespace Nirvana.Editor
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
             
-            BlackboardInspector.DrawGUI(areaRect, currentGraph.blackboard);
+            BlackboardInspector.DrawGUI(areaRect, currentGraph.bbSource);
 
             if (_e.type == EventType.Repaint) {
                 _blackboardHeight = GUILayoutUtility.GetLastRect().yMax + 30;

@@ -1,9 +1,9 @@
 #if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
-using Nirvana.Attributes;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,78 +11,95 @@ namespace Nirvana
 {
     public partial class Node
     {
+        private static bool _nodeInspectorHeaderGroup = true;
+        
+        private List<FieldInfo> _fieldInfos = new List<FieldInfo>();
+
+        private List<FieldInfo> GetAllFieldInfos()
+        {
+            if (_fieldInfos.Count == 0)
+            {
+                _fieldInfos = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance).ToList();
+            }
+
+            return _fieldInfos;
+        }
+
         [JsonIgnore] public bool isSelected => GraphUtils.activeNodes.Contains(this);
 
         public virtual void DrawInspectorGUI()
         {
             tag = EditorGUILayout.TextField(tag);
             EditorUtils.DefaultTextField(tag, "Tag...");
-
-            var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var info in fields)
+            
+            _nodeInspectorHeaderGroup = EditorGUILayout.BeginFoldoutHeaderGroup(_nodeInspectorHeaderGroup, "Fields");
+            if (_nodeInspectorHeaderGroup)
             {
-                EditorGUI.BeginChangeCheck();
-                var value = EditorUtils.TypeField(info.Name, info.GetValue(this), info.FieldType);
-                if (EditorGUI.EndChangeCheck())
+                var fields = GetAllFieldInfos();
+                foreach (var info in fields.Where(info => !info.HasAttribute<IgnoreInNodeInspectorAttribute>()))
                 {
-                    info.SetValue(this, value);
-                }
-            }
-        }
-
-        public virtual void DrawNodeGUI()
-        {
-            List<FieldInfo> inPorts = new List<FieldInfo>();
-            List<FieldInfo> outPorts = new List<FieldInfo>();
-            var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var info in fields)
-            {
-                var inPortAtt = info.GetAttribute<InPortAttribute>();
-                if (inPortAtt != null)
-                {
-                    inPorts.Add(info);
-                }
-                else
-                {
-                    var outPortAtt = info.GetAttribute<OutPortAttribute>();
-                    if (outPortAtt != null)
+                    EditorGUI.BeginChangeCheck();
+                    var value = EditorUtils.TypeField(info.Name, info.GetValue(this), info.FieldType);
+                    if (EditorGUI.EndChangeCheck())
                     {
-                        outPorts.Add(info);
+                        info.SetValue(this, value);
                     }
                 }
             }
-            
-            DrawPorts(inPorts, outPorts);
+
+            EditorGUILayout.EndFoldoutHeaderGroup();
         }
 
-        private void DrawPorts(List<FieldInfo> inPorts, List<FieldInfo> outPorts)
+        public virtual void DrawWindowGUI() { }
+
+        public virtual void DrawLinkGUI() { }
+
+        protected static void DrawPorts(List<Port> inPorts, List<Port> outPorts)
         {
+            int minL = Mathf.Min(inPorts.Count, outPorts.Count);
+            for (int i = 0; i < minL; i++)
+            {
+                DrawInOutPort(inPorts[i].name, outPorts[i].name);
+            }
 
+            for (int i = minL; i < inPorts.Count; i++)
+            {
+                DrawInPort(inPorts[i].name);
+            }
+            
+            for (int i = minL; i < outPorts.Count; i++)
+            {
+                DrawOutPort(outPorts[i].name);
+            }
         }
 
-        private void DrawInPort(string name)
+        protected static void DrawInOutPort(string inName, string outName)
         {
             GUILayout.BeginHorizontal();
-            GUILayout.Space(8);
+            GUILayout.Space(2);
+            GUILayout.Label(inName, StyleUtils.inPortLabel);
+            GUILayout.FlexibleSpace();
+            GUILayout.Space(10);
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(outName, StyleUtils.outPortLabel);
+            GUILayout.Space(2);
+            GUILayout.EndHorizontal();
+        }
+        
+        protected static void DrawInPort(string name)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(2);
             GUILayout.Label(name, StyleUtils.inPortLabel);
             GUILayout.EndHorizontal();
-            var lastRect = GUILayoutUtility.GetLastRect();
-            var width = StyleUtils.portSymbol.CalcSize("●").x;
-            lastRect.width = width;
-            EditorGUI.LabelField(lastRect, "●", StyleUtils.portSymbol);
         }
 
-        private void DrawOutPort(string name)
+        protected static void DrawOutPort(string name)
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label(name, StyleUtils.outPortLabel);
-            GUILayout.Space(13);
+            GUILayout.Space(2);
             GUILayout.EndHorizontal();
-            var lastRect = GUILayoutUtility.GetLastRect();
-            var width = StyleUtils.portSymbol.CalcSize("●").x;
-            lastRect.x = lastRect.width - width;
-            lastRect.width = width;
-            EditorGUI.LabelField(lastRect, "●", StyleUtils.portSymbol);
         }
     }
 }
