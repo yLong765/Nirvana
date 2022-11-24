@@ -97,6 +97,14 @@ namespace Nirvana.Editor
             // }
         }
 
+        private void OnInspectorUpdate()
+        {
+            if (!GraphUtils.willRepaint)
+            {
+                Repaint();
+            }
+        }
+
         private void OnGUI()
         {
             _graphRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
@@ -129,6 +137,16 @@ namespace Nirvana.Editor
                 GraphUtils.willSetDirty = false;
                 if (data != null) EditorUtility.SetDirty(data);
                 Repaint();
+            }
+
+            if (GraphUtils.willRepaint)
+            {
+                Repaint();
+            }
+
+            if (_e.type == EventType.Repaint)
+            {
+                GraphUtils.willRepaint = false;
             }
         }
 
