@@ -65,9 +65,7 @@ namespace Nirvana
         }
 
 #if UNITY_EDITOR
-
         private static bool _clickPort = false;
-        private static bool _mouseInPort = false;
         private static Vector3 _clickPortPos = default;
         private int _clickPortId = 0;
         
@@ -81,15 +79,38 @@ namespace Nirvana
             for (int i = 0; i < _inPorts.Count; i++)
             {
                 float portHeight = StyleUtils.inPortLabel.CalcSize(_inPorts[i].name).y - 3;
-                var portRect = new Rect(rect.x - portWidth, yStart + i * portHeight, portWidth, portHeight);
-                DrawPortGUI(portRect, _inPorts[i], e);
+                _inPorts[i].rect = new Rect(rect.x - portWidth, yStart + i * portHeight, portWidth, portHeight);
             }
             
             for (int i = 0; i < _outPorts.Count; i++)
             {
                 float portHeight = StyleUtils.outPortLabel.CalcSize(_outPorts[i].name).y - 3;
-                var portRect = new Rect(rect.x + rect.width, yStart + i * portHeight, portWidth, portHeight);
-                DrawPortGUI(portRect, _outPorts[i], e);
+                _outPorts[i].rect = new Rect(rect.x + rect.width, yStart + i * portHeight, portWidth, portHeight);
+            }
+
+            for (int i = 0; i < _inPorts.Count; i++)
+            {
+                if (e.type == EventType.MouseUp && e.button == 0 && _inPorts[i].rect.Contains(e.mousePosition))
+                {
+                    Debug.Log(_inPorts[i].name);
+                    _clickPort = false;
+                    _clickPortPos = default;
+                    _clickPortId = 0;
+                    e.Use();
+                }
+            }
+
+            if (e.type == EventType.MouseUp && e.button == 0)
+            {
+                _clickPort = false;
+                _clickPortPos = default;
+                _clickPortId = 0;
+                e.Use();
+            }
+
+            for (int i = 0; i < _ports.Count; i++)
+            {
+                DrawPortGUI(_ports[i], e);
             }
             
             if (_clickPort)
@@ -97,69 +118,32 @@ namespace Nirvana
                 GraphUtils.willRepaint = true;
                 UnityEditor.Handles.DrawBezier(_clickPortPos, e.mousePosition, _clickPortPos, e.mousePosition, ColorUtils.orange1, Texture2D.whiteTexture, 3);
             }
-
-            // if (_clickPort && e.type == EventType.MouseUp && e.button == 0)
-            // {
-            //     _clickPort = false;
-            //     _clickPortPos = default;
-            //     _clickPortId = 0;
-            //     e.Use();
-            // }
         }
 
-        private void DrawPortGUI(Rect portRect, Port port, Event e)
+        private void DrawPortGUI(Port port, Event e)
         {
-            if (portRect.Contains(e.mousePosition))
+            if (e.type == EventType.MouseDown && e.button == 0 && port.rect.Contains(e.mousePosition))
             {
-                if (_clickPort && e.type == EventType.MouseUp && e.button == 0)
-                {
-                    Debug.Log(port.name);
-                    _clickPort = false;
-                    _clickPortPos = default;
-                    _clickPortId = 0;
-                    e.Use();
-                }
-            }
-            else
-            {
-                if (_clickPort && e.type == EventType.MouseUp && e.button == 0)
-                {
-                    Debug.Log(port.name + " 11");
-                    _clickPort = false;
-                    _clickPortPos = default;
-                    _clickPortId = 0;
-                }
-            }
-            
-            if (e.type == EventType.MouseDown && e.button == 0 && portRect.Contains(e.mousePosition))
-            {
-                Debug.Log(portRect);
-                Debug.Log(e.mousePosition);
                 _clickPort = true;
-                _clickPortPos = portRect.center;
+                _clickPortPos = port.rect.center;
                 _clickPortId = port.ID;
                 e.Use();
             }
             
-            if (portRect.Contains(e.mousePosition))
+            if (port.rect.Contains(e.mousePosition))
             {
-                _mouseInPort = true;
-                UnityEditor.EditorGUIUtility.AddCursorRect(portRect, UnityEditor.MouseCursor.ArrowPlus);
-            }
-            else
-            {
-                _mouseInPort |= false;
+                UnityEditor.EditorGUIUtility.AddCursorRect(port.rect, UnityEditor.MouseCursor.ArrowPlus);
             }
             
-            if (_clickPort && _clickPortId == port.ID || portRect.Contains(e.mousePosition))
+            if (_clickPort && _clickPortId == port.ID || port.rect.Contains(e.mousePosition))
             {
                 GUI.color = ColorUtils.orange1;
-                UnityEditor.EditorGUI.LabelField(portRect, "●", StyleUtils.portSymbol);
+                UnityEditor.EditorGUI.LabelField(port.rect, "●", StyleUtils.portSymbol);
                 GUI.color = Color.white;
             }
             else
             {
-                UnityEditor.EditorGUI.LabelField(portRect, "●", StyleUtils.portSymbol);
+                UnityEditor.EditorGUI.LabelField(port.rect, "●", StyleUtils.portSymbol);
             }
         }
 

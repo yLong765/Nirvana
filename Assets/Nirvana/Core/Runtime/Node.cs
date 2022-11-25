@@ -16,6 +16,24 @@ namespace Nirvana
         
         private Graph _graph;
 
+        private List<Link> _links = new List<Link>();
+
+        public List<Link> links
+        {
+            get => _links;
+            set => _links = value;
+        }
+
+        public void AddLink(Port port)
+        {
+            
+        }
+
+        public void DelLink(Port port)
+        {
+            
+        }
+
         [JsonIgnore] public int ID
         {
             get => _id;
