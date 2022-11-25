@@ -19,6 +19,7 @@ namespace Nirvana
         public static Color gray51 => new Color(0.51f, 0.51f, 0.51f, 1f);
         public static Color deepSkyBlue => new Color(0f, 0.749f, 1f, 1f);
         public static Color orange1 => new Color(1f, 0.647f, 0f, 1f);
+        public static Color darkOrang1 => new Color(1f, 0.498f, 0f, 1f);
         public static Color darkOrang2 => new Color(0.933f, 0.463f, 0f, 1f);
     }
 }
