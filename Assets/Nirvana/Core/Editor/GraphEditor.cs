@@ -136,7 +136,6 @@ namespace Nirvana.Editor
             {
                 GraphUtils.willSetDirty = false;
                 if (data != null) EditorUtility.SetDirty(data);
-                Repaint();
             }
 
             if (GraphUtils.willRepaint)

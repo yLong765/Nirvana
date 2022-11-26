@@ -11,6 +11,14 @@ namespace Nirvana
 {
     public partial class Node
     {
+        private int _id;
+        
+        [JsonIgnore] public int ID
+        {
+            get => _id;
+            set => _id = value;
+        }
+        
         private static bool _nodeInspectorHeaderGroup = true;
         
         private List<FieldInfo> _fieldInfos = new List<FieldInfo>();

@@ -14,6 +14,8 @@ namespace Nirvana
         {
             TypeNameHandling = TypeNameHandling.All,
             NullValueHandling = NullValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
         };
         
         [SerializeField] private string _serializedData;
@@ -52,6 +54,7 @@ namespace Nirvana
         {
             if (allNodes.Contains(node))
             {
+                node.OnDelete();
                 allNodes.Remove(node);
             }
 
@@ -68,6 +71,22 @@ namespace Nirvana
             newVariable.name = varName;
             bbSource.variables[varName] = newVariable;
             return newVariable;
+        }
+
+        public Link AddLink(Node source, Node target, string sourcePortName, string targetPortName)
+        {
+            var link = new Link();
+            
+            link.SetSourceNode(source, sourcePortName);
+            link.SetTargetNode(target, targetPortName);
+            
+            return link;
+        }
+
+        public void DelLink(Link link)
+        {
+            link.sourceNode.outLinks.Remove(link);
+            link.targetNode.inLinks.Remove(link);
         }
 
         public void OnBeforeSerialize()

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Nirvana
 {
+    [AttributeUsage(AttributeTargets.Class)]
     public class NodeNameAttribute : Attribute
     {
         public string name;
@@ -15,21 +16,7 @@ namespace Nirvana
         }
     }
 
-    public class LeftPortAttribute : Attribute
-    {
-        
-    }
-
-    public class RightPortAttribute : Attribute
-    {
-        
-    }
-
-    public class DownPortAttribute : Attribute
-    {
-        
-    }
-    
+    [AttributeUsage(AttributeTargets.Field)]
     public class InPortAttribute : Attribute
     {
         public string name;
@@ -43,6 +30,7 @@ namespace Nirvana
         }
     }
     
+    [AttributeUsage(AttributeTargets.Field)]
     public class OutPortAttribute : Attribute
     {
         public string name;
@@ -56,6 +44,7 @@ namespace Nirvana
         }
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
     public class IgnoreInNodeInspectorAttribute : Attribute
     {
         

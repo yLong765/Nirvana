@@ -8,36 +8,48 @@ namespace Nirvana
 {
     public partial class Node 
     {
-        private int _id;
         private string _title;
         private string _tag;
         private Vector2 _position;
         private Vector2 _size;
-        
         private Graph _graph;
 
-        private List<Link> _links = new List<Link>();
+        private List<Link> _inLinks = new List<Link>();
+        private List<Link> _outLinks = new List<Link>();
 
-        public List<Link> links
+        public List<Link> inLinks => _inLinks;
+        public List<Link> outLinks => _outLinks;
+
+        public Link GetLink(Node targetNode, string sourcePortName = null, string targetPortName = null)
         {
-            get => _links;
-            set => _links = value;
+            foreach (var link in _outLinks)
+            {
+                if (link.sourceNode == this && link.targetNode == targetNode && link.sourcePort == sourcePortName && link.targetPort == targetPortName)
+                {
+                    return link;
+                }
+            }
+
+            return null;
         }
 
-        public void AddLink(Port port)
+        public void DelOutLink(Link source)
         {
-            
+            if (source != null)
+            {
+                _outLinks.Remove(source);
+                source.targetNode.DelOutLink(this, source.targetPort, source.sourcePort);
+            }
         }
 
-        public void DelLink(Port port)
+        public void DelOutLink(Node targetNode, string sourcePortName = null, string targetPortName = null)
         {
-            
-        }
-
-        [JsonIgnore] public int ID
-        {
-            get => _id;
-            set => _id = value;
+            var link = GetLink(targetNode, sourcePortName, targetPortName);
+            if (link != null)
+            {
+                _outLinks.Remove(link);
+                link.targetNode.DelOutLink(this, targetPortName, sourcePortName);
+            }
         }
 
         public string title
@@ -84,10 +96,24 @@ namespace Nirvana
         }
 
         [JsonIgnore] public static Vector2 MIN_SIZE = new(80, 50);
+        
 
         public virtual void OnCreate() { }
         
         public virtual void OnRefresh() { }
+
+        public virtual void OnDelete()
+        {
+            for (int i = _inLinks.Count - 1; i >= 0; i--)
+            {
+                graph.DelLink(_inLinks[i]);
+            }
+            
+            for (int i = outLinks.Count - 1; i >= 0; i--)
+            {
+                graph.DelLink(outLinks[i]);
+            }
+        }
 
         public static Node Create(Graph graph, Type type, Vector2 pos)
         {

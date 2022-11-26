@@ -5,49 +5,39 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public class Port
+    public partial class Port
     {
-        private int _id;
         private string _name;
-        private Type _type;
-        private int _order;
-        private Rect _rect;
-        private Node _node;
+        private string _fieldName;
+        private Type _fieldFieldType;
 
-        public Node node
-        {
-            get => _node;
-            set => _node = value;
-        }
-
-        public int ID
-        {
-            get => _id;
-            set => _id = value;
-        }
-        
         public string name
         {
             get => _name;
             set => _name = value;
         }
-
-        public Type type
+        
+        public string fieldName
         {
-            get => _type;
-            set => _type = value;
+            get => _fieldName;
+            set => _fieldName = value;
         }
 
-        public int order
+        public Type fieldType
         {
-            get => _order;
-            set => _order = value;
+            get => _fieldFieldType;
+            set => _fieldFieldType = value;
         }
         
-        public Rect rect
+        public static Port Create(Node node, string portName, string fieldName, Type fieldType, int order)
         {
-            get => _rect;
-            set => _rect = value;
+            var newPort = new Port();
+            newPort.node = node;
+            newPort.name = portName;
+            newPort.fieldName = fieldName;
+            newPort.fieldType = fieldType;
+            newPort.order = order;
+            return newPort;
         }
     }
 }
