@@ -9,7 +9,8 @@ namespace Nirvana
     {
         private string _name;
         private string _fieldName;
-        private Type _fieldFieldType;
+        private Type _fieldType;
+        private Node _node;
 
         public string name
         {
@@ -25,18 +26,27 @@ namespace Nirvana
 
         public Type fieldType
         {
-            get => _fieldFieldType;
-            set => _fieldFieldType = value;
+            get => _fieldType;
+            set => _fieldType = value;
         }
         
-        public static Port Create(Node node, string portName, string fieldName, Type fieldType, int order)
+        public Node node
+        {
+            get => _node;
+            set => _node = value;
+        }
+        
+        public static Port Create(Node node, string portName, string fieldName, Type fieldType, PortAttribute portAtt)
         {
             var newPort = new Port();
             newPort.node = node;
             newPort.name = portName;
             newPort.fieldName = fieldName;
             newPort.fieldType = fieldType;
-            newPort.order = order;
+            newPort.order = portAtt.order;
+            newPort.linkCount = 0;
+            newPort.maxLinkCount = portAtt.maxLink;
+            newPort.canDragLink = portAtt.canDragLink;
             return newPort;
         }
     }

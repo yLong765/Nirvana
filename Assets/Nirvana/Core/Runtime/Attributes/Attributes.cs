@@ -17,30 +17,41 @@ namespace Nirvana
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class InPortAttribute : Attribute
+    public class PortAttribute : Attribute
     {
         public string name;
         public int order = 100;
-        
-        public InPortAttribute() {}
+        public int maxLink = 1;
+        public bool canDragLink = true;
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class InPortAttribute : PortAttribute
+    {
+        public InPortAttribute()
+        {
+            canDragLink = false;
+        }
 
         public InPortAttribute(string name)
         {
             this.name = name;
+            canDragLink = false;
         }
     }
     
     [AttributeUsage(AttributeTargets.Field)]
-    public class OutPortAttribute : Attribute
+    public class OutPortAttribute : PortAttribute
     {
-        public string name;
-        public int order = 100;
-        
-        public OutPortAttribute() {}
+        public OutPortAttribute()
+        {
+            maxLink = 100;
+        }
 
         public OutPortAttribute(string name)
         {
             this.name = name;
+            maxLink = 100;
         }
     }
 

@@ -20,38 +20,6 @@ namespace Nirvana
         public List<Link> inLinks => _inLinks;
         public List<Link> outLinks => _outLinks;
 
-        public Link GetLink(Node targetNode, string sourcePortName = null, string targetPortName = null)
-        {
-            foreach (var link in _outLinks)
-            {
-                if (link.sourceNode == this && link.targetNode == targetNode && link.sourcePort == sourcePortName && link.targetPort == targetPortName)
-                {
-                    return link;
-                }
-            }
-
-            return null;
-        }
-
-        public void DelOutLink(Link source)
-        {
-            if (source != null)
-            {
-                _outLinks.Remove(source);
-                source.targetNode.DelOutLink(this, source.targetPort, source.sourcePort);
-            }
-        }
-
-        public void DelOutLink(Node targetNode, string sourcePortName = null, string targetPortName = null)
-        {
-            var link = GetLink(targetNode, sourcePortName, targetPortName);
-            if (link != null)
-            {
-                _outLinks.Remove(link);
-                link.targetNode.DelOutLink(this, targetPortName, sourcePortName);
-            }
-        }
-
         public string title
         {
             get

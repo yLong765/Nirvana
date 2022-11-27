@@ -238,6 +238,26 @@ namespace Nirvana
             }
         }
 
+        private static GUIStyle _portWarningLabel;
+        public static GUIStyle portWarningLabel
+        {
+            get
+            {
+                if (_portWarningLabel == null)
+                {
+                    _portWarningLabel = new GUIStyle(EditorStyles.label);
+                    _portWarningLabel.normal.textColor = Color.red;
+                    _portWarningLabel.margin = new RectOffset(0, 0, 0, 0);
+                    _portWarningLabel.padding = new RectOffset(0, 0, 0, 0);
+                    _portWarningLabel.fontSize = 8;
+                    _portWarningLabel.alignment = TextAnchor.MiddleLeft;
+                    
+                }
+
+                return _portWarningLabel;
+            }
+        }
+
         private static GUIStyle _defaultLabel;
         public static GUIStyle defaultLabel {
             get

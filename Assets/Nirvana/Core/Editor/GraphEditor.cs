@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
@@ -281,7 +282,7 @@ namespace Nirvana.Editor
                 GenericMenu menu = new GenericMenu();
                 menu.AddItem(new GUIContent("Export Json"), false, () =>
                 {
-                    var json = currentGraph.Serialize();
+                    var json = currentGraph.Serialize(Formatting.Indented);
                     var selectPath = EditorUtility.SaveFilePanel("Select Export Path", "Assets", currentGraph.title, "json");
                     if (!string.IsNullOrEmpty(selectPath))
                     {

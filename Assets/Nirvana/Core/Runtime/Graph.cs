@@ -73,13 +73,42 @@ namespace Nirvana
             return newVariable;
         }
 
-        public Link AddLink(Node source, Node target, string sourcePortName, string targetPortName)
+        public bool CheckCanLink(Node source, Node target, string sourceOutPortName, string targetInPortName)
         {
+            if (source.TryGetOutPort(sourceOutPortName, out Port outPort))
+            {
+                if (outPort.linkCount == outPort.maxLinkCount)
+                {
+                    return false;
+                }
+            }
+
+            if (target.TryGetInPort(targetInPortName, out Port inPort))
+            {
+                if (inPort.linkCount == inPort.maxLinkCount)
+                {
+                    return false;
+                }
+            }
+
+            if (inPort != null && outPort != null)
+            {
+                if (!outPort.fieldType.IsAssignableFrom(inPort.fieldType))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
+        public Link AddLink(Node source, Node target, string sourceOutPortName, string targetInPortName)
+        {
+            if (!CheckCanLink(source, target, sourceOutPortName, targetInPortName)) return null;
+            
             var link = new Link();
-            
-            link.SetSourceNode(source, sourcePortName);
-            link.SetTargetNode(target, targetPortName);
-            
+            link.SetSourceNode(source, sourceOutPortName);
+            link.SetTargetNode(target, targetInPortName);
             return link;
         }
 
@@ -87,6 +116,17 @@ namespace Nirvana
         {
             link.sourceNode.outLinks.Remove(link);
             link.targetNode.inLinks.Remove(link);
+
+            if (link.sourceNode.TryGetOutPort(link.sourceOutPort, out Port outPort))
+            {
+                outPort.isLink = false;
+            }
+            
+            if (link.targetNode.TryGetInPort(link.targetInPort, out Port inPort))
+            {
+                inPort.isLink = false;
+            }
+            
         }
 
         public void OnBeforeSerialize()
@@ -106,9 +146,9 @@ namespace Nirvana
             }
         }
 
-        public string Serialize()
+        public string Serialize(Formatting formatting = Formatting.None)
         {
-            return JsonConvert.SerializeObject(_graphSource, Formatting.Indented, _settings);
+            return JsonConvert.SerializeObject(_graphSource, formatting, _settings);
         }
 
         public void Deserialize(string json)

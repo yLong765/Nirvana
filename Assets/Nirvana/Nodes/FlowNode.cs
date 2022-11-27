@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using UnityEditor;
 using UnityEngine;
 
 namespace Nirvana
@@ -19,9 +20,31 @@ namespace Nirvana
         [JsonIgnore] public List<Port> inPorts => _inPorts;
         [JsonIgnore] public List<Port> outPorts => _outPorts;
 
-        private Port GetPort(string fieldName)
+        public Port GetPort(string fieldName)
         {
             return _ports.FirstOrDefault(port => port.fieldName == fieldName);
+        }
+
+        public Port GetInPort(string fieldName)
+        {
+            return _inPorts.FirstOrDefault(port => port.fieldName == fieldName);
+        }
+        
+        public Port GetOutPort(string fieldName)
+        {
+            return _outPorts.FirstOrDefault(port => port.fieldName == fieldName);
+        }
+
+        public bool TryGetInPort(string fieldName, out Port port)
+        {
+            port = GetInPort(fieldName);
+            return port != null;
+        }
+        
+        public bool TryGetOutPort(string fieldName, out Port port)
+        {
+            port = GetOutPort(fieldName);
+            return port != null;
         }
 
         private static int ComparerPort(Port p1, Port p2)
@@ -40,14 +63,14 @@ namespace Nirvana
                 if (info.TryGetAttribute<InPortAttribute>(out var inAtt))
                 {
                     var portName = string.IsNullOrEmpty(inAtt.name) ? info.Name : inAtt.name;
-                    var port = Port.Create(this, portName, info.Name, info.FieldType, inAtt.order);
+                    var port = Port.Create(this, portName, info.Name, info.FieldType, inAtt);
                     _ports.Add(port);
                     _inPorts.Add(port);
                 }
                 else if (info.TryGetAttribute<OutPortAttribute>(out var outAtt))
                 {
                     var portName = string.IsNullOrEmpty(outAtt.name) ? info.Name : outAtt.name;
-                    var port = Port.Create(this, portName, info.Name, info.FieldType, outAtt.order);
+                    var port = Port.Create(this, portName, info.Name, info.FieldType, outAtt);
                     _ports.Add(port);
                     _outPorts.Add(port);
                 }
@@ -59,14 +82,15 @@ namespace Nirvana
 
             //------更新PortLink------
             
-            for (int i = inLinks.Count - 1; i >= 0; i--)
+            for (int i = outLinks.Count - 1; i >= 0; i--)
             {
-                if (GetPort(inLinks[i].sourcePort) == null)
+                if (!TryGetOutPort(outLinks[i].sourceOutPort, out _))
                 {
-                    DelOutLink(inLinks[i]);
+                    graph.DelLink(outLinks[i]);
                 }
             }
         }
+        
         
         public override void OnCreate()
         {
@@ -114,6 +138,25 @@ namespace Nirvana
                 _outPorts[i].rect = new Rect(rect.x + rect.width, yStart + i * portHeight, portWidth, portHeight);
             }
 
+            // ------链接警告提示------
+
+            if (_clickPort != null)
+            {
+                foreach (var port in _inPorts)
+                {
+                    if (port.rect.Contains(e.mousePosition))
+                    {
+                        if (!graph.CheckCanLink(_clickPort.node, this, _clickPort.port.fieldName, port.fieldName))
+                        {
+                            var size = StyleUtils.portWarningLabel.CalcSize("E: Non-identical or inherited types");
+                            var warning = new Rect(0, 0, size.x, size.y);
+                            warning.center = new Vector2(e.mousePosition.x - size.x * 0.5f, e.mousePosition.y - size.y);
+                            EditorGUI.LabelField(warning, "E: Non-identical or inherited types", StyleUtils.portWarningLabel);
+                        }
+                    }
+                }
+            }
+            
             // ------处理鼠标抬起事件------
             
             if (_clickPort != null && e.type == EventType.MouseUp && e.button == 0)
@@ -159,24 +202,22 @@ namespace Nirvana
             
             // ------绘制已经链接的线------
 
-            foreach (var link in inLinks)
+            foreach (var link in outLinks)
             {
                 Port sourcePort = null;
                 Port targetPort = null;
                 if (link.sourceNode is FlowNode snode)
                 {
-                    sourcePort = snode.GetPort(link.sourcePort);
+                    sourcePort = snode.GetOutPort(link.sourceOutPort);
                 }
 
                 if (link.targetNode is FlowNode tnode)
                 {
-                    targetPort = tnode.GetPort(link.targetPort);
+                    targetPort = tnode.GetInPort(link.targetInPort);
                 }
 
                 if (sourcePort != null && targetPort != null)
                 {
-                    sourcePort.isLink = true;
-                    targetPort.isLink = true;
                     UnityEditor.Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, Texture2D.whiteTexture, 3);
                 }
             }
