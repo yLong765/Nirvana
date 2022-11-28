@@ -28,15 +28,11 @@ namespace Nirvana
     [AttributeUsage(AttributeTargets.Field)]
     public class InPortAttribute : PortAttribute
     {
-        public InPortAttribute()
-        {
-            canDragLink = false;
-        }
+        public InPortAttribute() { }
 
         public InPortAttribute(string name)
         {
             this.name = name;
-            canDragLink = false;
         }
     }
     

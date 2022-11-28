@@ -9,7 +9,7 @@ namespace Nirvana
     [Serializable]
     public class Blackboard : ISerializationCallbackReceiver
     {
-        private static JsonSerializerSettings _settings = new()
+        private static readonly JsonSerializerSettings Settings = new()
         {
             TypeNameHandling = TypeNameHandling.All,
             NullValueHandling = NullValueHandling.Ignore,
@@ -26,13 +26,13 @@ namespace Nirvana
 
         public void OnBeforeSerialize()
         {
-            _serializedData = JsonConvert.SerializeObject(_bbSource, Formatting.None, _settings);
+            _serializedData = JsonConvert.SerializeObject(_bbSource, Formatting.None, Settings);
         }
 
         public void OnAfterDeserialize()
         {
             _bbSource = !string.IsNullOrEmpty(_serializedData)
-                ? JsonConvert.DeserializeObject<BlackboardSource>(_serializedData, _settings)
+                ? JsonConvert.DeserializeObject<BlackboardSource>(_serializedData, Settings)
                 : new BlackboardSource();
         }
     }

@@ -1,15 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Nirvana
 {
     public class FlowNode : Node
     {
-        [InPort("▶", order = 0), IgnoreInNodeInspector] public Port InPort;
+        [InPort("▶", order = 0, canDragLink = true), IgnoreInNodeInspector] public Port InPort;
         [OutPort("▶", order = 0), IgnoreInNodeInspector] public Port OutPort;
 
         private List<Port> _ports = new List<Port>();
@@ -19,6 +22,8 @@ namespace Nirvana
         [JsonIgnore] public List<Port> allPorts => _ports;
         [JsonIgnore] public List<Port> inPorts => _inPorts;
         [JsonIgnore] public List<Port> outPorts => _outPorts;
+
+        private bool _updateLink = false;
 
         public Port GetPort(string fieldName)
         {
@@ -63,14 +68,14 @@ namespace Nirvana
                 if (info.TryGetAttribute<InPortAttribute>(out var inAtt))
                 {
                     var portName = string.IsNullOrEmpty(inAtt.name) ? info.Name : inAtt.name;
-                    var port = Port.Create(this, portName, info.Name, info.FieldType, inAtt);
+                    var port = Port.Create(this, portName, info.Name, info.FieldType, inAtt, PortType.In);
                     _ports.Add(port);
                     _inPorts.Add(port);
                 }
                 else if (info.TryGetAttribute<OutPortAttribute>(out var outAtt))
                 {
                     var portName = string.IsNullOrEmpty(outAtt.name) ? info.Name : outAtt.name;
-                    var port = Port.Create(this, portName, info.Name, info.FieldType, outAtt);
+                    var port = Port.Create(this, portName, info.Name, info.FieldType, outAtt, PortType.Out);
                     _ports.Add(port);
                     _outPorts.Add(port);
                 }
@@ -80,15 +85,7 @@ namespace Nirvana
             _inPorts.Sort(ComparerPort);
             _outPorts.Sort(ComparerPort);
 
-            //------更新PortLink------
-            
-            for (int i = outLinks.Count - 1; i >= 0; i--)
-            {
-                if (!TryGetOutPort(outLinks[i].sourceOutPort, out _))
-                {
-                    graph.DelLink(outLinks[i]);
-                }
-            }
+            _updateLink = true;
         }
         
         
@@ -102,75 +99,124 @@ namespace Nirvana
             RefreshPorts();
         }
 
-#if UNITY_EDITOR
-        private class GUIPort
+        private void UpdateLink()
         {
-            public Node node;
-            public Port port;
-
-            public GUIPort(Node node, Port port)
+            _updateLink = false;
+            for (int i = outLinks.Count - 1; i >= 0; i--)
             {
-                this.node = node;
-                this.port = port;
+                var snode = outLinks[i].sourceNode;
+                var tnode = outLinks[i].targetNode;
+                if (snode.TryGetOutPort(outLinks[i].sourceOutPort, out Port outPort) && tnode.TryGetInPort(outLinks[i].targetInPort, out Port inPort))
+                {
+                    outPort.linkCount++;
+                    inPort.linkCount++;
+                }
+                else
+                {
+                    graph.DelLink(outLinks[i]);
+                }
             }
         }
-        private static GUIPort _clickPort;
+
+#if UNITY_EDITOR
+        private class GUILink
+        {
+            public Node sourceNode;
+            public Port sourcePort;
+            public Node targetNode;
+            public Port targetPort;
+
+            public GUILink(Node sourceNode, Port sourcePort, Node targetNode = null, Port targetPort = null)
+            {
+                this.sourceNode = sourceNode;
+                this.sourcePort = sourcePort;
+                this.targetNode = targetNode;
+                this.targetPort = targetPort;
+            }
+        }
+        private static GUILink _clickLink;
         private static int _dragLinkMissNodeCount = 0;
-        
+
         public override void DrawLinkGUI()
         {
+            //------更新Link状态避免因修改Field而导致的Link失效------
+            
+            if (_updateLink) UpdateLink();
+            
             var e = Event.current;
 
-            float yStart = rect.y + StyleUtils.windowTitle.CalcSize(title).y + 1;
-            float portWidth = StyleUtils.portSymbol.CalcSize("●").x;
+            var yStart = rect.y + StyleUtils.windowTitle.CalcSize(title).y + 1;
+            var portWidth = StyleUtils.portSymbol.CalcSize("●").x;
             
             // ------确定Port位置------
             
             for (int i = 0; i < _inPorts.Count; i++)
             {
-                float portHeight = StyleUtils.inPortLabel.CalcSize(_inPorts[i].name).y - 3;
+                var portHeight = StyleUtils.inPortLabel.CalcSize(_inPorts[i].name).y - 3;
                 _inPorts[i].rect = new Rect(rect.x - portWidth, yStart + i * portHeight, portWidth, portHeight);
             }
             
             for (int i = 0; i < _outPorts.Count; i++)
             {
-                float portHeight = StyleUtils.outPortLabel.CalcSize(_outPorts[i].name).y - 3;
+                var portHeight = StyleUtils.outPortLabel.CalcSize(_outPorts[i].name).y - 3;
                 _outPorts[i].rect = new Rect(rect.x + rect.width, yStart + i * portHeight, portWidth, portHeight);
             }
 
             // ------链接警告提示------
 
-            if (_clickPort != null)
+            if (_clickLink != null)
             {
-                foreach (var port in _inPorts)
+                foreach (var port in _inPorts.Where(port => port.rect.Contains(e.mousePosition)))
                 {
-                    if (port.rect.Contains(e.mousePosition))
+                    switch (port.portType)
                     {
-                        if (!graph.CheckCanLink(_clickPort.node, this, _clickPort.port.fieldName, port.fieldName))
-                        {
-                            var size = StyleUtils.portWarningLabel.CalcSize("E: Non-identical or inherited types");
-                            var warning = new Rect(0, 0, size.x, size.y);
-                            warning.center = new Vector2(e.mousePosition.x - size.x * 0.5f, e.mousePosition.y - size.y);
-                            EditorGUI.LabelField(warning, "E: Non-identical or inherited types", StyleUtils.portWarningLabel);
-                        }
+                        case PortType.In:
+                            if (!graph.CheckCanLink(_clickLink.sourceNode, this, _clickLink.sourcePort.fieldName, port.fieldName))
+                            {
+                                var size = StyleUtils.portWarningLabel.CalcSize("E: Non-identical or inherited types");
+                                var warning = new Rect(0, 0, size.x, size.y);
+                                warning.center = new Vector2(e.mousePosition.x - size.x * 0.5f, e.mousePosition.y - size.y);
+                                EditorGUI.LabelField(warning, "E: Non-identical or inherited types", StyleUtils.portWarningLabel);
+                            }
+                            break;
+                        case PortType.Out:
+                            if (!graph.CheckCanLink(this, _clickLink.sourceNode, port.fieldName, _clickLink.sourcePort.fieldName))
+                            {
+                                var size = StyleUtils.portWarningLabel.CalcSize("E: Non-identical or inherited types");
+                                var warning = new Rect(0, 0, size.x, size.y);
+                                warning.center = new Vector2(e.mousePosition.x + size.x * 0.5f, e.mousePosition.y - size.y);
+                                EditorGUI.LabelField(warning, "E: Non-identical or inherited types", StyleUtils.portWarningLabel);
+                            }
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
             }
             
             // ------处理鼠标抬起事件------
             
-            if (_clickPort != null && e.type == EventType.MouseUp && e.button == 0)
+            if (_clickLink != null && e.type == EventType.MouseUp && e.button == 0)
             {
                 bool mouseOnPort = false;
-                foreach (var port in _inPorts)
+                foreach (var port in _ports.Where(port => port.rect.Contains(e.mousePosition)))
                 {
-                    if (port.rect.Contains(e.mousePosition))
+                    Link newLink = null;
+                    if (port.portType == PortType.In && _clickLink.sourcePort.portType == PortType.Out)
                     {
-                        Debug.Log("Add Link " + _clickPort.port.fieldName + " to " + port.fieldName);
-                        graph.AddLink(_clickPort.node, this, _clickPort.port.fieldName, port.fieldName);
+                        newLink = graph.AddLink(_clickLink.sourceNode, this, _clickLink.sourcePort.fieldName, port.fieldName);
+                    }
+                    else if (port.portType == PortType.Out && _clickLink.sourcePort.portType == PortType.In)
+                    {
+                        newLink = graph.AddLink(this, _clickLink.sourceNode, port.fieldName, _clickLink.sourcePort.fieldName);
+                    }
+
+                    if (newLink != null)
+                    {
                         mouseOnPort = true;
-                        _clickPort = null;
+                        _clickLink = null;
                         e.Use();
+                        break;
                     }
                 }
 
@@ -179,7 +225,11 @@ namespace Nirvana
                     _dragLinkMissNodeCount++;
                     if (_dragLinkMissNodeCount == graph.allNodes.Count)
                     {
-                        _clickPort = null;
+                        if (_clickLink.targetNode != null && _clickLink.targetPort != null)
+                        {
+                            graph.AddLink(_clickLink.sourceNode, _clickLink.targetNode, _clickLink.sourcePort.fieldName, _clickLink.targetPort.fieldName);
+                        }
+                        _clickLink = null;
                         e.Use();
                     }
                 }
@@ -194,32 +244,19 @@ namespace Nirvana
             
             // ------绘制拖动的链接线------
             
-            if (_clickPort != null)
+            if (_clickLink != null)
             {
                 GraphUtils.willRepaint = true;
-                UnityEditor.Handles.DrawBezier(_clickPort.port.rect.center, e.mousePosition, _clickPort.port.rect.center, e.mousePosition, ColorUtils.orange1, Texture2D.whiteTexture, 3);
+                Handles.DrawBezier(_clickLink.sourcePort.rect.center, e.mousePosition, _clickLink.sourcePort.rect.center, e.mousePosition, ColorUtils.orange1, Texture2D.whiteTexture, 3);
             }
             
             // ------绘制已经链接的线------
 
             foreach (var link in outLinks)
             {
-                Port sourcePort = null;
-                Port targetPort = null;
-                if (link.sourceNode is FlowNode snode)
-                {
-                    sourcePort = snode.GetOutPort(link.sourceOutPort);
-                }
-
-                if (link.targetNode is FlowNode tnode)
-                {
-                    targetPort = tnode.GetInPort(link.targetInPort);
-                }
-
-                if (sourcePort != null && targetPort != null)
-                {
-                    UnityEditor.Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, Texture2D.whiteTexture, 3);
-                }
+                var sourcePort = link.GetSourceOutPort();
+                var targetPort = link.GetTargetInPort();
+                Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, Texture2D.whiteTexture, 3);
             }
         }
 
@@ -227,28 +264,48 @@ namespace Nirvana
         {
             if (e.type == EventType.MouseDown && e.button == 0 && port.rect.Contains(e.mousePosition))
             {
-                GraphUtils.activeNodes = null;
-                _dragLinkMissNodeCount = 0;
-                _clickPort = new GUIPort(this, port);
-                e.Use();
+                if (port.canDragLink && port.linkCount < port.maxLinkCount)
+                {
+                    GraphUtils.activeNodes = null;
+                    _dragLinkMissNodeCount = 0;
+                    _clickLink = new GUILink(this, port);
+                    e.Use();
+                }
+                else if (port.linkCount == 1)
+                {
+                    GraphUtils.activeNodes = null;
+                    _dragLinkMissNodeCount = 0;
+                    foreach (var link in port.node.inLinks)
+                    {
+                        if (link.targetInPort == port.fieldName)
+                        {
+                            var outPort = link.GetSourceOutPort();
+                            var inPort = link.GetTargetInPort();
+                            _clickLink = new GUILink(link.sourceNode, outPort, link.targetNode, inPort);
+                            graph.DelLink(link);
+                            e.Use();
+                            break;
+                        }
+                    }
+                }
             }
             
             if (port.rect.Contains(e.mousePosition))
             {
-                UnityEditor.EditorGUIUtility.AddCursorRect(port.rect, UnityEditor.MouseCursor.ArrowPlus);
+                EditorGUIUtility.AddCursorRect(port.rect, MouseCursor.ArrowPlus);
             }
             
-            if (_clickPort != null && _clickPort.port.fieldName == port.fieldName && _clickPort.node == this ||
+            if (_clickLink != null && _clickLink.sourcePort.fieldName == port.fieldName && _clickLink.sourceNode == this ||
                 port.rect.Contains(e.mousePosition) ||
                 port.isLink)
             {
                 GUI.color = ColorUtils.orange1;
-                UnityEditor.EditorGUI.LabelField(port.rect, "●", StyleUtils.portSymbol);
+                EditorGUI.LabelField(port.rect, "●", StyleUtils.portSymbol);
                 GUI.color = Color.white;
             }
             else
             {
-                UnityEditor.EditorGUI.LabelField(port.rect, "●", StyleUtils.portSymbol);
+                EditorGUI.LabelField(port.rect, "●", StyleUtils.portSymbol);
             }
         }
 

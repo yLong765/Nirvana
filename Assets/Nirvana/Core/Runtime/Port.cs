@@ -5,6 +5,12 @@ using UnityEngine;
 
 namespace Nirvana
 {
+    public enum PortType
+    {
+        In,
+        Out,
+    }
+    
     public partial class Port
     {
         private string _name;
@@ -36,7 +42,7 @@ namespace Nirvana
             set => _node = value;
         }
         
-        public static Port Create(Node node, string portName, string fieldName, Type fieldType, PortAttribute portAtt)
+        public static Port Create(Node node, string portName, string fieldName, Type fieldType, PortAttribute portAtt, PortType portType)
         {
             var newPort = new Port();
             newPort.node = node;
@@ -47,6 +53,7 @@ namespace Nirvana
             newPort.linkCount = 0;
             newPort.maxLinkCount = portAtt.maxLink;
             newPort.canDragLink = portAtt.canDragLink;
+            newPort.portType = portType;
             return newPort;
         }
     }

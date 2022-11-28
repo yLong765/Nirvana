@@ -10,7 +10,7 @@ namespace Nirvana
     [Serializable]
     public class Graph : ISerializationCallbackReceiver, ISerialize
     {
-        private static JsonSerializerSettings _settings = new()
+        private static readonly JsonSerializerSettings Settings = new()
         {
             TypeNameHandling = TypeNameHandling.All,
             NullValueHandling = NullValueHandling.Ignore,
@@ -82,7 +82,7 @@ namespace Nirvana
                     return false;
                 }
             }
-
+            
             if (target.TryGetInPort(targetInPortName, out Port inPort))
             {
                 if (inPort.linkCount == inPort.maxLinkCount)
@@ -116,22 +116,13 @@ namespace Nirvana
         {
             link.sourceNode.outLinks.Remove(link);
             link.targetNode.inLinks.Remove(link);
-
-            if (link.sourceNode.TryGetOutPort(link.sourceOutPort, out Port outPort))
-            {
-                outPort.isLink = false;
-            }
-            
-            if (link.targetNode.TryGetInPort(link.targetInPort, out Port inPort))
-            {
-                inPort.isLink = false;
-            }
-            
+            link.GetSourceOutPort().linkCount--;
+            link.GetTargetInPort().linkCount--;
         }
 
         public void OnBeforeSerialize()
         {
-            _serializedData = Serialize();
+            _serializedData = Serialize(Formatting.Indented);
         }
 
         public void OnAfterDeserialize()
@@ -148,12 +139,12 @@ namespace Nirvana
 
         public string Serialize(Formatting formatting = Formatting.None)
         {
-            return JsonConvert.SerializeObject(_graphSource, formatting, _settings);
+            return JsonConvert.SerializeObject(_graphSource, formatting, Settings);
         }
 
         public void Deserialize(string json)
         {
-            _graphSource = JsonConvert.DeserializeObject<GraphSource>(json, _settings) ?? new GraphSource();
+            _graphSource = JsonConvert.DeserializeObject<GraphSource>(json, Settings) ?? new GraphSource();
             for (int i = 0; i < _graphSource.nodes.Count; i++)
             {
                 _graphSource.nodes[i].ID = i + 1;

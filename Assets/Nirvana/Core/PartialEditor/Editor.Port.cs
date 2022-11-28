@@ -8,10 +8,10 @@ namespace Nirvana
     {
         private int _order;
         private Rect _rect;
-        private bool _isLink;
         private int _linkCount;
         private int _maxLinkCount;
         private bool _canDragLink;
+        private PortType _portType;
 
         public int order
         {
@@ -25,12 +25,8 @@ namespace Nirvana
             set => _rect = value;
         }
 
-        public bool isLink
-        {
-            get => _isLink;
-            set => _isLink = value;
-        }
-        
+        public bool isLink => linkCount > 0;
+
         public int linkCount
         {
             get => _linkCount;
@@ -47,6 +43,12 @@ namespace Nirvana
         {
             get => _canDragLink;
             set => _canDragLink = value;
+        }
+        
+        public PortType portType
+        {
+            get => _portType;
+            set => _portType = value;
         }
     }
 }

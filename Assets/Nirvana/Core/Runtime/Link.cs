@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Nirvana
@@ -11,25 +13,46 @@ namespace Nirvana
         private string _sourceOutPort;
         private string _targetInPort;
 
-        public Node sourceNode => _sourceNode;
+        public Node sourceNode
+        {
+            get => _sourceNode;
+            set => _sourceNode = value;
+        }
 
-        public Node targetNode => _targetNode;
+        public Node targetNode
+        {
+            get => _targetNode;
+            set => _targetNode = value;
+        }
 
-        public string sourceOutPort => _sourceOutPort;
+        public string sourceOutPort
+        {
+            get => _sourceOutPort;
+            set => _sourceOutPort = value;
+        }
 
-        public string targetInPort => _targetInPort;
+        public string targetInPort
+        {
+            get => _targetInPort;
+            set => _targetInPort = value;
+        }
+
+        public Port GetSourceOutPort()
+        {
+            return _sourceNode.GetOutPort(_sourceOutPort);
+        }
+        
+        public Port GetTargetInPort()
+        {
+            return _targetNode.GetInPort(_targetInPort);
+        }
 
         public void SetSourceNode(Node node, string portName)
         {
             _sourceNode = node;
             _sourceOutPort = portName;
             _sourceNode.outLinks.Add(this);
-
-            if (_sourceNode.TryGetOutPort(_sourceOutPort, out Port port))
-            {
-                port.isLink = true;
-                port.linkCount++;
-            }
+            GetSourceOutPort().linkCount++;
         }
 
         public void SetTargetNode(Node node, string portName)
@@ -37,12 +60,7 @@ namespace Nirvana
             _targetNode = node;
             _targetInPort = portName;
             _targetNode.inLinks.Add(this);
-
-            if (_targetNode.TryGetInPort(_targetInPort, out Port port))
-            {
-                port.isLink = true;
-                port.linkCount++;
-            }
+            GetTargetInPort().linkCount++;
         }
     }
 }
