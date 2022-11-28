@@ -12,8 +12,9 @@ namespace Nirvana
         public static bool allowClick = true;
         public static bool showBlackboardPanel = true;
 
+        //------Node相关------
+        
         private static List<WeakReference<Node>> _activeNodes = new List<WeakReference<Node>>();
-
         public static List<Node> activeNodes
         {
             get
@@ -45,12 +46,10 @@ namespace Nirvana
                 }
             }
         }
-
         public static void AddActiveNode(Node node)
         {
             _activeNodes.Add(new WeakReference<Node>(node));
         }
-
         public static void RemoveActiveNode(Node node)
         {
             foreach (var weakNode in _activeNodes)
@@ -61,6 +60,29 @@ namespace Nirvana
                     break;
                 }
             }
+        }
+        
+        //------链接相关------
+        
+        private static WeakReference<Link> _activeLink = new WeakReference<Link>(null);
+        public static Link activeLink
+        {
+            get
+            {
+                if (_activeLink.TryGetTarget(out Link link))
+                {
+                    return link;
+                }
+
+                return null;
+            }
+            set => _activeLink = new WeakReference<Link>(value);
+        }
+
+        public static void ClearGraphMouseSelect()
+        {
+            activeNodes = null;
+            activeLink = null;
         }
     }
 }

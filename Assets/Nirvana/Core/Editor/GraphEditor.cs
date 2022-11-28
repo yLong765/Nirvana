@@ -186,7 +186,7 @@ namespace Nirvana.Editor
                 {
                     if (_e.clickCount == 1)
                     {
-                        GraphUtils.activeNodes = null;
+                        GraphUtils.ClearGraphMouseSelect();
                         _e.Use();
                     }
                 }
@@ -227,9 +227,14 @@ namespace Nirvana.Editor
                         {
                             currentGraph.RemoveNode(node);
                         }
-                        
+
+                        if (GraphUtils.activeLink != null)
+                        {
+                            currentGraph.DelLink(GraphUtils.activeLink);
+                        }
+
                         GraphUtils.willSetDirty = true;
-                        GraphUtils.activeNodes = null;
+                        GraphUtils.ClearGraphMouseSelect();
                     }
 
                     _e.Use();

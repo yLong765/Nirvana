@@ -134,6 +134,7 @@ namespace Nirvana
                 this.targetPort = targetPort;
             }
         }
+
         private static GUILink _clickLink;
         private static int _dragLinkMissNodeCount = 0;
 
@@ -256,7 +257,16 @@ namespace Nirvana
             {
                 var sourcePort = link.GetSourceOutPort();
                 var targetPort = link.GetTargetInPort();
-                Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, Texture2D.whiteTexture, 3);
+                var height = GraphUtils.activeLink == link ? 5 : 3;
+                Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, Texture2D.whiteTexture, height);
+                if (e.type == EventType.MouseDown && e.button == 0)
+                {
+                    if (CurveUtils.IsPosInCurve(e.mousePosition, sourcePort.rect.center, targetPort.rect.center, 3))
+                    {
+                        GraphUtils.activeLink = link;
+                        e.Use();
+                    }
+                }
             }
         }
 
@@ -266,14 +276,14 @@ namespace Nirvana
             {
                 if (port.canDragLink && port.linkCount < port.maxLinkCount)
                 {
-                    GraphUtils.activeNodes = null;
+                    GraphUtils.ClearGraphMouseSelect();
                     _dragLinkMissNodeCount = 0;
                     _clickLink = new GUILink(this, port);
                     e.Use();
                 }
                 else if (port.linkCount == 1)
                 {
-                    GraphUtils.activeNodes = null;
+                    GraphUtils.ClearGraphMouseSelect();
                     _dragLinkMissNodeCount = 0;
                     foreach (var link in port.node.inLinks)
                     {
