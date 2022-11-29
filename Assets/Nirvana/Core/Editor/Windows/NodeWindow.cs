@@ -39,8 +39,8 @@ namespace Nirvana.Editor
                 {
                     //if (e.button == 0 || e.button == 1)
                     {
-                        GraphUtils.ClearGraphMouseSelect();
-                        GraphUtils.AddActiveNode(node);
+                        GraphUtils.Select(node);
+                        // GraphUtils.AddActiveNode(node);
                         GUIUtility.keyboardControl = 0;
                     }
 
@@ -63,7 +63,7 @@ namespace Nirvana.Editor
                     menu.AddItem(new GUIContent("Delete"), false, () =>
                     {
                         node.graph.RemoveNode(node);
-                        GraphUtils.ClearGraphMouseSelect();
+                        GraphUtils.ClearSelect();
                     });
                     menu.ShowAsContext();
 

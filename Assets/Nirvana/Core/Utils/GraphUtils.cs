@@ -79,7 +79,27 @@ namespace Nirvana
             set => _activeLink = new WeakReference<Link>(value);
         }
 
-        public static void ClearGraphMouseSelect()
+        public static void Select<T>(T select)
+        {
+            ClearSelect();
+            
+            if (select is Node node)
+            {
+                AddActiveNode(node);
+            }
+
+            if (select is List<Node> nodes)
+            {
+                activeNodes = nodes;
+            }
+            
+            if (select is Link link)
+            {
+                activeLink = link;
+            }
+        }
+        
+        public static void ClearSelect()
         {
             activeNodes = null;
             activeLink = null;

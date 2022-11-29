@@ -8,7 +8,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 
-namespace Nirvana.Editor
+namespace Nirvana
 {
     public static class EditorUtils
     {

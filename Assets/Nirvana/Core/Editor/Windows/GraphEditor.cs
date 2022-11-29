@@ -1,7 +1,7 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using UnityEditor;
@@ -15,11 +15,15 @@ namespace Nirvana.Editor
         private static Vector2 _realMousePosition;
         private static Vector2 _graphMousePosition;
         private static Rect _graphRect;
+        public static Rect graphtRect => _graphRect;
 
         private static readonly float GRAPH_TOP = 21;
         private static readonly float GRAPH_LEFT = 2;
         private static readonly float GRAPH_RIGHT = 2;
         private static readonly float GRAPH_BOTTOM = 2;
+
+        private static bool _mulSelect;
+        private static Vector3 _mulSelectStartPos;
         
         private GraphEditorData _data;
         private int _dataID;
@@ -133,6 +137,8 @@ namespace Nirvana.Editor
             GraphUtils.allowClick = _graphRect.Contains(_realMousePosition) && !inspectorRect.Contains(_realMousePosition) &&
                                     !blackboardRect.Contains(_realMousePosition);
 
+            DrawLogger();
+
             if (GraphUtils.willSetDirty)
             {
                 GraphUtils.willSetDirty = false;
@@ -154,10 +160,11 @@ namespace Nirvana.Editor
         {
             if (data == null)
             {
-                var graphCenter = _graphRect.center;
-                var size = StyleUtils.symbolText.CalcSize("Please Select One Graph Editor Data!");
-                var popup = new Rect(graphCenter.x - size.x / 2f, graphCenter.y - size.y / 2f, size.x, size.y);
-                EditorGUI.LabelField(popup, "Please Select One Graph Editor Data!", StyleUtils.symbolText);
+                // var graphCenter = _graphRect.center;
+                // var size = StyleUtils.symbolText.CalcSize("Please Select One Graph Editor Data!");
+                // var popup = new Rect(graphCenter.x - size.x / 2f, graphCenter.y - size.y / 2f, size.x, size.y);
+                // EditorGUI.LabelField(popup, "Please Select One Graph Editor Data!", StyleUtils.symbolText);
+                ShowNotification(new GUIContent("Please Select One Graph Editor Data!"));
                 return false;
             }
 
@@ -186,14 +193,16 @@ namespace Nirvana.Editor
                 {
                     if (_e.clickCount == 1)
                     {
-                        GraphUtils.ClearGraphMouseSelect();
+                        _mulSelect = true;
+                        _mulSelectStartPos = _e.mousePosition;
+                        GraphUtils.ClearSelect();
                         _e.Use();
                     }
                 }
                 else if (_e.button == 1)
                 {
                     var menu = new GenericMenuPopup("Nodes");
-                    var types = TypeUtils.GetSubClassTypes(typeof(Node));
+                    var types = TypeUtils.GetSubClassTypes(typeof(FlowNode));
                     foreach (var t in types)
                     {
                         menu.AddItem(t.Name, () =>
@@ -206,6 +215,21 @@ namespace Nirvana.Editor
                     menu.Show();
                     _e.Use();
                 }
+            }
+
+            if (_mulSelect && _e.type == EventType.MouseUp)
+            {
+                var boxRect = RectUtils.GetBoundRect(_mulSelectStartPos, _e.mousePosition);
+                var overlapNoes = currentGraph.allNodes.Where(node => boxRect.Overlaps(node.rect)).ToList();
+                GraphUtils.Select(overlapNoes);
+                _mulSelect = false;
+            }
+
+            if (_mulSelect)
+            {
+                var boxRect = RectUtils.GetBoundRect(_mulSelectStartPos, _e.mousePosition);
+                var color = new Color(0.5f, 0.5f, 1f, 0.3f);
+                EditorUtils.DrawBox(boxRect, color, StyleUtils.normalBG);
             }
 
             if (GUIUtility.keyboardControl == 0)
@@ -234,7 +258,7 @@ namespace Nirvana.Editor
                         }
 
                         GraphUtils.willSetDirty = true;
-                        GraphUtils.ClearGraphMouseSelect();
+                        GraphUtils.ClearSelect();
                     }
 
                     _e.Use();
@@ -308,6 +332,10 @@ namespace Nirvana.Editor
                         AssetDatabase.Refresh();
                     }
                 });
+                menu.AddItem(new GUIContent("Add Text Log"), false, () =>
+                {
+                    LogUtils.Error("测试Log语句，啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦");
+                });
                 menu.ShowAsContext();
             }
 
@@ -327,7 +355,7 @@ namespace Nirvana.Editor
         private static Rect DrawInspector()
         {
             var rect = default(Rect);
-            if (GraphUtils.activeNodes.Count != 1) return rect;
+            if (GraphUtils.activeNodes.Count != 1 && GraphUtils.activeLink == null) return rect;
 
             var nodeInspectorWidth = 300f;
             rect.x = _graphRect.xMin;
@@ -338,11 +366,13 @@ namespace Nirvana.Editor
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
             
-            NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes[0]);
-            
-            // if (_e.type == EventType.Repaint) {
-            //     _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 30;
-            // }
+            if (GraphUtils.activeNodes.Count == 1) NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes[0]);
+            if (GraphUtils.activeLink != null) LinkInspector.DrawInspector(areaRect, GraphUtils.activeLink);
+
+            if (_e.type == EventType.Repaint)
+            {
+                _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 30;
+            }
             
             GUILayout.EndArea();
             GUI.EndClip();
@@ -369,7 +399,8 @@ namespace Nirvana.Editor
             
             BlackboardInspector.DrawGUI(areaRect, currentGraph.bbSource);
 
-            if (_e.type == EventType.Repaint) {
+            if (_e.type == EventType.Repaint)
+            {
                 _blackboardHeight = GUILayoutUtility.GetLastRect().yMax + 30;
             }
 
@@ -379,5 +410,49 @@ namespace Nirvana.Editor
             
             return rect;
         }
+
+        private static float _loggerHeight = 0;
+        
+        private static void DrawLogger()
+        {
+            var rect = default(Rect);
+            rect.x = _graphRect.xMin;
+            rect.y = _graphRect.yMax - _loggerHeight;
+            rect.width = 200f;
+            rect.height = _loggerHeight;
+            var areaRect = Rect.MinMaxRect(2, 0, rect.width, rect.height);
+            GUI.BeginClip(rect);
+            GUILayout.BeginArea(areaRect);
+            LogUtils.CheckAllLog();
+            var heightCount = 0.0f;
+            foreach (var log in LogUtils.allLogs)
+            {
+                var height = Mathf.Max(35f, StyleUtils.loggerBox.CalcHeight(log.value, 165f));
+                EditorUtils.DrawBox(new Rect(0, heightCount, 200, height), ColorUtils.gray21, StyleUtils.normalBG);
+                heightCount += height + 2f;
+
+                var iconName = log.type switch
+                {
+                    LogType.Normal => "console.infoicon",
+                    LogType.Warning => "console.warnicon",
+                    _ => "console.erroricon"
+                };
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(EditorGUIUtility.IconContent(iconName), GUILayout.MaxWidth(35));
+                GUILayout.Label(log.value, StyleUtils.loggerBox);
+                GUILayout.EndHorizontal();
+                GUILayout.Space(2f);
+            }
+            
+            if (_e.type == EventType.Repaint)
+            {
+                _loggerHeight = heightCount;
+            }
+            
+            GUILayout.EndArea();
+            GUI.EndClip();
+        }
     }
 }
+#endif

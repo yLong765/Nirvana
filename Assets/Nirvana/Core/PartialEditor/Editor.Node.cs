@@ -23,7 +23,7 @@ namespace Nirvana
         
         private List<FieldInfo> _fieldInfos = new List<FieldInfo>();
 
-        private List<FieldInfo> GetAllFieldInfos()
+        protected List<FieldInfo> GetAllFieldInfos()
         {
             if (_fieldInfos.Count == 0)
             {
@@ -37,9 +37,6 @@ namespace Nirvana
 
         public virtual void DrawInspectorGUI()
         {
-            tag = EditorGUILayout.TextField(tag);
-            EditorUtils.DefaultTextField(tag, "Tag...");
-            
             _nodeInspectorHeaderGroup = EditorGUILayout.BeginFoldoutHeaderGroup(_nodeInspectorHeaderGroup, "Fields");
             if (_nodeInspectorHeaderGroup)
             {

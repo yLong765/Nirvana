@@ -6,7 +6,6 @@ namespace Nirvana.Editor
 {
     public class NodeInspector
     {
-        
         public static void DrawGUI(Rect rect, Node node)
         {
             if (node == null)
@@ -24,6 +23,10 @@ namespace Nirvana.Editor
                 EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
                 GUILayout.Label(node.title, StyleUtils.panelTitle);
                 GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 4, rect.xMax - 4, rect.yMax - 2));
+                
+                // Tag
+                node.tag = EditorGUILayout.TextField(node.tag);
+                EditorUtils.DefaultTextField(node.tag, "Tag...");
                 
                 node.DrawInspectorGUI();
 

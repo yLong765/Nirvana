@@ -64,7 +64,6 @@ namespace Nirvana
         }
 
         [JsonIgnore] public static Vector2 MIN_SIZE = new(80, 50);
-        
 
         public virtual void OnCreate() { }
         
@@ -83,6 +82,16 @@ namespace Nirvana
             }
         }
 
+        public virtual bool CanLinkToTarget()
+        {
+            return true;
+        }
+
+        public virtual bool CanLinkFromSource()
+        {
+            return true;
+        }
+
         public static Node Create(Graph graph, Type type, Vector2 pos)
         {
             var newNode = (Node) Activator.CreateInstance(type);
@@ -90,6 +99,84 @@ namespace Nirvana
             newNode.position = pos;
             newNode.OnCreate();
             return newNode;
+        }
+
+        public static bool CheckCanLink(Node source, Node target, string sourceOutPortName, string targetInPortName)
+        {
+            if (source.TryGetOutPort(sourceOutPortName, out Port outPort))
+            {
+                if (outPort.linkCount == outPort.maxLinkCount)
+                {
+                    return false;
+                }
+            }
+            
+            if (target.TryGetInPort(targetInPortName, out Port inPort))
+            {
+                if (inPort.linkCount == inPort.maxLinkCount)
+                {
+                    return false;
+                }
+            }
+
+            if (inPort != null && outPort != null)
+            {
+                if (inPort.portType == outPort.portType)
+                {
+                    return false;
+                }
+                
+                if (!outPort.fieldType.IsAssignableFrom(inPort.fieldType))
+                {
+                    return false;
+                }
+            }
+
+            var res = true;
+            res &= source.CanLinkToTarget();
+            res &= target.CanLinkFromSource();
+            return res;
+        }
+        
+        public static bool IsNewLinkAllowed(Node source, Node target, string sourceOutPortName, string targetInPortName)
+        {
+            if (source.TryGetOutPort(sourceOutPortName, out Port outPort))
+            {
+                if (outPort.linkCount == outPort.maxLinkCount)
+                {
+                    LogUtils.Error($"port{{{outPort.fieldName}}} link is full");
+                    return false;
+                }
+            }
+            
+            if (target.TryGetInPort(targetInPortName, out Port inPort))
+            {
+                if (inPort.linkCount == inPort.maxLinkCount)
+                {
+                    LogUtils.Error($"port{{{inPort.fieldName}}} link is full");
+                    return false;
+                }
+            }
+
+            if (inPort != null && outPort != null)
+            {
+                if (inPort.portType == outPort.portType)
+                {
+                    LogUtils.Error("same port type");
+                    return false;
+                }
+                
+                if (!outPort.fieldType.IsAssignableFrom(inPort.fieldType))
+                {
+                    LogUtils.Error("non-identical or inherited types");
+                    return false;
+                }
+            }
+
+            var res = true;
+            res &= source.CanLinkToTarget();
+            res &= target.CanLinkFromSource();
+            return res;
         }
     }
 }

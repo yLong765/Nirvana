@@ -28,6 +28,24 @@ namespace Nirvana
 
         #endregion
 
+        #region Texture
+
+        private static Dictionary<string, Texture2D> _cacheTexture = new Dictionary<string, Texture2D>();
+        
+        public static Texture2D LoadTexture2D(string path)
+        {
+            if (_cacheTexture.ContainsKey(path))
+            {
+                return _cacheTexture[path];
+            }
+
+            var texture = Resources.Load<Texture2D>(path);
+            _cacheTexture.Add(path, texture);
+            return texture;
+        }
+
+        #endregion
+
         private static GUIStyle _normalBG;
         public static GUIStyle normalBG
         {
@@ -238,23 +256,41 @@ namespace Nirvana
             }
         }
 
-        private static GUIStyle _portWarningLabel;
-        public static GUIStyle portWarningLabel
+        private static GUIStyle _errorTipBox;
+        public static GUIStyle errorTipBox
         {
             get
             {
-                if (_portWarningLabel == null)
+                if (_errorTipBox == null)
                 {
-                    _portWarningLabel = new GUIStyle(EditorStyles.label);
-                    _portWarningLabel.normal.textColor = Color.red;
-                    _portWarningLabel.margin = new RectOffset(0, 0, 0, 0);
-                    _portWarningLabel.padding = new RectOffset(0, 0, 0, 0);
-                    _portWarningLabel.fontSize = 8;
-                    _portWarningLabel.alignment = TextAnchor.MiddleLeft;
-                    
+                    _errorTipBox = new GUIStyle(EditorStyles.label);
+                    _errorTipBox.normal.textColor = Color.red;
+                    _errorTipBox.margin = new RectOffset(0, 0, 0, 0);
+                    _errorTipBox.padding = new RectOffset(1, 1, 0, 0);
+                    _errorTipBox.fontSize = 12;
+                    _errorTipBox.alignment = TextAnchor.MiddleLeft;
                 }
 
-                return _portWarningLabel;
+                return _errorTipBox;
+            }
+        }
+
+        private static GUIStyle _loggerBox;
+        public static GUIStyle loggerBox
+        {
+            get
+            {
+                if (_loggerBox == null)
+                {
+                    _loggerBox = new GUIStyle(EditorStyles.label);
+                    _loggerBox.margin = new RectOffset(0, 0, 0, 0);
+                    _loggerBox.padding = new RectOffset(0, 0, 0, 0);
+                    _loggerBox.fontSize = 12;
+                    _loggerBox.alignment = TextAnchor.MiddleLeft;
+                    _loggerBox.wordWrap = true;
+                }
+
+                return _loggerBox;
             }
         }
 

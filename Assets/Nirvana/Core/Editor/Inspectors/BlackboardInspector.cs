@@ -20,6 +20,7 @@ namespace Nirvana.Editor
             EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
             GUILayout.Label("Blackboard", StyleUtils.panelTitle);
             GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 2, rect.xMax - 2, rect.yMax - 2));
+            
             if (GUILayout.Button("Add Variable"))
             {
                 var menu = new GenericMenuPopup("Fields");
@@ -44,15 +45,18 @@ namespace Nirvana.Editor
             GUI.color = Color.white;
             GUILayout.EndHorizontal();
 
-            if (_tempVariablesList == null || !_tempVariablesList.SequenceEqual(bbSource.variables.Values)) {
+            if (_tempVariablesList == null || !_tempVariablesList.SequenceEqual(bbSource.variables.Values))
+            {
                 _tempVariablesList = bbSource.variables.Values.ToList();
             }
+            
             EditorUtils.ReorderableList(_tempVariablesList, i =>
             {
                 DrawVariableItem(bbSource, _tempVariablesList[i], i);
             });
             
-            if ( GUI.changed || Event.current.rawType == EventType.MouseUp ) {
+            if ( GUI.changed || Event.current.rawType == EventType.MouseUp )
+            {
                 try
                 {
                     bbSource.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);

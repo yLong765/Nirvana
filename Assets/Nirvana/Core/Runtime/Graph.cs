@@ -73,38 +73,9 @@ namespace Nirvana
             return newVariable;
         }
 
-        public bool CheckCanLink(Node source, Node target, string sourceOutPortName, string targetInPortName)
-        {
-            if (source.TryGetOutPort(sourceOutPortName, out Port outPort))
-            {
-                if (outPort.linkCount == outPort.maxLinkCount)
-                {
-                    return false;
-                }
-            }
-            
-            if (target.TryGetInPort(targetInPortName, out Port inPort))
-            {
-                if (inPort.linkCount == inPort.maxLinkCount)
-                {
-                    return false;
-                }
-            }
-
-            if (inPort != null && outPort != null)
-            {
-                if (!outPort.fieldType.IsAssignableFrom(inPort.fieldType))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        
         public Link AddLink(Node source, Node target, string sourceOutPortName, string targetInPortName)
         {
-            if (!CheckCanLink(source, target, sourceOutPortName, targetInPortName)) return null;
+            if (!Node.IsNewLinkAllowed(source, target, sourceOutPortName, targetInPortName)) return null;
             
             var link = new Link();
             link.SetSourceNode(source, sourceOutPortName);

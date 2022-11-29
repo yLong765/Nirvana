@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Nirvana
 {
@@ -41,7 +44,7 @@ namespace Nirvana
         {
             return _sourceNode.GetOutPort(_sourceOutPort);
         }
-        
+
         public Port GetTargetInPort()
         {
             return _targetNode.GetInPort(_targetInPort);
@@ -62,5 +65,13 @@ namespace Nirvana
             _targetNode.inLinks.Add(this);
             GetTargetInPort().linkCount++;
         }
+
+#if UNITY_EDITOR
+        public void DrawInspectorGUI()
+        {
+            GUILayout.Label("Link Node: " + sourceNode.title + " link to " + targetNode.title);
+            GUILayout.Label("Link Port: " + sourceOutPort + " link to " + targetInPort);
+        }
+#endif
     }
 }
