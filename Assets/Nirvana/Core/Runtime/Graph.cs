@@ -73,14 +73,11 @@ namespace Nirvana
             return newVariable;
         }
 
-        public Link AddLink(Node source, Node target, string sourceOutPortName, string targetInPortName)
+        public Link AddLink(Port sourcePort, Port targetPort)
         {
-            if (!Node.IsNewLinkAllowed(source, target, sourceOutPortName, targetInPortName)) return null;
+            if (!Node.IsNewLinkAllowed(sourcePort, targetPort)) return null;
             
-            var link = new Link();
-            link.SetSourceNode(source);
-            link.SetTargetNode(target);
-            return link;
+            return Link.Create(sourcePort, targetPort);
         }
 
         public void DelLink(Link link)
@@ -118,7 +115,6 @@ namespace Nirvana
             {
                 _graphSource.nodes[i].ID = i + 1;
                 _graphSource.nodes[i].graph = this;
-                _graphSource.nodes[i].OnRefresh();
             }
         }
     }

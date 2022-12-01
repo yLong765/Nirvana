@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Test1Node : FlowNode
 {
-    [InPort] public string JC;
-    public string haha;
+    protected override void RegisterPorts()
+    {
+        
+    }
 }

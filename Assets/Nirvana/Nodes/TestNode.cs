@@ -5,10 +5,12 @@ using Nirvana;
 
 public class TestNode : FlowNode
 {
-    public override void RegisterPorts()
+    protected override void RegisterPorts()
     {
         AddInPort<string>("String Param");
         AddInPort<string>("String Param");
         AddOutPort<string>("String Param", () => "NB");
+        AddFlowInPort("In");
+        AddFlowOutPort("Out");
     }
 }

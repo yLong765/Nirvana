@@ -11,37 +11,52 @@ namespace Nirvana
 {
     public class Link
     {
-        private Node _sourceNode;
-        private Node _targetNode;
+        private Port _sourcePort;
+        private Port _targetPort;
 
-        public Node sourceNode
+        public Port sourcePort
         {
-            get => _sourceNode;
-            set => _sourceNode = value;
+            get => _sourcePort;
+            set => _sourcePort = value;
         }
 
-        public Node targetNode
+        public Port targetPort
         {
-            get => _targetNode;
-            set => _targetNode = value;
+            get => _targetPort;
+            set => _targetPort = value;
         }
 
-        public void SetSourceNode(Node node)
+        [JsonIgnore] public Node sourceNode => _sourcePort.node;
+        [JsonIgnore] public Node targetNode => _targetPort.node;
+        [JsonIgnore] public string sourcePortId => _sourcePort.ID;
+        [JsonIgnore] public string targetPortId => _targetPort.ID;
+
+        public void SetSourcePort(Port port)
         {
-            _sourceNode = node;
-            _sourceNode.outLinks.Add(this);
+            _sourcePort = port;
+            _sourcePort.node.outLinks.Add(this);
+            _sourcePort.linkCount++;
         }
 
-        public void SetTargetNode(Node node)
+        public void SetTargetPort(Port port)
         {
-            _targetNode = node;
-            _targetNode.inLinks.Add(this);
+            _targetPort = port;
+            _targetPort.node.inLinks.Add(this);
+            _targetPort.linkCount++;
+        }
+
+        public static Link Create(Port sourcePort, Port targetPort)
+        {
+            var newLink = new Link();
+            newLink.SetSourcePort(sourcePort);
+            newLink.SetTargetPort(targetPort);
+            return newLink;
         }
 
 #if UNITY_EDITOR
         public void DrawInspectorGUI()
         {
-            GUILayout.Label("Link Node: " + sourceNode.title + " link to " + targetNode.title);
+            GUILayout.Label("Link Node: " + sourcePort.node.title + " link to " + sourcePort.node.title);
         }
 #endif
     }

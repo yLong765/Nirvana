@@ -6,8 +6,10 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public partial class Node 
+    public abstract partial class Node 
     {
+        private static Vector2 MIN_SIZE = new(80, 50);
+        
         private string _title;
         private string _tag;
         private Vector2 _position;
@@ -16,7 +18,6 @@ namespace Nirvana
 
         private List<Link> _inLinks = new List<Link>();
         private List<Link> _outLinks = new List<Link>();
-        
         
         public List<Link> inLinks => _inLinks;
         public List<Link> outLinks => _outLinks;
@@ -64,11 +65,7 @@ namespace Nirvana
             }
         }
 
-        [JsonIgnore] public static Vector2 MIN_SIZE = new(80, 50);
-
         public virtual void OnCreate() { }
-        
-        public virtual void OnRefresh() { }
 
         public virtual void OnDelete()
         {
@@ -102,44 +99,29 @@ namespace Nirvana
             return newNode;
         }
 
-        public static bool IsNewLinkAllowed(Node source, Node target, string sourceOutPortName, string targetInPortName)
+        public static bool IsNewLinkAllowed(Port sourcePort, Port targetPort)
         {
-            if (source.TryGetOutPort(sourceOutPortName, out Port outPort))
+            if (sourcePort.linkCount == sourcePort.maxLinkCount)
             {
-                if (outPort.linkCount == outPort.maxLinkCount)
-                {
-                    LogUtils.Error($"port [{outPort.node.title}.{outPort.fieldName}] link is full");
-                    return false;
-                }
+                LogUtils.Error($"port [{sourcePort.node.title}.{sourcePort.ID}] link is full");
+                return false;
             }
             
-            if (target.TryGetInPort(targetInPortName, out Port inPort))
+            if (targetPort.linkCount == targetPort.maxLinkCount)
             {
-                if (inPort.linkCount == inPort.maxLinkCount)
-                {
-                    LogUtils.Error($"port [{inPort.node.title}.{inPort.fieldName}] link is full");
-                    return false;
-                }
+                LogUtils.Error($"port [{targetPort.node.title}.{targetPort.ID}] link is full");
+                return false;
             }
 
-            if (inPort != null && outPort != null)
+            if (!(sourcePort is FlowOutPort && targetPort is FlowInPort) && !targetPort.type.IsAssignableFrom(sourcePort.type))
             {
-                if (inPort.portType == outPort.portType)
-                {
-                    LogUtils.Error("same port type");
-                    return false;
-                }
-                
-                if (!outPort.type.IsAssignableFrom(inPort.type))
-                {
-                    LogUtils.Error("non-identical or inherited types");
-                    return false;
-                }
+                LogUtils.Error("non-identical or inherited types");
+                return false;
             }
 
             var res = true;
-            res &= source.CanLinkToTarget();
-            res &= target.CanLinkFromSource();
+            res &= sourcePort.node.CanLinkToTarget();
+            res &= targetPort.node.CanLinkFromSource();
             return res;
         }
     }

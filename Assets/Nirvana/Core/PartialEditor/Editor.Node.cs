@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public partial class Node
+    public abstract partial class Node
     {
         private int _id;
         
