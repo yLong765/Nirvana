@@ -11,50 +11,74 @@ namespace Nirvana
         Out,
     }
     
-    public partial class Port
+    public abstract partial class Port
     {
-        private string _name;
-        private string _fieldName;
-        private Type _fieldType;
-        private Node _node;
+        public string ID { get; set; }
+        public string fieldName { get; private set; }
+        public abstract Type type { get; }
+        public Node node { get; set; }
+        public int linkCount { get; set; }
+        public int maxLinkCount { get; set; }
+        
+        public bool IsLink => linkCount > 0;
+        public bool IsFullLink => linkCount == maxLinkCount;
+    }
+    
+    public abstract class InPort : Port
+    {
+    }
 
-        public string name
-        {
-            get => _name;
-            set => _name = value;
-        }
+    public abstract class OutPort : Port
+    {
+        public abstract object GetValue();
+    }
+
+    public class InPort<T> : InPort
+    {
+        public Func<T> outValue;
+        private T _value;
         
-        public string fieldName
+        public T value => outValue != null ? outValue() : _value;
+        public override Type type => typeof(T);
+
+        public void BintTo(OutPort source)
         {
-            get => _fieldName;
-            set => _fieldName = value;
+            if (source is OutPort<T> port)
+            {
+                outValue = port.getValue;
+                return;
+            }
+            
+            if (type.IsAssignableFrom(source.type))
+            {
+                outValue = () => (T) source.GetValue();
+            }
         }
 
-        public Type fieldType
+        public InPort(Node node, string ID)
         {
-            get => _fieldType;
-            set => _fieldType = value;
+            this.node = node;
+            this.ID = ID;
+            this.maxLinkCount = 1;
         }
-        
-        public Node node
+    }
+
+    public class OutPort<T> : OutPort
+    {
+        public Func<T> getValue;
+
+        public override Type type => typeof(T);
+        public override object GetValue()
         {
-            get => _node;
-            set => _node = value;
+            return getValue();
         }
-        
-        public static Port Create(Node node, string portName, string fieldName, Type fieldType, PortAttribute portAtt, PortType portType)
+
+        public OutPort(Node node, string ID, Func<T> getValue)
         {
-            var newPort = new Port();
-            newPort.node = node;
-            newPort.name = portName;
-            newPort.fieldName = fieldName;
-            newPort.fieldType = fieldType;
-            newPort.order = portAtt.order;
-            newPort.linkCount = 0;
-            newPort.maxLinkCount = portAtt.maxLink;
-            newPort.canDragLink = portAtt.canDragLink;
-            newPort.portType = portType;
-            return newPort;
+            this.node = node;
+            this.ID = ID;
+            this.maxLinkCount = 100;
+            this.getValue = getValue;
         }
     }
 }

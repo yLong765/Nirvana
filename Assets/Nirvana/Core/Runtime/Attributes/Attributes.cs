@@ -5,12 +5,12 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class NodeNameAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field)]
+    public class NameAttribute : Attribute
     {
         public string name;
 
-        public NodeNameAttribute(string name)
+        public NameAttribute(string name)
         {
             this.name = name;
         }
@@ -19,21 +19,14 @@ namespace Nirvana
     [AttributeUsage(AttributeTargets.Field)]
     public class PortAttribute : Attribute
     {
-        public string name;
         public int order = 100;
         public int maxLink = 1;
-        public bool canDragLink = true;
     }
 
     [AttributeUsage(AttributeTargets.Field)]
     public class InPortAttribute : PortAttribute
     {
         public InPortAttribute() { }
-
-        public InPortAttribute(string name)
-        {
-            this.name = name;
-        }
     }
     
     [AttributeUsage(AttributeTargets.Field)]
@@ -46,7 +39,6 @@ namespace Nirvana
 
         public OutPortAttribute(string name)
         {
-            this.name = name;
             maxLink = 100;
         }
     }

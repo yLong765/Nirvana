@@ -41,13 +41,16 @@ namespace Nirvana
             return search;
         }
 
-        public static void DefaultTextField(string check, string defaultText)
+        public static string DefaultTextField(string value, string defaultText)
         {
+            var check = EditorGUILayout.TextField(value);
             if (string.IsNullOrEmpty(check))
             {
                 var lastRect = GUILayoutUtility.GetLastRect();
                 GUI.Label(lastRect, defaultText, StyleUtils.defaultLabel);
             }
+
+            return check;
         }
 
         private static IList pickedList;

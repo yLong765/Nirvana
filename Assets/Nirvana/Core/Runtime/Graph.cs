@@ -78,8 +78,8 @@ namespace Nirvana
             if (!Node.IsNewLinkAllowed(source, target, sourceOutPortName, targetInPortName)) return null;
             
             var link = new Link();
-            link.SetSourceNode(source, sourceOutPortName);
-            link.SetTargetNode(target, targetInPortName);
+            link.SetSourceNode(source);
+            link.SetTargetNode(target);
             return link;
         }
 
@@ -87,8 +87,6 @@ namespace Nirvana
         {
             link.sourceNode.outLinks.Remove(link);
             link.targetNode.inLinks.Remove(link);
-            link.GetSourceOutPort().linkCount--;
-            link.GetTargetInPort().linkCount--;
         }
 
         public void OnBeforeSerialize()

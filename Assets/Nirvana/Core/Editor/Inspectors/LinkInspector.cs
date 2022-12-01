@@ -20,7 +20,6 @@ namespace Nirvana
             
             link.DrawInspectorGUI();
 
-            GUILayout.EndArea();
             if (EditorGUI.EndChangeCheck())
             {
                 GraphUtils.willSetDirty = true;

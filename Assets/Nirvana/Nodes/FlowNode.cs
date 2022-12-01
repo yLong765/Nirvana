@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Unity.VisualScripting;
 using UnityEngine;
 #if UNITY_EDITOR
+using System.Reflection;
 using UnityEditor;
 #endif
 
@@ -12,32 +14,39 @@ namespace Nirvana
 {
     public class FlowNode : Node
     {
-        [InPort("▶", order = 0, canDragLink = true), IgnoreInNodeInspector] public Port InPort;
-        [OutPort("▶", order = 0), IgnoreInNodeInspector] public Port OutPort;
+        // [Name("▶")][InPort(order = 0), IgnoreInNodeInspector] public Port inPort;
+        // [Name("▶")][OutPort(order = 0), IgnoreInNodeInspector] public Port outPort;
 
-        private List<Port> _ports = new List<Port>();
-        private List<Port> _inPorts = new List<Port>();
-        private List<Port> _outPorts = new List<Port>();
+        // private List<Port> _inPorts = new List<Port>();
+        // private List<Port> _outPorts = new List<Port>();
         
-        [JsonIgnore] public List<Port> allPorts => _ports;
-        [JsonIgnore] public List<Port> inPorts => _inPorts;
-        [JsonIgnore] public List<Port> outPorts => _outPorts;
+        // [JsonIgnore] public List<Port> allPorts
+        // {
+        //     get
+        //     {
+        //         var ports = new List<Port>();
+        //         ports.AddRange(_inPorts);
+        //         ports.AddRange(_outPorts);
+        //         return ports;
+        //     }
+        // }
+        //
+        // [JsonIgnore] public List<Port> inPorts => _inPorts;
+        // [JsonIgnore] public List<Port> outPorts => _outPorts;
+
+        private Dictionary<string, Port> _inPorts = new Dictionary<string, Port>();
+        private Dictionary<string, Port> _outPorts = new Dictionary<string, Port>();
 
         private bool _updateLink = false;
 
-        public Port GetPort(string fieldName)
+        public Port GetInPort(string ID)
         {
-            return _ports.FirstOrDefault(port => port.fieldName == fieldName);
-        }
-
-        public Port GetInPort(string fieldName)
-        {
-            return _inPorts.FirstOrDefault(port => port.fieldName == fieldName);
+            return _inPorts.ContainsKey(ID) ? _inPorts[ID] : null;
         }
         
-        public Port GetOutPort(string fieldName)
+        public Port GetOutPort(string ID)
         {
-            return _outPorts.FirstOrDefault(port => port.fieldName == fieldName);
+            return _outPorts.ContainsKey(ID) ? _outPorts[ID] : null;
         }
 
         public bool TryGetInPort(string fieldName, out Port port)
@@ -52,71 +61,71 @@ namespace Nirvana
             return port != null;
         }
 
-        private static int ComparerPort(Port p1, Port p2)
-        {
-            return p1.order < p2.order ? -1 : p1.order == p2.order ? 0 : 1;
-        }
-        
-        private void RefreshPorts()
-        {
-            _ports.Clear();
-            _inPorts.Clear();
-            _outPorts.Clear();
-            var fields = GetType().GetAllFields();
-            foreach (var info in fields)
-            {
-                if (info.TryGetAttribute<InPortAttribute>(out var inAtt))
-                {
-                    var portName = string.IsNullOrEmpty(inAtt.name) ? info.Name : inAtt.name;
-                    var port = Port.Create(this, portName, info.Name, info.FieldType, inAtt, PortType.In);
-                    _ports.Add(port);
-                    _inPorts.Add(port);
-                }
-                else if (info.TryGetAttribute<OutPortAttribute>(out var outAtt))
-                {
-                    var portName = string.IsNullOrEmpty(outAtt.name) ? info.Name : outAtt.name;
-                    var port = Port.Create(this, portName, info.Name, info.FieldType, outAtt, PortType.Out);
-                    _ports.Add(port);
-                    _outPorts.Add(port);
-                }
-            }
-            
-            _ports.Sort(ComparerPort);
-            _inPorts.Sort(ComparerPort);
-            _outPorts.Sort(ComparerPort);
-
-            _updateLink = true;
-        }
-        
-        
         public override void OnCreate()
         {
-            RefreshPorts();
+            //RefreshPorts();
+            RegisterPorts();
         }
 
         public override void OnRefresh()
         {
-            RefreshPorts();
+            //RefreshPorts();
+            RegisterPorts();
         }
 
-        private void UpdateLink()
+        public virtual void RegisterPorts() { }
+
+        private string GetPortID(string name, IDictionary dict)
         {
-            _updateLink = false;
-            for (int i = outLinks.Count - 1; i >= 0; i--)
+            var id = name;
+            while (dict.Contains(id))
             {
-                var snode = outLinks[i].sourceNode;
-                var tnode = outLinks[i].targetNode;
-                if (snode.TryGetOutPort(outLinks[i].sourceOutPort, out Port outPort) && tnode.TryGetInPort(outLinks[i].targetInPort, out Port inPort))
-                {
-                    outPort.linkCount++;
-                    inPort.linkCount++;
-                }
-                else
-                {
-                    graph.DelLink(outLinks[i]);
-                }
+                id += " ";
             }
+
+            return id;
         }
+        
+        public void AddInPort<T>(string name)
+        {
+            var ID = GetPortID(name, _inPorts);
+            _inPorts.Add(ID, new InPort<T>(this, ID));
+        }
+
+        public void AddOutPort<T>(string name, Func<T> getValue)
+        {
+            var ID = GetPortID(name, _outPorts);
+            _outPorts.Add(ID, new OutPort<T>(this, ID, getValue));
+        }
+
+        public void AddFlowInPort()
+        {
+            
+        }
+
+        public void AddFlowOutPort()
+        {
+            
+        }
+
+        // private void UpdateLink()
+        // {
+        //     _updateLink = false;
+        //     for (int i = outLinks.Count - 1; i >= 0; i--)
+        //     {
+        //         var snode = outLinks[i].sourceNode;
+        //         var tnode = outLinks[i].targetNode;
+        //         if (snode.TryGetOutPort(outLinks[i].sourceOutPort, out Port outPort) && tnode.TryGetInPort(outLinks[i].targetInPort, out Port inPort))
+        //         {
+        //             outPort.linkCount++;
+        //             inPort.linkCount++;
+        //         }
+        //         else
+        //         {
+        //             graph.DelLink(outLinks[i]);
+        //         }
+        //     }
+        // }
 
 #if UNITY_EDITOR
         private class GUILink
@@ -142,7 +151,7 @@ namespace Nirvana
         {
             //------更新Link状态避免因修改Field而导致的Link失效------
             
-            if (_updateLink) UpdateLink();
+            // if (_updateLink) UpdateLink();
             
             var e = Event.current;
 
@@ -150,74 +159,51 @@ namespace Nirvana
             var portWidth = StyleUtils.portSymbol.CalcSize("●").x;
             
             // ------确定Port位置------
-            
-            for (int i = 0; i < _inPorts.Count; i++)
+
+            int id = 0;
+            foreach (var pair in _inPorts)
             {
-                var portHeight = StyleUtils.inPortLabel.CalcSize(_inPorts[i].name).y - 3;
-                _inPorts[i].rect = new Rect(rect.x - portWidth, yStart + i * portHeight, portWidth, portHeight);
+                var portHeight = StyleUtils.inPortLabel.CalcSize(pair.Value.ID).y - 3;
+                pair.Value.rect = new Rect(rect.x - portWidth, yStart + id * portHeight, portWidth, portHeight);
+                ++id;
             }
             
-            for (int i = 0; i < _outPorts.Count; i++)
+            id = 0;
+            foreach (var pair in _outPorts)
             {
-                var portHeight = StyleUtils.outPortLabel.CalcSize(_outPorts[i].name).y - 3;
-                _outPorts[i].rect = new Rect(rect.x + rect.width, yStart + i * portHeight, portWidth, portHeight);
+                var portHeight = StyleUtils.inPortLabel.CalcSize(pair.Value.ID).y - 3;
+                pair.Value.rect = new Rect(rect.x + rect.width, yStart + id * portHeight, portWidth, portHeight);
+                ++id;
             }
 
-            // ------链接警告提示------
-
-            // if (_clickLink != null)
-            // {
-            //     foreach (var port in _ports.Where(port => port.rect.Contains(e.mousePosition)))
-            //     {
-            //         switch (port.portType)
-            //         {
-            //             case PortType.In:
-            //                 if (!IsNewLinkAllowed(_clickLink.sourceNode, this, _clickLink.sourcePort.fieldName, port.fieldName))
-            //                 {
-            //                     var size = StyleUtils.errorTipBox.CalcSize("error");
-            //                     var warning = new Rect(0, 0, size.x, size.y);
-            //                     warning.center = new Vector2(e.mousePosition.x - size.x * 0.5f, e.mousePosition.y - size.y);
-            //                     EditorGUI.LabelField(warning, "error", StyleUtils.errorTipBox);
-            //                 }
-            //                 break;
-            //             case PortType.Out:
-            //                 if (!IsNewLinkAllowed(this, _clickLink.sourceNode, port.fieldName, _clickLink.sourcePort.fieldName))
-            //                 {
-            //                     var size = StyleUtils.errorTipBox.CalcSize("error");
-            //                     var warning = new Rect(0, 0, size.x, size.y);
-            //                     warning.center = new Vector2(e.mousePosition.x + size.x * 0.5f, e.mousePosition.y - size.y);
-            //                     EditorGUI.LabelField(warning, "error", StyleUtils.errorTipBox);
-            //                 }
-            //                 break;
-            //             default:
-            //                 throw new ArgumentOutOfRangeException();
-            //         }
-            //     }
-            // }
-            
             // ------处理鼠标抬起事件------
             
             if (_clickLink != null && e.type == EventType.MouseUp && e.button == 0)
             {
                 bool mouseOnPort = false;
-                foreach (var port in _ports.Where(port => port.rect.Contains(e.mousePosition)))
+                if (_clickLink.sourcePort.IsInPort())
                 {
-                    Link newLink = null;
-                    if (port.portType == PortType.In && _clickLink.sourcePort.portType == PortType.Out)
+                    foreach (var port in _outPorts.Select(pair => pair.Value).Where(port => port.rect.Contains(e.mousePosition)))
                     {
-                        newLink = graph.AddLink(_clickLink.sourceNode, this, _clickLink.sourcePort.fieldName, port.fieldName);
-                    }
-                    else if (port.portType == PortType.Out && _clickLink.sourcePort.portType == PortType.In)
-                    {
-                        newLink = graph.AddLink(this, _clickLink.sourceNode, port.fieldName, _clickLink.sourcePort.fieldName);
-                    }
-
-                    if (newLink != null)
-                    {
+                        PortLink.Create(port, _clickLink.sourcePort);
                         mouseOnPort = true;
                         _clickLink = null;
                         e.Use();
                         break;
+                    }
+                }
+                else if (_clickLink.sourcePort.IsOutPort())
+                {
+                    foreach (var port in _inPorts.Select(pair => pair.Value))
+                    {
+                        if (port.rect.Contains(e.mousePosition))
+                        {
+                            PortLink.Create(_clickLink.sourcePort, port);
+                            mouseOnPort = true;
+                            _clickLink = null;
+                            e.Use();
+                            break;
+                        }
                     }
                 }
 
@@ -228,21 +214,27 @@ namespace Nirvana
                     {
                         if (_clickLink.targetNode != null && _clickLink.targetPort != null)
                         {
-                            graph.AddLink(_clickLink.sourceNode, _clickLink.targetNode, _clickLink.sourcePort.fieldName, _clickLink.targetPort.fieldName);
+                            PortLink.Create(_clickLink.sourcePort, _clickLink.targetPort);
                         }
+
                         _clickLink = null;
                         e.Use();
                     }
                 }
             }
-
+            
             // ------绘制Port圆点------
             
-            foreach (var port in _ports)
+            foreach (var pair in _inPorts)
             {
-                DrawPortGUI(port, e);
+                DrawPortGUI(pair.Value, e);
             }
             
+            foreach (var pair in _outPorts)
+            {
+                DrawPortGUI(pair.Value, e);
+            }
+
             // ------绘制拖动的链接线------
             
             if (_clickLink != null)
@@ -256,17 +248,22 @@ namespace Nirvana
 
             foreach (var link in outLinks)
             {
-                var sourcePort = link.GetSourceOutPort();
-                var targetPort = link.GetTargetInPort();
-                var height = GraphUtils.activeLink == link ? 5 : 3;
-                var texture = StyleUtils.LoadTexture2D("Textures/Bezier");
-                Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, texture, height);
-                if (e.type == EventType.MouseDown && e.button == 0)
+                var portLink = link as PortLink;
+                if (portLink != null)
                 {
-                    if (CurveUtils.IsPosInCurve(e.mousePosition, sourcePort.rect.center, targetPort.rect.center, 5))
+                    var sourcePort = portLink.sourcePort;
+                    var targetPort = portLink.targetPort;
+                    var height = GraphUtils.activeLink == link ? 5 : 3;
+                    var texture = StyleUtils.LoadTexture2D("Textures/Bezier");
+                    Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center,
+                        ColorUtils.orange1, texture, height);
+                    if (e.type == EventType.MouseDown && e.button == 0)
                     {
-                        GraphUtils.Select(link);
-                        e.Use();
+                        if (CurveUtils.IsPosInCurve(e.mousePosition, sourcePort.rect.center, targetPort.rect.center, 5))
+                        {
+                            GraphUtils.Select(link);
+                            e.Use();
+                        }
                     }
                 }
             }
@@ -276,7 +273,7 @@ namespace Nirvana
         {
             if (e.type == EventType.MouseDown && e.button == 0 && port.rect.Contains(e.mousePosition))
             {
-                if (port.canDragLink && port.linkCount < port.maxLinkCount)
+                if (!port.IsFullLink)
                 {
                     GraphUtils.ClearSelect();
                     _dragLinkMissNodeCount = 0;
@@ -289,14 +286,15 @@ namespace Nirvana
                     _dragLinkMissNodeCount = 0;
                     foreach (var link in port.node.inLinks)
                     {
-                        if (link.targetInPort == port.fieldName)
+                        if (link is PortLink portLink)
                         {
-                            var outPort = link.GetSourceOutPort();
-                            var inPort = link.GetTargetInPort();
-                            _clickLink = new GUILink(link.sourceNode, outPort, link.targetNode, inPort);
-                            graph.DelLink(link);
-                            e.Use();
-                            break;
+                            if (portLink.targetPortId == port.fieldName)
+                            {
+                                _clickLink = new GUILink(link.sourceNode, portLink.sourcePort, link.targetNode, portLink.targetPort);
+                                graph.DelLink(link);
+                                e.Use();
+                                break;
+                            }
                         }
                     }
                 }
@@ -307,9 +305,9 @@ namespace Nirvana
                 EditorGUIUtility.AddCursorRect(port.rect, MouseCursor.ArrowPlus);
             }
             
-            if (_clickLink != null && _clickLink.sourcePort.fieldName == port.fieldName && _clickLink.sourceNode == this ||
+            if (_clickLink != null && _clickLink.sourcePort == port && _clickLink.sourceNode == this ||
                 port.rect.Contains(e.mousePosition) ||
-                port.isLink)
+                port.IsLink)
             {
                 GUI.color = ColorUtils.orange1;
                 EditorGUI.LabelField(port.rect, "●", StyleUtils.portSymbol);
@@ -323,71 +321,7 @@ namespace Nirvana
 
         public override void DrawWindowGUI()
         {
-            DrawPorts(inPorts, outPorts);
-        }
-
-        private static bool _inPortHeaderGroup = true;
-        private static bool _outPortHeaderGroup = true;
-        private static bool _otherHeaderGroup = true;
-        
-        public override void DrawInspectorGUI()
-        {
-            var fields = GetAllFieldInfos();
-            
-            _inPortHeaderGroup = EditorGUILayout.BeginFoldoutHeaderGroup(_inPortHeaderGroup, "InPorts");
-            if (_inPortHeaderGroup)
-            {
-                foreach (var info in fields.Where(info => !info.HasAttribute<IgnoreInNodeInspectorAttribute>() && info.HasAttribute<InPortAttribute>()))
-                {
-                    EditorGUI.BeginChangeCheck();
-                    GUILayout.BeginVertical();
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label(info.Name);
-                    var value = EditorUtils.TypeField(GUIContent.none, info.GetValue(this), info.FieldType);
-                    GUILayout.EndHorizontal();
-                    GUILayout.EndVertical();
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        info.SetValue(this, value);
-                    }
-                }
-            }
-
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            
-            _outPortHeaderGroup = EditorGUILayout.BeginFoldoutHeaderGroup(_outPortHeaderGroup, "OutPorts");
-            if (_outPortHeaderGroup)
-            {
-                foreach (var info in fields.Where(info => !info.HasAttribute<IgnoreInNodeInspectorAttribute>() && info.HasAttribute<OutPortAttribute>()))
-                {
-                    EditorGUI.BeginChangeCheck();
-                    var value = EditorUtils.TypeField(info.Name, info.GetValue(this), info.FieldType);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        info.SetValue(this, value);
-                    }
-                }
-            }
-
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            
-            _otherHeaderGroup = EditorGUILayout.BeginFoldoutHeaderGroup(_otherHeaderGroup, "OutPorts");
-            if (_otherHeaderGroup)
-            {
-                foreach (var info in fields.Where(info => !info.HasAttribute<IgnoreInNodeInspectorAttribute>() && 
-                                                          !info.HasAttribute<OutPortAttribute>() &&
-                                                          !info.HasAttribute<InPortAttribute>()))
-                {
-                    EditorGUI.BeginChangeCheck();
-                    var value = EditorUtils.TypeField(info.Name, info.GetValue(this), info.FieldType);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        info.SetValue(this, value);
-                    }
-                }
-            }
-
-            EditorGUILayout.EndFoldoutHeaderGroup();
+            DrawPorts(_inPorts.Values.ToList(), _outPorts.Values.ToList());
         }
 #endif
     }

@@ -4,51 +4,20 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public partial class Port
+    public abstract partial class Port
     {
-        private int _order;
-        private Rect _rect;
-        private int _linkCount;
-        private int _maxLinkCount;
-        private bool _canDragLink;
-        private PortType _portType;
+        public int order { get; set; }
+        public Rect rect { get; set; }
+        public PortType portType { get; set; }
 
-        public int order
+        public bool IsInPort()
         {
-            get => _order;
-            set => _order = value;
-        }
-        
-        public Rect rect
-        {
-            get => _rect;
-            set => _rect = value;
+            return this is InPort;
         }
 
-        public bool isLink => linkCount > 0;
-
-        public int linkCount
+        public bool IsOutPort()
         {
-            get => _linkCount;
-            set => _linkCount = value;
-        }
-        
-        public int maxLinkCount
-        {
-            get => _maxLinkCount;
-            set => _maxLinkCount = value;
-        }
-        
-        public bool canDragLink
-        {
-            get => _canDragLink;
-            set => _canDragLink = value;
-        }
-        
-        public PortType portType
-        {
-            get => _portType;
-            set => _portType = value;
+            return this is OutPort;
         }
     }
 }

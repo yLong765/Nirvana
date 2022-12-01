@@ -16,7 +16,8 @@ namespace Nirvana
 
         private List<Link> _inLinks = new List<Link>();
         private List<Link> _outLinks = new List<Link>();
-
+        
+        
         public List<Link> inLinks => _inLinks;
         public List<Link> outLinks => _outLinks;
 
@@ -101,50 +102,13 @@ namespace Nirvana
             return newNode;
         }
 
-        public static bool CheckCanLink(Node source, Node target, string sourceOutPortName, string targetInPortName)
-        {
-            if (source.TryGetOutPort(sourceOutPortName, out Port outPort))
-            {
-                if (outPort.linkCount == outPort.maxLinkCount)
-                {
-                    return false;
-                }
-            }
-            
-            if (target.TryGetInPort(targetInPortName, out Port inPort))
-            {
-                if (inPort.linkCount == inPort.maxLinkCount)
-                {
-                    return false;
-                }
-            }
-
-            if (inPort != null && outPort != null)
-            {
-                if (inPort.portType == outPort.portType)
-                {
-                    return false;
-                }
-                
-                if (!outPort.fieldType.IsAssignableFrom(inPort.fieldType))
-                {
-                    return false;
-                }
-            }
-
-            var res = true;
-            res &= source.CanLinkToTarget();
-            res &= target.CanLinkFromSource();
-            return res;
-        }
-        
         public static bool IsNewLinkAllowed(Node source, Node target, string sourceOutPortName, string targetInPortName)
         {
             if (source.TryGetOutPort(sourceOutPortName, out Port outPort))
             {
                 if (outPort.linkCount == outPort.maxLinkCount)
                 {
-                    LogUtils.Error($"port{{{outPort.fieldName}}} link is full");
+                    LogUtils.Error($"port [{outPort.node.title}.{outPort.fieldName}] link is full");
                     return false;
                 }
             }
@@ -153,7 +117,7 @@ namespace Nirvana
             {
                 if (inPort.linkCount == inPort.maxLinkCount)
                 {
-                    LogUtils.Error($"port{{{inPort.fieldName}}} link is full");
+                    LogUtils.Error($"port [{inPort.node.title}.{inPort.fieldName}] link is full");
                     return false;
                 }
             }
@@ -166,7 +130,7 @@ namespace Nirvana
                     return false;
                 }
                 
-                if (!outPort.fieldType.IsAssignableFrom(inPort.fieldType))
+                if (!outPort.type.IsAssignableFrom(inPort.type))
                 {
                     LogUtils.Error("non-identical or inherited types");
                     return false;

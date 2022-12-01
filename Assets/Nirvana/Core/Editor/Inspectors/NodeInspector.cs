@@ -24,13 +24,10 @@ namespace Nirvana.Editor
                 GUILayout.Label(node.title, StyleUtils.panelTitle);
                 GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 4, rect.xMax - 4, rect.yMax - 2));
                 
-                // Tag
-                node.tag = EditorGUILayout.TextField(node.tag);
-                EditorUtils.DefaultTextField(node.tag, "Tag...");
+                node.tag = EditorUtils.DefaultTextField(node.tag, "Tag...");
                 
                 node.DrawInspectorGUI();
 
-                GUILayout.EndArea();
                 if (EditorGUI.EndChangeCheck())
                 {
                     GraphUtils.willSetDirty = true;

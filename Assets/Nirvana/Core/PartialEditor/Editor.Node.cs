@@ -64,17 +64,17 @@ namespace Nirvana
             int minL = Mathf.Min(inPorts.Count, outPorts.Count);
             for (int i = 0; i < minL; i++)
             {
-                DrawInOutPort(inPorts[i].name, outPorts[i].name);
+                DrawInOutPort(inPorts[i].ID, outPorts[i].ID);
             }
 
             for (int i = minL; i < inPorts.Count; i++)
             {
-                DrawInPort(inPorts[i].name);
+                DrawInPort(inPorts[i].ID);
             }
             
             for (int i = minL; i < outPorts.Count; i++)
             {
-                DrawOutPort(outPorts[i].name);
+                DrawOutPort(outPorts[i].ID);
             }
         }
 

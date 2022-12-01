@@ -371,9 +371,10 @@ namespace Nirvana.Editor
 
             if (_e.type == EventType.Repaint)
             {
-                _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 30;
+                _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 32;
             }
             
+            GUILayout.EndArea();
             GUILayout.EndArea();
             GUI.EndClip();
 
@@ -416,9 +417,10 @@ namespace Nirvana.Editor
         private static void DrawLogger()
         {
             var rect = default(Rect);
+            var loggerWidth = 250f;
             rect.x = _graphRect.xMin;
             rect.y = _graphRect.yMax - _loggerHeight;
-            rect.width = 200f;
+            rect.width = loggerWidth;
             rect.height = _loggerHeight;
             var areaRect = Rect.MinMaxRect(2, 0, rect.width, rect.height);
             GUI.BeginClip(rect);
@@ -428,7 +430,7 @@ namespace Nirvana.Editor
             foreach (var log in LogUtils.allLogs)
             {
                 var height = Mathf.Max(35f, StyleUtils.loggerBox.CalcHeight(log.value, 165f));
-                EditorUtils.DrawBox(new Rect(0, heightCount, 200, height), ColorUtils.gray21, StyleUtils.normalBG);
+                EditorUtils.DrawBox(new Rect(0, heightCount, loggerWidth, height), ColorUtils.gray21, StyleUtils.normalBG);
                 heightCount += height + 2f;
 
                 var iconName = log.type switch
