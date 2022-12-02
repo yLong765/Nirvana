@@ -51,9 +51,9 @@ namespace Nirvana
             _name = name;
         }
         
-        [JsonIgnore] public abstract Type type { get; }
-        [JsonIgnore] public bool isLink => linkCount > 0;
-        [JsonIgnore] public bool isFullLink => linkCount == maxLinkCount;
+        public abstract Type type { get; }
+        public bool isLink => linkCount > 0;
+        public bool isFullLink => linkCount == maxLinkCount;
     }
     
     public class FlowInPort : Port
@@ -79,6 +79,10 @@ namespace Nirvana
     public abstract class InPort : Port
     {
         public InPort(Node node, string ID, string name) : base(node, ID, name) { }
+
+        public abstract object GetObjectValue();
+        public abstract void SetObjectValue(object value);
+        public abstract void BindTo(OutPort source);
     }
 
     public abstract class OutPort : Port
@@ -90,13 +94,13 @@ namespace Nirvana
 
     public class InPort<T> : InPort
     {
-        [JsonIgnore] public Func<T> outValue;
+        public Func<T> outValue;
         private T _value;
         
         public T value => outValue != null ? outValue() : _value;
         public override Type type => typeof(T);
 
-        public void BintTo(OutPort source)
+        public override void BindTo(OutPort source)
         {
             if (source is OutPort<T> port)
             {
@@ -114,11 +118,21 @@ namespace Nirvana
         {
             maxLinkCount = 1;
         }
+
+        public override object GetObjectValue()
+        {
+            return value;
+        }
+
+        public override void SetObjectValue(object value)
+        {
+            _value = (T) value;
+        }
     }
 
     public class OutPort<T> : OutPort
     {
-        [JsonIgnore] public Func<T> getValue;
+        public Func<T> getValue;
 
         public override Type type => typeof(T);
         public override object GetValue()

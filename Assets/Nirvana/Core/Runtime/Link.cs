@@ -11,38 +11,95 @@ namespace Nirvana
 {
     public class Link
     {
+        private Node _sourceNode;
+        private Node _targetNode;
+        private string _sourcePortID;
+        private string _targetPortID;
         private Port _sourcePort;
         private Port _targetPort;
 
+        [JsonIgnore]
         public Port sourcePort
         {
-            get => _sourcePort;
+            get => _sourcePort ??= _sourceNode.GetOutPort(sourcePortId);
             set => _sourcePort = value;
         }
 
+        [JsonIgnore]
         public Port targetPort
         {
-            get => _targetPort;
+            get => _targetPort ??= _targetNode.GetInPort(_targetPortID);
             set => _targetPort = value;
         }
 
-        [JsonIgnore] public Node sourceNode => _sourcePort.node;
-        [JsonIgnore] public Node targetNode => _targetPort.node;
-        [JsonIgnore] public string sourcePortId => _sourcePort.ID;
-        [JsonIgnore] public string targetPortId => _targetPort.ID;
+        public Node sourceNode
+        {
+            get => _sourceNode;
+            set => _sourceNode = value;
+        }
+
+        public Node targetNode
+        {
+            get => _targetNode;
+            set => _targetNode = value;
+        }
+
+        public string sourcePortId
+        {
+            get => _sourcePort != null ? _sourcePort.ID : _sourcePortID;
+            set => _sourcePortID = value;
+        }
+
+        public string targetPortId
+        {
+            get => _targetPort != null ? _targetPort.ID : _targetPortID;
+            set => _targetPortID = value;
+        }
 
         public void SetSourcePort(Port port)
         {
-            _sourcePort = port;
-            _sourcePort.node.outLinks.Add(this);
-            _sourcePort.linkCount++;
+            sourcePort = port;
+            sourceNode = port.node;
+            sourcePortId = port.ID;
+            sourcePort.node.outLinks.Add(this);
+            sourcePort.linkCount++;
         }
 
         public void SetTargetPort(Port port)
         {
-            _targetPort = port;
-            _targetPort.node.inLinks.Add(this);
-            _targetPort.linkCount++;
+            targetPort = port;
+            targetNode = port.node;
+            targetPortId = port.ID;
+            targetPort.node.inLinks.Add(this);
+            targetPort.linkCount++;
+        }
+
+        public void RefreshSourcePort()
+        {
+            _sourcePort = null;
+            if (sourcePort != null)
+            {
+                sourcePort.linkCount++;
+            }
+        }
+
+        public void RefreshTargetPort()
+        {
+            _targetPort = null;
+            if (targetPort != null)
+            {
+                targetPort.linkCount++;
+            }
+            
+            if (sourcePort is InPort inPort && targetPort is OutPort outPort)
+            {
+                inPort.BindTo(outPort);
+            }
+        }
+
+        public void Refresh()
+        {
+            
         }
 
         public static Link Create(Port sourcePort, Port targetPort)
@@ -50,6 +107,10 @@ namespace Nirvana
             var newLink = new Link();
             newLink.SetSourcePort(sourcePort);
             newLink.SetTargetPort(targetPort);
+            if (sourcePort is InPort inPort && targetPort is OutPort outPort)
+            {
+                inPort.BindTo(outPort);
+            }
             return newLink;
         }
 

@@ -84,6 +84,8 @@ namespace Nirvana
         {
             link.sourceNode.outLinks.Remove(link);
             link.targetNode.inLinks.Remove(link);
+            link.sourcePort.linkCount--;
+            link.targetPort.linkCount--;
         }
 
         public void OnBeforeSerialize()
@@ -115,6 +117,7 @@ namespace Nirvana
             {
                 _graphSource.nodes[i].ID = i + 1;
                 _graphSource.nodes[i].graph = this;
+                _graphSource.nodes[i].OnRefresh();
             }
         }
     }

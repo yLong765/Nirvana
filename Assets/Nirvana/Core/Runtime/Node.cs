@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -18,9 +19,17 @@ namespace Nirvana
 
         private List<Link> _inLinks = new List<Link>();
         private List<Link> _outLinks = new List<Link>();
+
+        private Dictionary<string, Port> _inPorts = new Dictionary<string, Port>();
+        private Dictionary<string, Port> _outPorts = new Dictionary<string, Port>();
         
         public List<Link> inLinks => _inLinks;
         public List<Link> outLinks => _outLinks;
+
+        [JsonIgnore] public Dictionary<string, Port> inPorts => _inPorts;
+        [JsonIgnore] public Dictionary<string, Port> outPorts => _outPorts;
+        [JsonIgnore] public List<Port> inPortList => _inPorts.Values.ToList();
+        [JsonIgnore] public List<Port> outPortList => _outPorts.Values.ToList();
 
         public string title
         {
@@ -64,8 +73,30 @@ namespace Nirvana
                 _size.y = Mathf.Max(value.height, MIN_SIZE.y);
             }
         }
+        
+        public Port GetInPort(string ID)
+        {
+            return _inPorts.ContainsKey(ID) ? _inPorts[ID] : null;
+        }
+        
+        public Port GetOutPort(string ID)
+        {
+            return _outPorts.ContainsKey(ID) ? _outPorts[ID] : null;
+        }
+
+        public Link GetInLink(Port port)
+        {
+            return inLinks.FirstOrDefault(link => link.targetPortId == port.ID);
+        }
+        
+        public Link GetOutLink(Port port)
+        {
+            return outLinks.FirstOrDefault(link => link.sourcePortId == port.ID);
+        }
 
         public virtual void OnCreate() { }
+        
+        public virtual void OnRefresh() { }
 
         public virtual void OnDelete()
         {
@@ -103,19 +134,25 @@ namespace Nirvana
         {
             if (sourcePort.linkCount == sourcePort.maxLinkCount)
             {
-                LogUtils.Error($"port [{sourcePort.node.title}.{sourcePort.ID}] link is full");
+                LogUtils.Error($"Port [{sourcePort.node.title}.{sourcePort.ID}] link is full");
                 return false;
             }
             
             if (targetPort.linkCount == targetPort.maxLinkCount)
             {
-                LogUtils.Error($"port [{targetPort.node.title}.{targetPort.ID}] link is full");
+                LogUtils.Error($"Port [{targetPort.node.title}.{targetPort.ID}] link is full");
                 return false;
             }
 
             if (!(sourcePort is FlowOutPort && targetPort is FlowInPort) && !targetPort.type.IsAssignableFrom(sourcePort.type))
             {
-                LogUtils.Error("non-identical or inherited types");
+                LogUtils.Error("Non-identical or inherited types");
+                return false;
+            }
+
+            if (sourcePort.node == targetPort.node)
+            {
+                LogUtils.Error($"Cannot connect to the same node [{sourcePort.node.title}]");
                 return false;
             }
 

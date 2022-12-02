@@ -58,54 +58,6 @@ namespace Nirvana
         public virtual void DrawWindowGUI() { }
 
         public virtual void DrawLinkGUI() { }
-
-        protected static void DrawPorts(List<Port> inPorts, List<Port> outPorts)
-        {
-            int minL = Mathf.Min(inPorts.Count, outPorts.Count);
-            for (int i = 0; i < minL; i++)
-            {
-                DrawInOutPort(inPorts[i].ID, outPorts[i].ID);
-            }
-
-            for (int i = minL; i < inPorts.Count; i++)
-            {
-                DrawInPort(inPorts[i].ID);
-            }
-            
-            for (int i = minL; i < outPorts.Count; i++)
-            {
-                DrawOutPort(outPorts[i].ID);
-            }
-        }
-
-        protected static void DrawInOutPort(string inName, string outName)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(2);
-            GUILayout.Label(inName, StyleUtils.inPortLabel);
-            GUILayout.FlexibleSpace();
-            GUILayout.Space(10);
-            GUILayout.FlexibleSpace();
-            GUILayout.Label(outName, StyleUtils.outPortLabel);
-            GUILayout.Space(2);
-            GUILayout.EndHorizontal();
-        }
-        
-        protected static void DrawInPort(string name)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(2);
-            GUILayout.Label(name, StyleUtils.inPortLabel);
-            GUILayout.EndHorizontal();
-        }
-
-        protected static void DrawOutPort(string name)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(name, StyleUtils.outPortLabel);
-            GUILayout.Space(2);
-            GUILayout.EndHorizontal();
-        }
     }
 }
 #endif
