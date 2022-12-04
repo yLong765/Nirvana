@@ -58,9 +58,12 @@ namespace Nirvana
     
     public class FlowInPort : Port
     {
-        public FlowInPort(Node node, string ID, string name) : base(node, ID, name)
+        public Action flowFunc;
+        
+        public FlowInPort(Node node, string ID, string name, Action flowFunc) : base(node, ID, name)
         {
             maxLinkCount = 1;
+            this.flowFunc = flowFunc;
         }
 
         public override Type type => typeof(FlowInPort);
@@ -68,9 +71,21 @@ namespace Nirvana
 
     public class FlowOutPort : Port
     {
+        private Action _nextFlow;
+        
         public FlowOutPort(Node node, string ID, string name) : base(node, ID, name)
         {
             maxLinkCount = 100;
+        }
+
+        public void Call()
+        {
+            _nextFlow?.Invoke();
+        }
+
+        public void BindTo(FlowInPort source)
+        {
+            _nextFlow = source.flowFunc;
         }
         
         public override Type type => typeof(FlowOutPort);

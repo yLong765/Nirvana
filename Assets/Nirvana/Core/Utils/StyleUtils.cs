@@ -256,22 +256,22 @@ namespace Nirvana
             }
         }
 
-        private static GUIStyle _errorTipBox;
-        public static GUIStyle errorTipBox
+        private static GUIStyle _portTipBox;
+        public static GUIStyle portTipBox
         {
             get
             {
-                if (_errorTipBox == null)
+                if (_portTipBox == null)
                 {
-                    _errorTipBox = new GUIStyle(EditorStyles.label);
-                    _errorTipBox.normal.textColor = Color.red;
-                    _errorTipBox.margin = new RectOffset(0, 0, 0, 0);
-                    _errorTipBox.padding = new RectOffset(1, 1, 0, 0);
-                    _errorTipBox.fontSize = 12;
-                    _errorTipBox.alignment = TextAnchor.MiddleLeft;
+                    _portTipBox = new GUIStyle(EditorStyles.label);
+                    _portTipBox.normal.background = Texture2D.whiteTexture;
+                    _portTipBox.margin = new RectOffset(0, 0, 0, 0);
+                    _portTipBox.padding = new RectOffset(1, 1, 1, 1);
+                    _portTipBox.fontSize = 12;
+                    _portTipBox.alignment = TextAnchor.MiddleLeft;
                 }
 
-                return _errorTipBox;
+                return _portTipBox;
             }
         }
 

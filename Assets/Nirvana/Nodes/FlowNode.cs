@@ -30,6 +30,8 @@ namespace Nirvana
 
         protected abstract void RegisterPorts();
 
+        public abstract void Execute();
+
         private string GetPortID(string name, IDictionary dict)
         {
             var id = name;
@@ -41,28 +43,36 @@ namespace Nirvana
             return id;
         }
 
-        public void AddInPort<T>(string name)
+        public InPort<T> AddInPort<T>(string name)
         {
             var ID = GetPortID(name, inPorts);
-            inPorts.Add(ID, new InPort<T>(this, ID, name));
+            var newPort = new InPort<T>(this, ID, name);
+            inPorts.Add(ID, newPort);
+            return newPort;
         }
 
-        public void AddOutPort<T>(string name, Func<T> getValue)
+        public OutPort<T> AddOutPort<T>(string name, Func<T> getValue)
         {
             var ID = GetPortID(name, outPorts);
-            outPorts.Add(ID, new OutPort<T>(this, ID, name, getValue));
+            var newPort = new OutPort<T>(this, ID, name, getValue);
+            outPorts.Add(ID, newPort);
+            return newPort;
         }
 
-        public void AddFlowInPort(string name)
+        public FlowInPort AddFlowInPort(string name ,Action flowFunc)
         {
             var ID = GetPortID(name, inPorts);
-            inPorts.Add(ID, new FlowInPort(this, ID, name));
+            var newPort = new FlowInPort(this, ID, name, flowFunc);
+            inPorts.Add(ID, newPort);
+            return newPort;
         }
 
-        public void AddFlowOutPort(string name)
+        public FlowOutPort AddFlowOutPort(string name)
         {
             var ID = GetPortID(name, outPorts);
-            outPorts.Add(ID, new FlowOutPort(this, ID, name));
+            var newPort = new FlowOutPort(this, ID, name);
+            outPorts.Add(ID, newPort);
+            return newPort;
         }
 
         private void RefreshLinks()
@@ -179,18 +189,6 @@ namespace Nirvana
                 }
             }
 
-            // ------绘制Port圆点------
-
-            foreach (var port in _orderInPorts)
-            {
-                DrawPortGUI(port, e);
-            }
-
-            foreach (var port in _orderOutPorts)
-            {
-                DrawPortGUI(port, e);
-            }
-
             // ------绘制拖动的链接线------
 
             if (_clickLink != null)
@@ -221,6 +219,18 @@ namespace Nirvana
                         }
                     }
                 }
+            }
+            
+            // ------绘制Port圆点------
+
+            foreach (var port in _orderInPorts)
+            {
+                DrawPortGUI(port, e);
+            }
+
+            foreach (var port in _orderOutPorts)
+            {
+                DrawPortGUI(port, e);
             }
         }
 
@@ -253,11 +263,14 @@ namespace Nirvana
             {
                 EditorGUIUtility.AddCursorRect(port.rect, MouseCursor.ArrowPlus);
                 var content = port.type.ToString();
-                var width = StyleUtils.errorTipBox.CalcSize(content).x;
+                var width = StyleUtils.portTipBox.CalcWidth(content);
                 var tipPort = port.rect;
                 tipPort.x -= port.IsInPort() ? width : -port.rect.width;
                 tipPort.width = width;
-                EditorGUI.LabelField(tipPort, content, StyleUtils.errorTipBox);
+                EditorUtils.DrawBox(tipPort, ColorUtils.orange1, StyleUtils.portTipBox);
+                GUI.color = Color.black;
+                EditorGUI.LabelField(tipPort, content);
+                GUI.color = Color.white;
             }
 
             if (port.isLink || port.rect.Contains(e.mousePosition))
@@ -325,13 +338,7 @@ namespace Nirvana
                                 var link = inPort.node.GetInLink(inPort);
                                 if (link != null)
                                 {
-                                    var title = inPort.name + $" [{link.sourceNode.title}.{link.sourcePortId}]";
-                                    GUILayout.BeginHorizontal();
-                                    EditorGUILayout.LabelField(title);
-                                    EditorGUI.BeginDisabledGroup(true);
-                                    EditorUtils.TypeField(GUIContent.none, inPort.GetObjectValue(), inPort.type);
-                                    EditorGUI.EndDisabledGroup();
-                                    GUILayout.EndHorizontal();
+                                    EditorGUILayout.LabelField(inPort.name + $" Link To [{link.sourceNode.title}.{link.sourcePortId}]");
                                 }
                             }
                             else

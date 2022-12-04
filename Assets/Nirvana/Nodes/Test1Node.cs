@@ -5,9 +5,16 @@ using UnityEngine;
 
 public class Test1Node : FlowNode
 {
+    public FlowOutPort outPort;
+    
     protected override void RegisterPorts()
     {
-        AddFlowOutPort("Out");
+        outPort = AddFlowOutPort("Out");
         AddOutPort<string>("ceshi", () => "ceshi");
+    }
+
+    public override void Execute()
+    {
+        outPort.Call();
     }
 }
