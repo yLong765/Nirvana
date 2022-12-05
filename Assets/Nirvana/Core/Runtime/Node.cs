@@ -9,6 +9,8 @@ namespace Nirvana
 {
     public abstract partial class Node 
     {
+        protected bool isOverwriteOnGraphStartMethod = false;
+        
         private static Vector2 MIN_SIZE = new(80, 50);
         
         private string _title;
@@ -38,6 +40,10 @@ namespace Nirvana
                 if (string.IsNullOrEmpty(_title))
                 {
                     _title = GetType().Name;
+                    if (isOverwriteOnGraphStartMethod)
+                    {
+                        _title = $"➦ {_title}";
+                    }
                 }
 
                 return _title;
@@ -56,7 +62,7 @@ namespace Nirvana
             set => _graph = value;
         }
 
-        public Vector2 position
+        [JsonIgnore] public Vector2 position
         {
             get => _position;
             set => _position = value;
@@ -94,11 +100,29 @@ namespace Nirvana
             return outLinks.FirstOrDefault(link => link.sourcePortId == port.ID);
         }
 
-        public virtual void OnCreate() { }
+        public void Create()
+        {
+            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart").DeclaringType == typeof(Node));
+            OnCreate();
+        }
         
-        public virtual void OnRefresh() { }
+        public void Refresh()
+        {
+            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart").DeclaringType == typeof(Node));
+            OnRefresh();
+        }
+        
+        #region Virtual
 
-        public virtual void OnDelete()
+        protected virtual void OnCreate() { }
+
+        protected virtual void OnRefresh() { }
+        
+        public virtual void OnGraphStart() {}
+
+        public virtual void OnGraphStop() { }
+
+        public virtual void OnDestroy()
         {
             for (int i = _inLinks.Count - 1; i >= 0; i--)
             {
@@ -120,13 +144,15 @@ namespace Nirvana
         {
             return true;
         }
+        
+        #endregion
 
         public static Node Create(Graph graph, Type type, Vector2 pos)
         {
             var newNode = (Node) Activator.CreateInstance(type);
             newNode.graph = graph;
             newNode.position = pos;
-            newNode.OnCreate();
+            newNode.Create();
             return newNode;
         }
 

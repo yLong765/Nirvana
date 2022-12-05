@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Nirvana
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public abstract partial class Port
     {
         private string _ID;

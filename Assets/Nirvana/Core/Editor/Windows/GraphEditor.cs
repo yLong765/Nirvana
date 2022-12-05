@@ -25,15 +25,15 @@ namespace Nirvana.Editor
         private static bool _mulSelect;
         private static Vector3 _mulSelectStartPos;
         
-        private GraphEditorData _data;
+        private GraphData _data;
         private int _dataID;
 
-        public GraphEditorData data
+        public GraphData data
         {
             get
             {
                 current ??= OpenWindow();
-                current._data ??= EditorUtility.InstanceIDToObject(_dataID) as GraphEditorData;
+                current._data ??= EditorUtility.InstanceIDToObject(_dataID) as GraphData;
                 return current._data;
             }
             set
@@ -58,7 +58,7 @@ namespace Nirvana.Editor
         public static Graph currentGraph { get; private set; }
         public static GraphEditor current { get; private set; }
 
-        private void InitData(GraphEditorData data, BlackboardSource bbSource)
+        private void InitData(GraphData data, BlackboardSource bbSource)
         {
             this.data = data;
             currentGraph = data.graph;
@@ -67,7 +67,7 @@ namespace Nirvana.Editor
         
         [UnityEditor.Callbacks.OnOpenAsset(1)]
         public static bool OpenAsset(int instanceID, int line) {
-            var target = EditorUtility.InstanceIDToObject(instanceID) as GraphEditorData;
+            var target = EditorUtility.InstanceIDToObject(instanceID) as GraphData;
             if ( target != null ) {
                 OpenWindow(target);
                 return true;
@@ -75,7 +75,7 @@ namespace Nirvana.Editor
             return false;
         }
 
-        public static GraphEditor OpenWindow(GraphEditorData data = null, BlackboardSource bbSource = null) {
+        public static GraphEditor OpenWindow(GraphData data = null, BlackboardSource bbSource = null) {
             var window = GetWindow<GraphEditor>();
             window.InitData(data, bbSource);
             window.titleContent = new GUIContent("Graph Canvas");

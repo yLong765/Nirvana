@@ -16,6 +16,12 @@ namespace Nirvana
             NullValueHandling = NullValueHandling.Ignore,
             ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            Error = (sender, args) =>
+            {
+                Debug.LogError(args.ErrorContext.Error.Message);
+                args.ErrorContext.Handled = true;
+            } 
         };
         
         [SerializeField] private string _serializedData;
@@ -54,7 +60,7 @@ namespace Nirvana
         {
             if (allNodes.Contains(node))
             {
-                node.OnDelete();
+                node.OnDestroy();
                 allNodes.Remove(node);
             }
 
@@ -117,7 +123,7 @@ namespace Nirvana
             {
                 _graphSource.nodes[i].ID = i + 1;
                 _graphSource.nodes[i].graph = this;
-                _graphSource.nodes[i].OnRefresh();
+                _graphSource.nodes[i].Refresh();
             }
         }
     }

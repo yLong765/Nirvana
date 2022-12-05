@@ -90,16 +90,19 @@ namespace Nirvana
             {
                 targetPort.linkCount++;
             }
-            
-            if (sourcePort is InPort inPort && targetPort is OutPort outPort)
-            {
-                inPort.BindTo(outPort);
-            }
         }
 
-        public void Refresh()
+        public void BindPorts()
         {
-            
+            switch (sourcePort)
+            {
+                case FlowOutPort foutPort when targetPort is FlowInPort finPort:
+                    foutPort.BindTo(finPort);
+                    break;
+                case OutPort outPort when targetPort is InPort inPort:
+                    inPort.BindTo(outPort);
+                    break;
+            }
         }
 
         public static Link Create(Port sourcePort, Port targetPort)

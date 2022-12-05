@@ -9,8 +9,6 @@ public class GraphRuntime : MonoBehaviour
 {
     private void Start()
     {
-        var test = Resources.Load<GraphEditorData>("NB");
-        Debug.Log("GGG");
-        test.Execute();
+        Resources.Load<GraphData>("NB").StartGraph();
     }
 }

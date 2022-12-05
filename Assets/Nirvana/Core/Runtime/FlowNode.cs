@@ -14,14 +14,14 @@ namespace Nirvana
     {
         private Port[] _orderInPorts;
         private Port[] _orderOutPorts;
-        
-        public override void OnCreate()
+
+        protected override void OnCreate()
         {
             RegisterPorts();
             RefreshEditorPort();
         }
 
-        public override void OnRefresh()
+        protected override void OnRefresh()
         {
             RegisterPorts();
             RefreshLinks();
@@ -30,22 +30,20 @@ namespace Nirvana
 
         protected abstract void RegisterPorts();
 
-        public abstract void Execute();
-
-        private string GetPortID(string name, IDictionary dict)
+        private string GetPortID(string name, string ID, IDictionary dict)
         {
-            var id = name;
-            while (dict.Contains(id))
+            if (string.IsNullOrEmpty(ID)) ID = name;
+            while (dict.Contains(ID))
             {
-                id += " ";
+                ID += " ";
             }
 
-            return id;
+            return ID;
         }
 
-        public InPort<T> AddInPort<T>(string name)
+        public InPort<T> AddInPort<T>(string name, string ID = "")
         {
-            var ID = GetPortID(name, inPorts);
+            ID = GetPortID(name, ID, inPorts);
             var newPort = new InPort<T>(this, ID, name);
             inPorts.Add(ID, newPort);
             return newPort;
@@ -53,7 +51,12 @@ namespace Nirvana
 
         public OutPort<T> AddOutPort<T>(string name, Func<T> getValue)
         {
-            var ID = GetPortID(name, outPorts);
+            return AddOutPort(name, "", getValue);
+        }
+        
+        public OutPort<T> AddOutPort<T>(string name, string ID, Func<T> getValue)
+        {
+            ID = GetPortID(name, ID, outPorts);
             var newPort = new OutPort<T>(this, ID, name, getValue);
             outPorts.Add(ID, newPort);
             return newPort;
@@ -61,15 +64,20 @@ namespace Nirvana
 
         public FlowInPort AddFlowInPort(string name ,Action flowFunc)
         {
-            var ID = GetPortID(name, inPorts);
+            return AddFlowInPort(name, "", flowFunc);
+        }
+        
+        public FlowInPort AddFlowInPort(string name, string ID, Action flowFunc)
+        {
+            ID = GetPortID(name, ID, inPorts);
             var newPort = new FlowInPort(this, ID, name, flowFunc);
             inPorts.Add(ID, newPort);
             return newPort;
         }
 
-        public FlowOutPort AddFlowOutPort(string name)
+        public FlowOutPort AddFlowOutPort(string name, string ID = "")
         {
-            var ID = GetPortID(name, outPorts);
+            ID = GetPortID(name, ID, outPorts);
             var newPort = new FlowOutPort(this, ID, name);
             outPorts.Add(ID, newPort);
             return newPort;
@@ -207,15 +215,19 @@ namespace Nirvana
                 {
                     var sourcePort = link.sourcePort;
                     var targetPort = link.targetPort;
-                    var height = GraphUtils.activeLink == link ? 5 : 3;
-                    var texture = StyleUtils.LoadTexture2D("Textures/Bezier");
-                    Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, texture, height);
-                    if (e.type == EventType.MouseDown && e.button == 0)
+                    if (sourcePort != null && targetPort != null)
                     {
-                        if (CurveUtils.IsPosInCurve(e.mousePosition, sourcePort.rect.center, targetPort.rect.center, 5))
+                        var height = GraphUtils.activeLink == link ? 5 : 3;
+                        var texture = StyleUtils.LoadTexture2D("Textures/Bezier");
+                        Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center,
+                            ColorUtils.orange1, texture, height);
+                        if (e.type == EventType.MouseDown && e.button == 0)
                         {
-                            GraphUtils.Select(link);
-                            e.Use();
+                            if (CurveUtils.IsPosInCurve(e.mousePosition, sourcePort.rect.center, targetPort.rect.center, 5))
+                            {
+                                GraphUtils.Select(link);
+                                e.Use();
+                            }
                         }
                     }
                 }
