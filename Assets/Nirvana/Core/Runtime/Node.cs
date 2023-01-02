@@ -126,12 +126,12 @@ namespace Nirvana
         {
             for (int i = _inLinks.Count - 1; i >= 0; i--)
             {
-                graph.DelLink(_inLinks[i]);
+                graph.RemoveLink(_inLinks[i]);
             }
             
             for (int i = outLinks.Count - 1; i >= 0; i--)
             {
-                graph.DelLink(outLinks[i]);
+                graph.RemoveLink(outLinks[i]);
             }
         }
 

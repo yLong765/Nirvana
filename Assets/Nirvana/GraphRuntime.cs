@@ -9,6 +9,6 @@ public class GraphRuntime : MonoBehaviour
 {
     private void Start()
     {
-        Resources.Load<GraphData>("NB").StartGraph();
+        Resources.Load<Graph>("NB").StartGraph();
     }
 }

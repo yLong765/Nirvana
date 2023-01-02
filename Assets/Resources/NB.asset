@@ -9,15 +9,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9610e62114a67f04ca4626bae3bad509, type: 3}
+  m_Script: {fileID: 11500000, guid: b204b06b491871f42b41dc9b1ef86154, type: 3}
   m_Name: NB
   m_EditorClassIdentifier: 
-  _graph:
-    _serializedData: "{\r\n  \"$id\": \"1\",\r\n  \"$type\": \"Nirvana.GraphSource,
-      Assembly-CSharp\",\r\n  \"nodes\": {\r\n    \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Node,
-      Assembly-CSharp]], mscorlib\",\r\n    \"$values\": []\r\n  },\r\n  \"bbSource\":
-      {\r\n    \"$id\": \"2\",\r\n    \"$type\": \"Nirvana.BlackboardSource, Assembly-CSharp\",\r\n   
-      \"variables\": {\r\n      \"$id\": \"3\",\r\n      \"$type\": \"System.Collections.Generic.Dictionary`2[[System.String,
-      mscorlib],[Nirvana.Variable, Assembly-CSharp]], mscorlib\"\r\n    }\r\n  },\r\n 
-      \"title\": \"Graph Canvas\"\r\n}"
-    _offset: {x: 0, y: 0}
+  _serializedData: "{\r\n  \"$id\": \"1\",\r\n  \"$type\": \"Nirvana.GraphSource,
+    Assembly-CSharp\",\r\n  \"nodes\": {\r\n    \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Node,
+    Assembly-CSharp]], mscorlib\",\r\n    \"$values\": [\r\n      {\r\n        \"$id\":
+    \"2\",\r\n        \"$type\": \"StartNode, Assembly-CSharp\",\r\n        \"inLinks\":
+    {\r\n          \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Link,
+    Assembly-CSharp]], mscorlib\",\r\n          \"$values\": []\r\n        },\r\n       
+    \"outLinks\": {\r\n          \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Link,
+    Assembly-CSharp]], mscorlib\",\r\n          \"$values\": []\r\n        },\r\n       
+    \"title\": \"\u27A6 StartNode\",\r\n        \"rect\": {\r\n          \"x\": 254.0,\r\n         
+    \"y\": 217.666656,\r\n          \"width\": 96.0,\r\n          \"height\": 50.0\r\n       
+    }\r\n      },\r\n      {\r\n        \"$id\": \"3\",\r\n        \"$type\": \"ConditionNode,
+    Assembly-CSharp\",\r\n        \"inLinks\": {\r\n          \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Link,
+    Assembly-CSharp]], mscorlib\",\r\n          \"$values\": [\r\n            {\r\n             
+    \"$id\": \"4\",\r\n              \"$type\": \"Nirvana.Link, Assembly-CSharp\",\r\n             
+    \"sourceNode\": {\r\n                \"$id\": \"5\",\r\n                \"$type\":
+    \"StartNode, Assembly-CSharp\",\r\n                \"inLinks\": {\r\n                 
+    \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Link, Assembly-CSharp]],
+    mscorlib\",\r\n                  \"$values\": []\r\n                },\r\n               
+    \"outLinks\": {\r\n                  \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Link,
+    Assembly-CSharp]], mscorlib\",\r\n                  \"$values\": [\r\n                   
+    {\r\n                      \"$ref\": \"4\"\r\n                    }\r\n                 
+    ]\r\n                },\r\n                \"title\": \"\u27A6 StartNode\",\r\n               
+    \"rect\": {\r\n                  \"x\": 255.0,\r\n                  \"y\": 358.666656,\r\n                 
+    \"width\": 96.0,\r\n                  \"height\": 50.0\r\n                }\r\n             
+    },\r\n              \"targetNode\": {\r\n                \"$ref\": \"3\"\r\n             
+    },\r\n              \"sourcePortId\": \"start\",\r\n              \"targetPortId\":
+    \"In\"\r\n            }\r\n          ]\r\n        },\r\n        \"outLinks\":
+    {\r\n          \"$type\": \"System.Collections.Generic.List`1[[Nirvana.Link,
+    Assembly-CSharp]], mscorlib\",\r\n          \"$values\": []\r\n        },\r\n       
+    \"title\": \"ConditionNode\",\r\n        \"rect\": {\r\n          \"x\": 537.0,\r\n         
+    \"y\": 214.666656,\r\n          \"width\": 115.0,\r\n          \"height\": 50.0\r\n       
+    }\r\n      },\r\n      {\r\n        \"$ref\": \"5\"\r\n      }\r\n    ]\r\n 
+    },\r\n  \"bbSource\": {\r\n    \"$id\": \"6\",\r\n    \"$type\": \"Nirvana.BlackboardSource,
+    Assembly-CSharp\",\r\n    \"variables\": {\r\n      \"$id\": \"7\",\r\n     
+    \"$type\": \"System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[Nirvana.Variable,
+    Assembly-CSharp]], mscorlib\"\r\n    }\r\n  },\r\n  \"title\": \"Graph Canvas\"\r\n}"
+  _offset: {x: 52, y: -7}

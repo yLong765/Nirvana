@@ -25,21 +25,21 @@ namespace Nirvana.Editor
         private static bool _mulSelect;
         private static Vector3 _mulSelectStartPos;
         
-        private GraphData _data;
-        private int _dataID;
+        private Graph _rootGraph;
+        private int _rootGraphID;
 
-        public GraphData data
+        public Graph rootGraph
         {
             get
             {
                 current ??= OpenWindow();
-                current._data ??= EditorUtility.InstanceIDToObject(_dataID) as GraphData;
-                return current._data;
+                current._rootGraph ??= EditorUtility.InstanceIDToObject(_rootGraphID) as Graph;
+                return current._rootGraph;
             }
             set
             {
-                current._data = value;
-                current._dataID = value != null ? value.GetInstanceID() : 0;
+                current._rootGraph = value;
+                current._rootGraphID = value != null ? value.GetInstanceID() : 0;
             }
         }
         
@@ -58,16 +58,15 @@ namespace Nirvana.Editor
         public static Graph currentGraph { get; private set; }
         public static GraphEditor current { get; private set; }
 
-        private void InitData(GraphData data, BlackboardSource bbSource)
+        private void InitData(Graph graph, BlackboardSource bbSource)
         {
-            this.data = data;
-            currentGraph = data.graph;
+            rootGraph = graph;
             if (bbSource != null) currentGraph.bbSource = bbSource;
         }
         
         [UnityEditor.Callbacks.OnOpenAsset(1)]
         public static bool OpenAsset(int instanceID, int line) {
-            var target = EditorUtility.InstanceIDToObject(instanceID) as GraphData;
+            var target = EditorUtility.InstanceIDToObject(instanceID) as Graph;
             if ( target != null ) {
                 OpenWindow(target);
                 return true;
@@ -75,7 +74,7 @@ namespace Nirvana.Editor
             return false;
         }
 
-        public static GraphEditor OpenWindow(GraphData data = null, BlackboardSource bbSource = null) {
+        public static GraphEditor OpenWindow(Graph data = null, BlackboardSource bbSource = null) {
             var window = GetWindow<GraphEditor>();
             window.InitData(data, bbSource);
             window.titleContent = new GUIContent("Graph Canvas");
@@ -95,11 +94,13 @@ namespace Nirvana.Editor
         private void OnEnable()
         {
             current = this;
+            Undo.undoRedoPerformed -= UndoRedoPerformed;
+            Undo.undoRedoPerformed += UndoRedoPerformed;
+        }
 
-            // if (GraphUtils.isInspectorPanel)
-            // {
-            //     NodeInspector.OpenWindow();
-            // }
+        private void OnDestroy()
+        {
+            Undo.undoRedoPerformed -= UndoRedoPerformed;
         }
 
         private void OnInspectorUpdate()
@@ -142,7 +143,7 @@ namespace Nirvana.Editor
             if (GraphUtils.willSetDirty)
             {
                 GraphUtils.willSetDirty = false;
-                if (data != null) EditorUtility.SetDirty(data);
+                if (rootGraph != null) EditorUtility.SetDirty(rootGraph);
             }
 
             if (GraphUtils.willRepaint)
@@ -158,7 +159,7 @@ namespace Nirvana.Editor
 
         private bool CheckGraph()
         {
-            if (data == null)
+            if (rootGraph == null)
             {
                 // var graphCenter = _graphRect.center;
                 // var size = StyleUtils.symbolText.CalcSize("Please Select One Graph Editor Data!");
@@ -168,9 +169,9 @@ namespace Nirvana.Editor
                 return false;
             }
 
-            if (currentGraph != data.graph)
+            if (currentGraph != rootGraph)
             {
-                currentGraph = data.graph;
+                currentGraph = rootGraph;
             }
 
             return true;
@@ -254,7 +255,7 @@ namespace Nirvana.Editor
 
                         if (GraphUtils.activeLink != null)
                         {
-                            currentGraph.DelLink(GraphUtils.activeLink);
+                            currentGraph.RemoveLink(GraphUtils.activeLink);
                         }
 
                         GraphUtils.willSetDirty = true;
@@ -332,10 +333,6 @@ namespace Nirvana.Editor
                         AssetDatabase.Refresh();
                     }
                 });
-                menu.AddItem(new GUIContent("Add Text Log"), false, () =>
-                {
-                    LogUtils.Error("测试Log语句，啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦");
-                });
                 menu.ShowAsContext();
             }
 
@@ -355,7 +352,7 @@ namespace Nirvana.Editor
         private static Rect DrawInspector()
         {
             var rect = default(Rect);
-            if (GraphUtils.activeNodes.Count != 1 && GraphUtils.activeLink == null) return rect;
+            if (GraphUtils.activeNodes.Count == 0 && GraphUtils.activeLink == null) return rect;
 
             var nodeInspectorWidth = 300f;
             rect.x = _graphRect.xMin;
@@ -367,6 +364,7 @@ namespace Nirvana.Editor
             GUILayout.BeginArea(areaRect);
             
             if (GraphUtils.activeNodes.Count == 1) NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes[0]);
+            else NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes);
             if (GraphUtils.activeLink != null) LinkInspector.DrawInspector(areaRect, GraphUtils.activeLink);
 
             if (_e.type == EventType.Repaint)
@@ -454,6 +452,11 @@ namespace Nirvana.Editor
             
             GUILayout.EndArea();
             GUI.EndClip();
+        }
+
+        private static void UndoRedoPerformed()
+        {
+            currentGraph.UpdateNodeIDs();
         }
     }
 }

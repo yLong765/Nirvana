@@ -265,7 +265,7 @@ namespace Nirvana
                     if (link != null)
                     {
                         _clickLink = new GUILink(link.sourcePort, link.targetPort);
-                        graph.DelLink(link);
+                        graph.RemoveLink(link);
                         e.Use();
                     }
                 }
