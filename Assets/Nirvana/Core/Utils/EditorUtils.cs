@@ -55,8 +55,15 @@ namespace Nirvana
 
         private static IList pickedList;
         private static int pickedListIndex = -1;
+        
+        public struct ReorderableListOptions
+        {
+            public delegate GenericMenu GetCustomItemMenu(int i);
+            public Graph context;
+            public GetCustomItemMenu customItemMenu;
+        }
 
-        public static void ReorderableList(IList list, System.Action<int> itemGUI)
+        public static void ReorderableList(IList list, ReorderableListOptions options, System.Action<int> itemGUI)
         {
             if (list == null) return;
 
@@ -70,8 +77,19 @@ namespace Nirvana
                 itemGUI(i);
                 GUILayout.EndVertical();
                 var lastRect = GUILayoutUtility.GetLastRect();
-                var pickRect = Rect.MinMaxRect(lastRect.xMin - 16, lastRect.yMin, lastRect.xMin, lastRect.yMax);
+                var pickRect = Rect.MinMaxRect(lastRect.xMin - 16, lastRect.yMin - 1, lastRect.xMin, lastRect.yMax);
                 GUI.Label(pickRect, "☰");
+                if (options.customItemMenu != null)
+                {
+                    GUILayout.Space(18);
+                    var buttonRect = Rect.MinMaxRect(lastRect.xMax + 1, lastRect.yMin - 1, lastRect.xMax + 19, lastRect.yMax);
+                    if (GUI.Button(buttonRect, "✱", StyleUtils.variableSettingText))
+                    {
+                        Undo.RecordObject(options.context, "Menu Item");
+                        options.customItemMenu(i).ShowAsContext();
+                        EditorUtility.SetDirty(options.context);
+                    }
+                }
                 GUILayout.EndHorizontal();
 
                 EditorGUIUtility.AddCursorRect(pickRect, MouseCursor.MoveArrow);
@@ -92,8 +110,6 @@ namespace Nirvana
                     {
                         GUI.Box(boundRect, string.Empty);
                     }
-
-                    Debug.Log(pickedListIndex + " " + i);
 
                     if (pickedListIndex != -1 && pickedListIndex != i && boundRect.Contains(e.mousePosition))
                     {

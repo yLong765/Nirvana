@@ -10,9 +10,14 @@ namespace Nirvana.Editor
     {
         private static List<Variable> _tempVariablesList;
         private static readonly GUILayoutOption[] _options = {GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true), GUILayout.MinHeight(18)};
-
-        public static void DrawGUI(Rect rect, BlackboardSource bbSource)
+        private static Graph _context;
+        private static BlackboardSource _bbSource;
+        
+        public static void DrawGUI(Rect rect, BlackboardSource bbSource, Graph graph)
         {
+            _context = graph;
+            _bbSource = bbSource;
+            
             EditorGUI.BeginChangeCheck();
             
             EditorUtils.DrawBox(new Rect(0, 0, rect.width, rect.height), ColorUtils.gray21, StyleUtils.normalBG);
@@ -29,7 +34,9 @@ namespace Nirvana.Editor
                 {
                     menu.AddItem(t.Name, () =>
                     {
+                        Undo.RecordObject(_context, "New Variable");
                         bbSource.AddVariable(t, t.Name);
+                        EditorUtility.SetDirty(_context);
                         GraphUtils.willSetDirty = true;
                     });
                 }
@@ -49,17 +56,20 @@ namespace Nirvana.Editor
             {
                 _tempVariablesList = bbSource.variables.Values.ToList();
             }
-            
-            EditorUtils.ReorderableList(_tempVariablesList, i =>
+
+            var options = new EditorUtils.ReorderableListOptions {context = graph, customItemMenu = i => GetCustomMenuItem(_tempVariablesList[i], i)};
+            EditorUtils.ReorderableList(_tempVariablesList, options, i =>
             {
-                DrawVariableItem(bbSource, _tempVariablesList[i], i);
+                DrawVariableItem(_tempVariablesList[i], i);
             });
             
-            if ( GUI.changed || Event.current.rawType == EventType.MouseUp )
+            if (GUI.changed || Event.current.rawType == EventType.MouseUp)
             {
                 try
                 {
+                    Undo.RecordObject(_context, "Drag Sort Variable");
                     bbSource.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);
+                    EditorUtility.SetDirty(_context);
                 }
                 catch
                 {
@@ -73,17 +83,24 @@ namespace Nirvana.Editor
             }
         }
         
-        private static void DrawVariableItem(BlackboardSource bbSource, Variable variable, int id)
+        private static void DrawVariableItem(Variable variable, int id)
         { 
             GUILayout.BeginHorizontal();
             variable.name = GUILayout.TextField(variable.name, _options);
             variable.value = EditorUtils.TypeField(GUIContent.none, variable.value, variable.type, _options);
-            if (GUILayout.Button("X", GUILayout.MaxWidth(20)))
-            {
-                _tempVariablesList.RemoveAt(id);
-                GraphUtils.willSetDirty = true;
-            }
             GUILayout.EndHorizontal();
+        }
+
+        private static GenericMenu GetCustomMenuItem(Variable variable, int id)
+        {
+            var menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Delete Variable"), false, () =>
+            {
+                Undo.RecordObject(_context, "Delete Variable");
+                _bbSource.DelVariable(variable.name);
+                EditorUtility.SetDirty(_context);
+            });
+            return menu;
         }
     }
 }

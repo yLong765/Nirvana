@@ -396,7 +396,7 @@ namespace Nirvana.Editor
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
             
-            BlackboardInspector.DrawGUI(areaRect, currentGraph.bbSource);
+            BlackboardInspector.DrawGUI(areaRect, currentGraph.bbSource, currentGraph);
 
             if (_e.type == EventType.Repaint)
             {

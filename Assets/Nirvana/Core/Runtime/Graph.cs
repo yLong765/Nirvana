@@ -50,7 +50,6 @@ namespace Nirvana
             allNodes.Add(newNode);
             
             EditorUtility.SetDirty(this);
-            
             return newNode;
         }
 
@@ -67,24 +66,16 @@ namespace Nirvana
             UpdateNodeIDs();
             EditorUtility.SetDirty(this);
         }
-        
-        public Variable AddVariable(Type type, string varName)
-        {
-            var variableType = typeof(Variable<>).MakeGenericType(type);
-            var newVariable = (Variable)Activator.CreateInstance(variableType);
-            newVariable.name = varName;
-            bbSource.variables[varName] = newVariable;
-            return newVariable;
-        }
 
         public Link AddLink(Port sourcePort, Port targetPort)
         {
             if (!Node.IsNewLinkAllowed(sourcePort, targetPort)) return null;
             
             Undo.RecordObject(this, "New Link");
-            var newLink = Link.Create(sourcePort, targetPort);
-            EditorUtility.SetDirty(this);
             
+            var newLink = Link.Create(sourcePort, targetPort);
+            
+            EditorUtility.SetDirty(this);
             return newLink;
         }
 
