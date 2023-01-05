@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Nirvana
@@ -11,7 +12,7 @@ namespace Nirvana
     {
         protected bool isOverwriteOnGraphStartMethod = false;
         
-        private static Vector2 MIN_SIZE = new(80, 50);
+        private static Vector2 MIN_SIZE = new(80, 38);
         
         private string _title;
         private string _tag;
@@ -33,16 +34,41 @@ namespace Nirvana
         [JsonIgnore] public List<Port> inPortList => _inPorts.Values.ToList();
         [JsonIgnore] public List<Port> outPortList => _outPorts.Values.ToList();
 
+        [JsonIgnore]
+        public List<Port> allPorts
+        {
+            get
+            {
+                var ports = new List<Port>();
+                ports.AddRange(inPortList);
+                ports.AddRange(outPortList);
+                return ports;
+            }
+        }
+
         public string title
         {
             get
             {
                 if (string.IsNullOrEmpty(_title))
                 {
-                    _title = GetType().Name;
-                    if (isOverwriteOnGraphStartMethod)
+                    
+                    if (GetType().TryGetAttribute<TitleAttribute>(out var titleAttribute))
                     {
-                        _title = $"➦ {_title}";
+                        _title = titleAttribute.title;
+                    }
+                    else
+                    {
+                        _title = GetType().Name;
+                        if (_title.EndsWith("Node"))
+                        {
+                            _title = _title[.._title.LastIndexOf("Node", StringComparison.Ordinal)];
+                        }
+
+                        if (isOverwriteOnGraphStartMethod)
+                        {
+                            _title = $"➦ {_title}";
+                        }
                     }
                 }
 
@@ -109,6 +135,7 @@ namespace Nirvana
         public void Refresh()
         {
             isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart").DeclaringType == typeof(Node));
+            rect = new Rect(position,  MIN_SIZE);
             OnRefresh();
         }
         

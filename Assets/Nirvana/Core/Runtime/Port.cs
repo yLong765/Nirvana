@@ -10,7 +10,7 @@ namespace Nirvana
     public abstract partial class Port
     {
         private string _ID;
-        private string _name;
+        protected string _name;
         private Node _node;
         private int _linkCount;
         private int _maxLinkCount;
@@ -21,7 +21,7 @@ namespace Nirvana
             set => _ID = value;
         }
 
-        public string name
+        public virtual string name
         {
             get => _name;
             set => _name = value;
@@ -60,6 +60,12 @@ namespace Nirvana
     public class FlowInPort : Port
     {
         public Action flowFunc;
+
+        public override string name
+        {
+            get => "► " + _name;
+            set => _name = value;
+        }
         
         public FlowInPort(Node node, string ID, string name, Action flowFunc) : base(node, ID, name)
         {
@@ -73,6 +79,12 @@ namespace Nirvana
     public class FlowOutPort : Port
     {
         private Action _nextFlow;
+        
+        public override string name
+        {
+            get => _name + " ►";
+            set => _name = value;
+        }
         
         public FlowOutPort(Node node, string ID, string name) : base(node, ID, name)
         {

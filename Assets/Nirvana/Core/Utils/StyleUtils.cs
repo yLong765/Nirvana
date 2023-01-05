@@ -68,13 +68,29 @@ namespace Nirvana
         {
             get
             {
-                if (_windowBG != null)
+                if (_windowBG == null)
                 {
                     _windowBG = new GUIStyle();
                     _windowBG.normal.background = Texture2D.whiteTexture;
                 }
 
                 return _windowBG;
+            }
+        }
+
+        private static GUIStyle _normalPortBG;
+        public static GUIStyle normalPortBG
+        {
+            get
+            {
+                if (_normalPortBG == null)
+                {
+                    _normalPortBG = new GUIStyle();
+                    _normalPortBG.normal.background = Texture2D.whiteTexture;
+                    _normalPortBG.margin = new RectOffset(1, 1, 0, 1);
+                }
+
+                return _normalPortBG;
             }
         }
 

@@ -75,6 +75,12 @@ namespace Nirvana
 
             return null;
         }
+
+        public static bool TryGetAttribute<T>(this Type type, out T attribute) where T : Attribute
+        {
+            attribute = GetAttribute<T>(type);
+            return attribute != null;
+        }
         
         public static T GetAttribute<T>(this FieldInfo info) where T : Attribute
         {

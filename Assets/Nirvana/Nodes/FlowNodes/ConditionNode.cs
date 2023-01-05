@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Nirvana;
 using UnityEngine;
 
-[Name("Condition Int")]
+[Title("Condition Int")]
 public class ConditionNode : FlowNode
 {
     private InPort<int> v1;

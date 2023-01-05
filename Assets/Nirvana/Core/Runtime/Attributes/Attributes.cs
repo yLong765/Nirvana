@@ -6,13 +6,13 @@ using UnityEngine;
 namespace Nirvana
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field)]
-    public class NameAttribute : Attribute
+    public class TitleAttribute : Attribute
     {
-        public string name;
+        public string title;
 
-        public NameAttribute(string name)
+        public TitleAttribute(string title)
         {
-            this.name = name;
+            this.title = title;
         }
     }
 
