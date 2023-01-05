@@ -13,8 +13,11 @@ namespace Nirvana.Editor
     {
         private static Event _e;
         private static Vector2 _realMousePosition;
-        private static Vector2 _graphMousePosition;
         private static Rect _graphRect;
+        
+        private static float _lastUpdateTime;
+        private static float? _smoothZoom;
+        private static float _zoomVelocity = 1;
         public static Rect graphtRect => _graphRect;
 
         private static readonly float GRAPH_TOP = 21;
@@ -51,6 +54,18 @@ namespace Nirvana.Editor
                 if (currentGraph != null)
                 {
                     currentGraph.offset = value;
+                }
+            }
+        }
+
+        private static float graphZoom
+        {
+            get => currentGraph.zoom;
+            set
+            {
+                if (currentGraph != null)
+                {
+                    currentGraph.zoom = value;
                 }
             }
         }
@@ -103,6 +118,19 @@ namespace Nirvana.Editor
             Undo.undoRedoPerformed -= UndoRedoPerformed;
         }
 
+        private void Update()
+        {
+            var currentTime = Time.realtimeSinceStartup;
+            var deltaTime = currentTime - _lastUpdateTime;
+            _lastUpdateTime = currentTime;
+
+            var needsRepaint = false;
+            needsRepaint |= UpdateSmoothZoom(deltaTime);
+            if ( needsRepaint ) {
+                Repaint();
+            }
+        }
+
         private void OnInspectorUpdate()
         {
             if (!GraphUtils.willRepaint)
@@ -119,13 +147,12 @@ namespace Nirvana.Editor
 
             _e = Event.current;
             _realMousePosition = _e.mousePosition;
-            _graphMousePosition = MousePosToGraph(_realMousePosition);
 
             EditorUtils.DrawBox(_graphRect, ColorUtils.gray13, StyleUtils.normalBG);
             DrawGrid(_graphRect, graphOffset);
             NodesWindowPrevEvent();
 
-            GUI.BeginClip(_graphRect, graphOffset, default, false);
+            GUI.BeginClip(_graphRect, graphOffset / graphZoom, default, false);
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();
@@ -177,12 +204,40 @@ namespace Nirvana.Editor
             return true;
         }
 
+        private static bool UpdateSmoothZoom(float deltaTime)
+        {
+            if (_smoothZoom == null) return false;
+
+            var targetZoom = (float) _smoothZoom;
+            if ( Mathf.Abs(targetZoom - graphZoom) < 0.00001f )
+            {
+                _smoothZoom = null;
+                return false;
+            }
+
+            graphZoom = Mathf.SmoothDamp(graphZoom, targetZoom, ref _zoomVelocity, 0.08f, Mathf.Infinity, deltaTime);
+            if ( Mathf.Abs(1 - graphZoom) < 0.00001f ) { graphZoom = 1; }
+            return true;
+        }
+
         private static void NodesWindowPrevEvent()
         {
             if (GraphUtils.allowClick && _e.type == EventType.MouseDrag && _e.button == 2)
             {
                 graphOffset += _e.delta;
                 _e.Use();
+            }
+            
+            if (GraphUtils.allowClick && _e.type == EventType.ScrollWheel && _graphRect.Contains(_e.mousePosition)) {
+                var zoomDelta = _e.shift ? 0.1f : 0.25f;
+                var delta = -_e.delta.y > 0 ? zoomDelta : -zoomDelta;
+                var center = _e.mousePosition;
+                if (graphZoom == 1 && delta > 0) return;
+                var pinPoint = (center - graphOffset) / graphZoom;
+                var newZ = graphZoom;
+                newZ += delta;
+                newZ = Mathf.Clamp(newZ, 0.25f, 1f);
+                _smoothZoom = newZ;
             }
         }
 
@@ -204,11 +259,12 @@ namespace Nirvana.Editor
                 {
                     var menu = new GenericMenuPopup("Nodes");
                     var types = TypeUtils.GetSubClassTypes(typeof(FlowNode));
+                    var graphMousePosition = MousePosToGraph(_e.mousePosition);
                     foreach (var t in types)
                     {
                         menu.AddItem(t.Name, () =>
                         {
-                            currentGraph.AddNode(t, _graphMousePosition);
+                            currentGraph.AddNode(t, graphMousePosition);
                             GraphUtils.willSetDirty = true;
                         });
                     }

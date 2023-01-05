@@ -9,6 +9,7 @@ namespace Nirvana
     {
         [SerializeField] private string _serializedData;
         [SerializeField] private Vector2 _offset;
+        [SerializeField] private float _zoom;
 
         public string serializedData
         {
@@ -20,6 +21,12 @@ namespace Nirvana
         {
             get => _offset;
             set => _offset = value;
+        }
+
+        public float zoom
+        {
+            get => _zoom;
+            set => _zoom = value;
         }
         
         public string title
