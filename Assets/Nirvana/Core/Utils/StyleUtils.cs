@@ -93,6 +93,22 @@ namespace Nirvana
                 return _normalPortBG;
             }
         }
+        
+        private static GUIStyle _roundedBox;
+        public static GUIStyle roundedBox
+        {
+            get
+            {
+                if (_roundedBox == null)
+                {
+                    _roundedBox = new GUIStyle("ShurikenEffectBg");
+                    _roundedBox.margin = new RectOffset(1, 1, 0, 0);
+                    _roundedBox.padding = new RectOffset(0, 0, 0, 0);
+                }
+
+                return _roundedBox;
+            }
+        }
 
         private static GUIStyle _windowTitle;
         public static GUIStyle windowTitle

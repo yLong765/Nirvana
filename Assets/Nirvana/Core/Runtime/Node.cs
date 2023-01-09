@@ -8,16 +8,16 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public abstract partial class Node 
+    public abstract partial class Node
     {
         protected bool isOverwriteOnGraphStartMethod = false;
         
-        private static Vector2 MIN_SIZE = new(80, 38);
+        public static Vector2 MIN_SIZE = new(80, 38);
         
         private string _title;
         private string _tag;
         private Vector2 _position;
-        private Vector2 _size;
+        private Vector2 _size = MIN_SIZE;
         private Graph _graph;
 
         private List<Link> _inLinks = new List<Link>();
@@ -135,7 +135,6 @@ namespace Nirvana
         public void Refresh()
         {
             isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart").DeclaringType == typeof(Node));
-            rect = new Rect(position,  MIN_SIZE);
             OnRefresh();
         }
         

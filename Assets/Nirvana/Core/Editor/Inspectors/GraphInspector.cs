@@ -26,9 +26,10 @@ namespace Nirvana.Editor
             if (Setting.Instance.debugMode)
             {
                 EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.Vector2Field("拖拽原点偏移量", _asset.offset);
+                EditorGUILayout.FloatField("缩放", _asset.zoom);
                 EditorGUILayout.LabelField("Graph Json Data");
                 EditorGUILayout.TextArea(_asset.serializedData);
-                EditorGUILayout.Vector2Field("拖拽原点偏移量", _asset.offset);
                 EditorGUI.EndDisabledGroup();
             }
         }

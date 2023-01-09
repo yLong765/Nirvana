@@ -9,16 +9,17 @@ namespace Nirvana.Editor
     {
         public static void DrawNodeGUI(Node node)
         {
+            
             node.rect = EditorUtils.Window(node.ID, node.rect, id =>
             {
                 DrawNodeWindowGUI(id, node);
-            }, ColorUtils.gray21, StyleUtils.normalBG);
+            }, ColorUtils.gray21, StyleUtils.normalBG, GUILayout.MaxWidth(Node.MIN_SIZE.x), GUILayout.MaxHeight(Node.MIN_SIZE.y));
 
             if (node.isSelected)
             {
                 EditorUtils.DrawBox(node.rect, ColorUtils.mediumPurple, StyleUtils.windowHeightLine);
             }
-            
+
             DrawTag(node);
             
             node.DrawLinkGUI();

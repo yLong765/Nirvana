@@ -14,20 +14,24 @@ namespace Nirvana.Editor
         private static Event _e;
         private static Vector2 _realMousePosition;
         private static Rect _graphRect;
-        
+
         private static float _lastUpdateTime;
+        private static Vector2? _smoothOffset;
+        private static Vector2 _offsetVelocity = Vector2.one;
         private static float? _smoothZoom;
         private static float _zoomVelocity = 1;
         public static Rect graphtRect => _graphRect;
 
-        private static readonly float GRAPH_TOP = 21;
-        private static readonly float GRAPH_LEFT = 2;
-        private static readonly float GRAPH_RIGHT = 2;
-        private static readonly float GRAPH_BOTTOM = 2;
+        private const float GRAPH_TOP = 21;
+        private const float GRAPH_LEFT = 2;
+        private const float GRAPH_RIGHT = 2;
+        private const float GRAPH_BOTTOM = 2;
+        private const float ZOOM_MIN = 0.25f;
+        private const float ZOOM_MAX = 1.0f;
 
         private static bool _mulSelect;
         private static Vector3 _mulSelectStartPos;
-        
+
         private Graph _rootGraph;
         private int _rootGraphID;
 
@@ -45,7 +49,7 @@ namespace Nirvana.Editor
                 current._rootGraphID = value != null ? value.GetInstanceID() : 0;
             }
         }
-        
+
         private static Vector2 graphOffset
         {
             get => currentGraph.offset;
@@ -53,22 +57,34 @@ namespace Nirvana.Editor
             {
                 if (currentGraph != null)
                 {
-                    currentGraph.offset = value;
+                    var t = value;
+                    if (_smoothOffset == null)
+                    {
+                        t.x = Mathf.Round(t.x);
+                        t.y = Mathf.Round(t.y);
+                    }
+                    currentGraph.offset = t;
                 }
             }
         }
 
         private static float graphZoom
         {
-            get => currentGraph.zoom;
+            get => currentGraph != null ? Mathf.Clamp(currentGraph.zoom, ZOOM_MIN, ZOOM_MAX) : ZOOM_MAX;
             set
             {
                 if (currentGraph != null)
                 {
-                    currentGraph.zoom = value;
+                    currentGraph.zoom = Mathf.Clamp(value, ZOOM_MIN, ZOOM_MAX);
                 }
             }
         }
+
+        //window width. Handles retina
+        private static float screenWidth => Screen.width / EditorGUIUtility.pixelsPerPoint;
+
+        //window height. Handles retina
+        private static float screenHeight => Screen.height / EditorGUIUtility.pixelsPerPoint;
 
         public static Graph currentGraph { get; private set; }
         public static GraphEditor current { get; private set; }
@@ -78,18 +94,22 @@ namespace Nirvana.Editor
             rootGraph = graph;
             if (bbSource != null) currentGraph.bbSource = bbSource;
         }
-        
+
         [UnityEditor.Callbacks.OnOpenAsset(1)]
-        public static bool OpenAsset(int instanceID, int line) {
+        public static bool OpenAsset(int instanceID, int line)
+        {
             var target = EditorUtility.InstanceIDToObject(instanceID) as Graph;
-            if ( target != null ) {
+            if (target != null)
+            {
                 OpenWindow(target);
                 return true;
             }
+
             return false;
         }
 
-        public static GraphEditor OpenWindow(Graph data = null, BlackboardSource bbSource = null) {
+        public static GraphEditor OpenWindow(Graph data = null, BlackboardSource bbSource = null)
+        {
             var window = GetWindow<GraphEditor>();
             window.InitData(data, bbSource);
             window.titleContent = new GUIContent("Graph Canvas");
@@ -97,7 +117,7 @@ namespace Nirvana.Editor
             window.Show();
             return window;
         }
-        
+
         private static Vector2 MousePosToGraph(Vector2 mousePos)
         {
             var offset = mousePos - graphOffset;
@@ -125,8 +145,10 @@ namespace Nirvana.Editor
             _lastUpdateTime = currentTime;
 
             var needsRepaint = false;
+            needsRepaint |= UpdateSmoothOffset(deltaTime);
             needsRepaint |= UpdateSmoothZoom(deltaTime);
-            if ( needsRepaint ) {
+            if (needsRepaint)
+            {
                 Repaint();
             }
         }
@@ -142,7 +164,7 @@ namespace Nirvana.Editor
         private void OnGUI()
         {
             _graphRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
-            
+
             if (!CheckGraph()) return;
 
             _e = Event.current;
@@ -152,14 +174,29 @@ namespace Nirvana.Editor
             DrawGrid(_graphRect, graphOffset);
             NodesWindowPrevEvent();
 
+            var originalGraphRect = _graphRect;
+            var originalMatrix = default(Matrix4x4);
+            if (graphZoom != 1)
+            {
+                _graphRect = BeginZoomArea(_graphRect, graphZoom, out originalMatrix);
+            }
+
+            //Debug.Log(_graphRect + " | " + graphOffset / graphZoom + " | " + graphOffset + " | " + graphZoom);
+            
             GUI.BeginClip(_graphRect, graphOffset / graphZoom, default, false);
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();
             GUI.EndClip();
-            
+
+            if (graphZoom != 1 && originalMatrix != default)
+            {
+                EndZoomArea(originalMatrix);
+                _graphRect = originalGraphRect;
+            }
+
             NodesWindowPostEvent();
-            DrawToolbar(currentGraph);
+            //DrawToolbar(currentGraph);
             var inspectorRect = DrawInspector();
             var blackboardRect = DrawBlackboard();
             GraphUtils.allowClick = _graphRect.Contains(_realMousePosition) && !inspectorRect.Contains(_realMousePosition) &&
@@ -204,19 +241,57 @@ namespace Nirvana.Editor
             return true;
         }
 
+        static Rect BeginZoomArea(Rect container, float zoomFactor, out Matrix4x4 oldMatrix)
+        {
+            GUI.EndClip();
+            container.y += GRAPH_TOP;
+            container.width *= 1 / zoomFactor;
+            container.height *= 1 / zoomFactor;
+            oldMatrix = GUI.matrix;
+            var matrix1 = Matrix4x4.TRS(new Vector2(container.x, container.y), Quaternion.identity, Vector3.one);
+            var matrix2 = Matrix4x4.Scale(new Vector3(zoomFactor, zoomFactor, 1f));
+            GUI.matrix = matrix1 * matrix2 * matrix1.inverse * GUI.matrix;
+            return container;
+        }
+
+        //Ends the zoom area
+        static void EndZoomArea(Matrix4x4 oldMatrix)
+        {
+            GUI.matrix = oldMatrix;
+            var recover = new Rect(0, GRAPH_TOP, screenWidth, screenHeight);
+            GUI.BeginClip(recover);
+        }
+
+        bool UpdateSmoothOffset(float deltaTime)
+        {
+            if (_smoothOffset == null) return false;
+
+            var targetOffset = (Vector2) _smoothOffset;
+            if ((targetOffset - graphOffset).magnitude < 0.1f)
+            {
+                _smoothOffset = null;
+                return false;
+            }
+
+            targetOffset = new Vector2(Mathf.FloorToInt(targetOffset.x), Mathf.FloorToInt(targetOffset.y));
+            graphOffset = Vector2.SmoothDamp(graphOffset, targetOffset, ref _offsetVelocity, 0.05f, Mathf.Infinity, deltaTime);
+            return true;
+        }
+
         private static bool UpdateSmoothZoom(float deltaTime)
         {
             if (_smoothZoom == null) return false;
 
             var targetZoom = (float) _smoothZoom;
-            if ( Mathf.Abs(targetZoom - graphZoom) < 0.00001f )
+            if (Mathf.Abs(targetZoom - graphZoom) < 0.00001f)
             {
                 _smoothZoom = null;
                 return false;
             }
 
-            graphZoom = Mathf.SmoothDamp(graphZoom, targetZoom, ref _zoomVelocity, 0.08f, Mathf.Infinity, deltaTime);
-            if ( Mathf.Abs(1 - graphZoom) < 0.00001f ) { graphZoom = 1; }
+            graphZoom = Mathf.SmoothDamp(graphZoom, targetZoom, ref _zoomVelocity, 0.05f, Mathf.Infinity, deltaTime);
+            if (Mathf.Abs(1 - graphZoom) < 0.00001f) graphZoom = 1;
+
             return true;
         }
 
@@ -225,19 +300,26 @@ namespace Nirvana.Editor
             if (GraphUtils.allowClick && _e.type == EventType.MouseDrag && _e.button == 2)
             {
                 graphOffset += _e.delta;
+                _smoothOffset = null;
+                _smoothZoom = null;
                 _e.Use();
             }
-            
-            if (GraphUtils.allowClick && _e.type == EventType.ScrollWheel && _graphRect.Contains(_e.mousePosition)) {
+
+            if (GraphUtils.allowClick && _e.type == EventType.ScrollWheel && _graphRect.Contains(_e.mousePosition))
+            {
                 var zoomDelta = _e.shift ? 0.1f : 0.25f;
                 var delta = -_e.delta.y > 0 ? zoomDelta : -zoomDelta;
-                var center = _e.mousePosition;
                 if (graphZoom == 1 && delta > 0) return;
-                var pinPoint = (center - graphOffset) / graphZoom;
+                var offsetPoint = (_e.mousePosition - graphOffset) / graphZoom;
                 var newZ = graphZoom;
                 newZ += delta;
                 newZ = Mathf.Clamp(newZ, 0.25f, 1f);
                 _smoothZoom = newZ;
+
+                var a = offsetPoint * newZ + graphOffset;
+                var b = _e.mousePosition;
+                var diff = b - a;
+                _smoothOffset = graphOffset + diff;
             }
         }
 
@@ -404,7 +486,7 @@ namespace Nirvana.Editor
         }
 
         private static float _nodeInspectorHeight = 200f;
-        
+
         private static Rect DrawInspector()
         {
             var rect = default(Rect);
@@ -418,7 +500,7 @@ namespace Nirvana.Editor
             var areaRect = Rect.MinMaxRect(2, 2, rect.width - 2, rect.height);
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
-            
+
             if (GraphUtils.activeNodes.Count == 1) NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes[0]);
             else NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes);
             if (GraphUtils.activeLink != null) LinkInspector.DrawInspector(areaRect, GraphUtils.activeLink);
@@ -427,7 +509,7 @@ namespace Nirvana.Editor
             {
                 _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 32;
             }
-            
+
             GUILayout.EndArea();
             GUILayout.EndArea();
             GUI.EndClip();
@@ -436,7 +518,7 @@ namespace Nirvana.Editor
         }
 
         private static float _blackboardHeight = 50f;
-        
+
         private static Rect DrawBlackboard()
         {
             var rect = default(Rect);
@@ -451,7 +533,7 @@ namespace Nirvana.Editor
             var areaRect = Rect.MinMaxRect(0, 2, rect.width - 2, rect.height);
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
-            
+
             BlackboardInspector.DrawGUI(areaRect, currentGraph.bbSource, currentGraph);
 
             if (_e.type == EventType.Repaint)
@@ -462,12 +544,12 @@ namespace Nirvana.Editor
             GUILayout.EndArea();
             GUILayout.EndArea();
             GUI.EndClip();
-            
+
             return rect;
         }
 
         private static float _loggerHeight = 0;
-        
+
         private static void DrawLogger()
         {
             var rect = default(Rect);
@@ -500,12 +582,12 @@ namespace Nirvana.Editor
                 GUILayout.EndHorizontal();
                 GUILayout.Space(2f);
             }
-            
+
             if (_e.type == EventType.Repaint)
             {
                 _loggerHeight = heightCount;
             }
-            
+
             GUILayout.EndArea();
             GUI.EndClip();
         }

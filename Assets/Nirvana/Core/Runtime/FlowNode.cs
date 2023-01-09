@@ -353,11 +353,14 @@ namespace Nirvana
         public override void DrawWindowGUI()
         {
             DrawPort(_guiFlowInPorts, _guiFlowOutPorts);
-            GUI.color = ColorUtils.gray13;
-            GUILayout.BeginVertical(StyleUtils.normalPortBG);
-            GUI.color = Color.white;
-            DrawPort(_guiInPorts, _guiOutPorts);
-            GUILayout.EndVertical();
+            if (_guiInPorts.Length > 0 || _guiOutPorts.Length > 0)
+            {
+                GUI.color = ColorUtils.gray13;
+                GUILayout.BeginVertical(StyleUtils.roundedBox);
+                GUI.color = Color.white;
+                DrawPort(_guiInPorts, _guiOutPorts);
+                GUILayout.EndVertical();
+            }
         }
 
         private static bool _flowInPortHeaderGroup = true;
