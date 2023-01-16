@@ -9,11 +9,8 @@ namespace Nirvana.Editor
     {
         public static void DrawNodeGUI(Node node)
         {
-            
-            node.rect = EditorUtils.Window(node.ID, node.rect, id =>
-            {
-                DrawNodeWindowGUI(id, node);
-            }, ColorUtils.gray21, StyleUtils.normalBG, GUILayout.MaxWidth(Node.MIN_SIZE.x), GUILayout.MaxHeight(Node.MIN_SIZE.y));
+            node.rect = EditorUtils.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, ColorUtils.gray21, StyleUtils.normalBG,
+                GUILayout.MaxWidth(Node.MIN_SIZE.x), GUILayout.MaxHeight(Node.MIN_SIZE.y));
 
             if (node.isSelected)
             {
@@ -21,58 +18,76 @@ namespace Nirvana.Editor
             }
 
             DrawTag(node);
-            
+
             node.DrawLinkGUI();
         }
-        
+
         private static void DrawNodeWindowGUI(int id, Node node)
+        {
+            var e = Event.current;
+
+            DrawTitleGUI(node);
+            node.DrawWindowGUI();
+            HandleEvents(node, e);
+        }
+
+        private static void DrawTitleGUI(Node node)
         {
             var titleHeight = StyleUtils.windowTitle.CalcSize(node.title).y;
             EditorUtils.DrawBox(new Rect(0, 0, node.rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
             GUILayout.Label(node.title, StyleUtils.windowTitle);
-            
-            node.DrawWindowGUI();
+        }
 
-            var e = Event.current;
-            if (GraphUtils.allowClick)
+        private static void HandleEvents(Node node, Event e)
+        {
+            if (GraphUtils.allowClick && e.type == EventType.MouseDown && e.button == 0)
             {
-                if (e.type == EventType.MouseDown && e.button != 2)
-                {
-                    //if (e.button == 0 || e.button == 1)
-                    {
-                        GraphUtils.Select(node);
-                        // GraphUtils.AddActiveNode(node);
-                        GUIUtility.keyboardControl = 0;
-                    }
+                Undo.RecordObject(node.graph, "Move Node");
 
-                    e.Use();
+                // GraphUtils.Select(node);
+                e.Use();
+            }
+
+            // right click MouseUp menu
+            if (GraphUtils.allowClick && (e.type == EventType.MouseUp && e.button == 1 || e.type == EventType.ContextClick))
+            {
+                var menu = new GenericMenu();
+                if (GraphUtils.activeNodes.Count > 1)
+                {
                 }
-
-                if (e.type == EventType.MouseDrag)
+                else
                 {
-                    foreach (var t in GraphUtils.activeNodes)
-                    {
-                        t.position += e.delta;
-                    }
-
-                    e.Use();
-                }
-
-                if (e.type == EventType.MouseUp && e.button == 1)
-                {
-                    GenericMenu menu = new GenericMenu();
                     menu.AddItem(new GUIContent("Delete"), false, () =>
                     {
                         node.graph.RemoveNode(node);
                         GraphUtils.ClearSelect();
                     });
                     menu.ShowAsContext();
+                }
 
-                    e.Use();
+                menu.ShowAsContext();
+                e.Use();
+            }
+
+            if (GraphUtils.allowClick && e.button != 2)
+            {
+                if (e.type == EventType.MouseDrag && GraphUtils.activeNodes.Count > 1)
+                {
+                    foreach (var n in GraphUtils.activeNodes)
+                    {
+                        n.position += e.delta;
+                    }
+
+                    return;
+                }
+
+                if (node.isSelected && e.type == EventType.MouseDrag)
+                {
+                    node.position += e.delta;
                 }
             }
         }
-        
+
         private static void DrawTag(Node node)
         {
             if (!string.IsNullOrEmpty(node.tag))

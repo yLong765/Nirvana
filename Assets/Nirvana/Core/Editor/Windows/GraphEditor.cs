@@ -63,6 +63,7 @@ namespace Nirvana.Editor
                         t.x = Mathf.Round(t.x);
                         t.y = Mathf.Round(t.y);
                     }
+
                     currentGraph.offset = t;
                 }
             }
@@ -170,6 +171,11 @@ namespace Nirvana.Editor
             _e = Event.current;
             _realMousePosition = _e.mousePosition;
 
+            if (mouseOverWindow == current && (_e.isMouse || _e.isKey))
+            {
+                GraphUtils.willRepaint = true;
+            }
+
             EditorUtils.DrawBox(_graphRect, ColorUtils.gray13, StyleUtils.normalBG);
             DrawGrid(_graphRect, graphOffset);
             NodesWindowPrevEvent();
@@ -181,12 +187,11 @@ namespace Nirvana.Editor
                 _graphRect = BeginZoomArea(_graphRect, graphZoom, out originalMatrix);
             }
 
-            //Debug.Log(_graphRect + " | " + graphOffset / graphZoom + " | " + graphOffset + " | " + graphZoom);
-            
             GUI.BeginClip(_graphRect, graphOffset / graphZoom, default, false);
             BeginWindows();
             DrawNodesGUI(currentGraph);
             EndWindows();
+            DrawGraphSelection();
             GUI.EndClip();
 
             if (graphZoom != 1 && originalMatrix != default)
@@ -196,11 +201,10 @@ namespace Nirvana.Editor
             }
 
             NodesWindowPostEvent();
-            //DrawToolbar(currentGraph);
+            DrawToolbar(currentGraph);
             var inspectorRect = DrawInspector();
             var blackboardRect = DrawBlackboard();
-            GraphUtils.allowClick = _graphRect.Contains(_realMousePosition) && !inspectorRect.Contains(_realMousePosition) &&
-                                    !blackboardRect.Contains(_realMousePosition);
+            GraphUtils.allowClick = !inspectorRect.Contains(_realMousePosition) && !blackboardRect.Contains(_realMousePosition);
 
             DrawLogger();
 
@@ -297,80 +301,39 @@ namespace Nirvana.Editor
 
         private static void NodesWindowPrevEvent()
         {
-            if (GraphUtils.allowClick && _e.type == EventType.MouseDrag && _e.button == 2)
+            if (GraphUtils.allowClick)
             {
-                graphOffset += _e.delta;
-                _smoothOffset = null;
-                _smoothZoom = null;
-                _e.Use();
-            }
+                if (_graphRect.Contains(_e.mousePosition) && _e.type == EventType.MouseDrag && _e.button == 2)
+                {
+                    graphOffset += _e.delta;
+                    _smoothOffset = null;
+                    _smoothZoom = null;
+                    _e.Use();
+                }
 
-            if (GraphUtils.allowClick && _e.type == EventType.ScrollWheel && _graphRect.Contains(_e.mousePosition))
-            {
-                var zoomDelta = _e.shift ? 0.1f : 0.25f;
-                var delta = -_e.delta.y > 0 ? zoomDelta : -zoomDelta;
-                if (graphZoom == 1 && delta > 0) return;
-                var offsetPoint = (_e.mousePosition - graphOffset) / graphZoom;
-                var newZ = graphZoom;
-                newZ += delta;
-                newZ = Mathf.Clamp(newZ, 0.25f, 1f);
-                _smoothZoom = newZ;
+                if (_e.type == EventType.ScrollWheel)
+                {
+                    var zoomDelta = _e.shift ? 0.1f : 0.25f;
+                    var delta = -_e.delta.y > 0 ? zoomDelta : -zoomDelta;
+                    if (graphZoom == 1 && delta > 0) return;
+                    var offsetPoint = (_e.mousePosition - graphOffset) / graphZoom;
+                    var newZ = graphZoom;
+                    newZ += delta;
+                    newZ = Mathf.Clamp(newZ, 0.25f, 1f);
+                    _smoothZoom = newZ;
 
-                var a = offsetPoint * newZ + graphOffset;
-                var b = _e.mousePosition;
-                var diff = b - a;
-                _smoothOffset = graphOffset + diff;
+                    var a = offsetPoint * newZ + graphOffset;
+                    var b = _e.mousePosition;
+                    var diff = b - a;
+                    _smoothOffset = graphOffset + diff;
+                    
+                    _e.Use();
+                }
             }
         }
 
         private static void NodesWindowPostEvent()
         {
-            if (GraphUtils.allowClick && _e.type == EventType.MouseDown)
-            {
-                if (_e.button == 0)
-                {
-                    if (_e.clickCount == 1)
-                    {
-                        _mulSelect = true;
-                        _mulSelectStartPos = _e.mousePosition;
-                        GraphUtils.ClearSelect();
-                        _e.Use();
-                    }
-                }
-                else if (_e.button == 1)
-                {
-                    var menu = new GenericMenuPopup("Nodes");
-                    var types = TypeUtils.GetSubClassTypes(typeof(FlowNode));
-                    var graphMousePosition = MousePosToGraph(_e.mousePosition);
-                    foreach (var t in types)
-                    {
-                        menu.AddItem(t.Name, () =>
-                        {
-                            currentGraph.AddNode(t, graphMousePosition);
-                            GraphUtils.willSetDirty = true;
-                        });
-                    }
-
-                    menu.Show();
-                    _e.Use();
-                }
-            }
-
-            if (_mulSelect && _e.type == EventType.MouseUp)
-            {
-                var boxRect = RectUtils.GetBoundRect(_mulSelectStartPos, _e.mousePosition);
-                var overlapNoes = currentGraph.allNodes.Where(node => boxRect.Overlaps(node.rect)).ToList();
-                GraphUtils.Select(overlapNoes);
-                _mulSelect = false;
-            }
-
-            if (_mulSelect)
-            {
-                var boxRect = RectUtils.GetBoundRect(_mulSelectStartPos, _e.mousePosition);
-                var color = new Color(0.5f, 0.5f, 1f, 0.3f);
-                EditorUtils.DrawBox(boxRect, color, StyleUtils.normalBG);
-            }
-
             if (GUIUtility.keyboardControl == 0)
             {
                 if (_e.type == EventType.ValidateCommand)
@@ -401,6 +364,64 @@ namespace Nirvana.Editor
                     }
 
                     _e.Use();
+                }
+            }
+            
+            if (GraphUtils.allowClick)
+            {
+                if (_e.type == EventType.ContextClick)
+                {
+                    var menu = new GenericMenuPopup("Nodes");
+                    var types = TypeUtils.GetSubClassTypes(typeof(FlowNode));
+                    var graphMousePosition = MousePosToGraph(_e.mousePosition);
+                    foreach (var t in types)
+                    {
+                        menu.AddItem(t.Name, () =>
+                        {
+                            currentGraph.AddNode(t, graphMousePosition);
+                            GraphUtils.willSetDirty = true;
+                        });
+                    }
+
+                    menu.Show();
+                    _e.Use();
+                }
+            }
+        }
+
+        private static void DrawGraphSelection()
+        {
+            if (GraphUtils.allowClick && _graphRect.Contains(MousePosToGraph(_e.mousePosition)) && _e.type == EventType.MouseDown && _e.button == 0)
+            {
+                if (_e.clickCount == 1)
+                {
+                    _mulSelect = true;
+                    _mulSelectStartPos = _e.mousePosition;
+                    GraphUtils.ClearSelect();
+                    _e.Use();
+                }
+            }
+
+            if (_mulSelect && _e.type == EventType.MouseUp)
+            {
+                var boxRect = RectUtils.GetBoundRect(_mulSelectStartPos, _e.mousePosition);
+                var overlapNoes = currentGraph.allNodes.Where(node => boxRect.Overlaps(node.rect)).ToList();
+                GraphUtils.Select(overlapNoes);
+                _mulSelect = false;
+                _e.Use();
+            }
+
+            if (_mulSelect)
+            {
+                var boxRect = RectUtils.GetBoundRect(_mulSelectStartPos, _e.mousePosition);
+                if (boxRect.width > 5 && boxRect.height > 5)
+                {
+                    var color = new Color(0.5f, 0.5f, 1f, 0.5f);
+                    EditorUtils.DrawBox(boxRect, color, StyleUtils.normalBG);
+                    foreach (var node in currentGraph.allNodes.Where(node => boxRect.Overlaps(node.rect)))
+                    {
+                        EditorUtils.DrawBox(node.rect, color, StyleUtils.windowHeightLine);
+                    }
                 }
             }
         }
