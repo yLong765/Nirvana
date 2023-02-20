@@ -81,11 +81,20 @@ namespace Nirvana
 
         public static void Select<T>(T select)
         {
-            ClearSelect();
-            
             if (select is Node node)
             {
-                AddActiveNode(node);
+                if (activeNodes.Count > 0)
+                {
+                    if (!activeNodes.Contains(node))
+                    {
+                        ClearSelect();
+                        AddActiveNode(node);
+                    }
+                }
+                else
+                {
+                    AddActiveNode(node);
+                }
             }
 
             if (select is List<Node> nodes)

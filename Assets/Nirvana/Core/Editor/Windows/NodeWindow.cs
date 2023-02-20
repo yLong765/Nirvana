@@ -40,10 +40,9 @@ namespace Nirvana.Editor
 
         private static void HandleEvents(Node node, Event e)
         {
-            if (GraphUtils.allowClick && e.type == EventType.MouseDown && e.button == 0)
+            if (GraphUtils.allowClick && e.type == EventType.MouseDown && e.button != 2)
             {
-                Undo.RecordObject(node.graph, "Move Node");
-                Debug.Log("NodeWindow MouseDown");
+                Undo.RegisterCompleteObjectUndo(node.graph, "Move Node");
                 GraphUtils.Select(node);
                 e.Use();
             }
@@ -54,6 +53,15 @@ namespace Nirvana.Editor
                 var menu = new GenericMenu();
                 if (GraphUtils.activeNodes.Count > 1)
                 {
+                    menu.AddItem(new GUIContent("Delete Selected Nodes"), false, () =>
+                    {
+                        foreach (var node in GraphUtils.activeNodes)
+                        {
+                            node.graph.RemoveNode(node);
+                        }
+                        GraphUtils.ClearSelect();
+                    });
+                    menu.ShowAsContext();
                 }
                 else
                 {

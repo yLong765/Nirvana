@@ -231,7 +231,7 @@ namespace Nirvana
                     _variableSettingText.alignment = TextAnchor.MiddleCenter;
                     _variableSettingText.margin = new RectOffset(0, 0, 0, 0);
                     _variableSettingText.border = new RectOffset(0, 0, 0, 0);
-                    _variableSettingText.padding = new RectOffset(-2, 0, 0, 0);
+                    _variableSettingText.padding = new RectOffset(0, 0, -2, 0);
                 }
 
                 return _variableSettingText;
