@@ -102,7 +102,7 @@ namespace Nirvana
                 if (_roundedBox == null)
                 {
                     _roundedBox = new GUIStyle("ShurikenEffectBg");
-                    _roundedBox.margin = new RectOffset(1, 1, 0, 0);
+                    _roundedBox.margin = new RectOffset(1, 1, 0, 1);
                     _roundedBox.padding = new RectOffset(0, 0, 0, 0);
                 }
 

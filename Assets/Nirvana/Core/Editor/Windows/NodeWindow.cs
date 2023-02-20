@@ -43,8 +43,8 @@ namespace Nirvana.Editor
             if (GraphUtils.allowClick && e.type == EventType.MouseDown && e.button == 0)
             {
                 Undo.RecordObject(node.graph, "Move Node");
-
-                // GraphUtils.Select(node);
+                Debug.Log("NodeWindow MouseDown");
+                GraphUtils.Select(node);
                 e.Use();
             }
 

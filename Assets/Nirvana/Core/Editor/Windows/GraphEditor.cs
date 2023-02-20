@@ -119,11 +119,20 @@ namespace Nirvana.Editor
             return window;
         }
 
-        private static Vector2 MousePosToGraph(Vector2 mousePos)
+        private static Vector2 GUIViewToCanvas(Vector2 mousePos)
         {
-            var offset = mousePos - graphOffset;
+            var offset = (mousePos - graphOffset) / graphZoom;
             offset.x -= GRAPH_LEFT;
             offset.y -= GRAPH_TOP;
+            return offset;
+        }
+        
+        private static Vector2 CanvasToGUIView(Vector2 mousePos)
+        {
+            var offset = mousePos;
+            offset.x += GRAPH_LEFT;
+            offset.y += GRAPH_TOP;
+            offset = offset * graphZoom + graphOffset;
             return offset;
         }
 
@@ -373,7 +382,7 @@ namespace Nirvana.Editor
                 {
                     var menu = new GenericMenuPopup("Nodes");
                     var types = TypeUtils.GetSubClassTypes(typeof(FlowNode));
-                    var graphMousePosition = MousePosToGraph(_e.mousePosition);
+                    var graphMousePosition = GUIViewToCanvas(_e.mousePosition);
                     foreach (var t in types)
                     {
                         menu.AddItem(t.Name, () =>
@@ -391,7 +400,7 @@ namespace Nirvana.Editor
 
         private static void DrawGraphSelection()
         {
-            if (GraphUtils.allowClick && _graphRect.Contains(MousePosToGraph(_e.mousePosition)) && _e.type == EventType.MouseDown && _e.button == 0)
+            if (GraphUtils.allowClick && _graphRect.Contains(CanvasToGUIView(_e.mousePosition)) && _e.type == EventType.MouseDown && _e.button == 0)
             {
                 if (_e.clickCount == 1)
                 {
