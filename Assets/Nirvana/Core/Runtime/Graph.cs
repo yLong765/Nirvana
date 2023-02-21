@@ -10,9 +10,14 @@ using UnityEngine;
 namespace Nirvana
 {
     [Serializable]
-    [CreateAssetMenu(menuName = "Nirvana Tools/Graph Canvas")]
-    public partial class Graph : ScriptableObject, ISerializationCallbackReceiver, ISerialize
+    public abstract partial class Graph : ScriptableObject, ISerializationCallbackReceiver, ISerialize
     {
+        #region abstract
+
+        public abstract Type baseNodeType { get; }
+
+        #endregion
+        
         private GraphSource _graphSource = new GraphSource();
         [JsonIgnore] public List<Node> allNodes => _graphSource.nodes;
         

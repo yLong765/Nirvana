@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Nirvana.Editor
 {
-    [CustomEditor(typeof(Graph))]
+    [CustomEditor(typeof(Graph), true)]
     public class GraphInspector : UnityEditor.Editor
     {
         private Graph _asset;

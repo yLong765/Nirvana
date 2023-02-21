@@ -380,8 +380,8 @@ namespace Nirvana.Editor
             {
                 if (_e.type == EventType.ContextClick)
                 {
-                    var menu = new GenericMenuPopup("Nodes");
-                    var types = TypeUtils.GetSubClassTypes(typeof(FlowNode));
+                    var menu = new GenericMenuPopup(currentGraph.baseNodeType.Name);
+                    var types = TypeUtils.GetSubClassTypes(currentGraph.baseNodeType);
                     var graphMousePosition = GUIViewToCanvas(_e.mousePosition);
                     foreach (var t in types)
                     {

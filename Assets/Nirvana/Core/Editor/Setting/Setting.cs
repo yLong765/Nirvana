@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    [CreateAssetMenu(menuName = "Nirvana Tools/Nirvana Setting")]
+    [CreateAssetMenu(menuName = "Nirvana Tools/Nirvana Setting", order = 80)]
     public class Setting : ScriptableObject
     {
         private static Setting _instance;
