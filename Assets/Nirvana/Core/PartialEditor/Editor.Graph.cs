@@ -9,7 +9,7 @@ namespace Nirvana
     {
         [SerializeField] private string _serializedData;
         [SerializeField] private Vector2 _offset;
-        [SerializeField] private float _zoom;
+        [SerializeField] private float _zoom = 1;
 
         public string serializedData
         {
