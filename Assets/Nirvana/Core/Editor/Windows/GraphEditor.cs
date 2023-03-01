@@ -380,19 +380,13 @@ namespace Nirvana.Editor
             {
                 if (_e.type == EventType.ContextClick)
                 {
-                    var menu = new GenericMenuPopup(currentGraph.baseNodeType.Name);
-                    var types = TypeUtils.GetSubClassTypes(currentGraph.baseNodeType);
                     var graphMousePosition = GUIViewToCanvas(_e.mousePosition);
-                    foreach (var t in types)
+                    EditorUtils.ShowChildTypeGenericMenu(currentGraph.baseNodeType, type =>
                     {
-                        menu.AddItem(t.Name, () =>
-                        {
-                            currentGraph.AddNode(t, graphMousePosition);
-                            GraphUtils.willSetDirty = true;
-                        });
-                    }
-
-                    menu.Show();
+                        currentGraph.AddNode(type, graphMousePosition);
+                        GraphUtils.willSetDirty = true;
+                    });
+                    
                     _e.Use();
                 }
             }

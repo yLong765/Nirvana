@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Nirvana.Editor;
 using ParadoxNotion;
-using ParadoxNotion.Design;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -183,9 +183,9 @@ namespace Nirvana
             }
 
             //create instance for value types
-            if (value == null && t.RTIsValueType())
+            if (value == null && t.IsValueType)
             {
-                value = System.Activator.CreateInstance(t);
+                value = Activator.CreateInstance(t);
             }
 
             //create new instance with button for non value types
@@ -330,6 +330,37 @@ namespace Nirvana
             }
 
             return value;
+        }
+
+        public static void ShowChildTypeGenericMenu(string title, Type baseType, Action<Type> clickAction)
+        {
+            var menu = new GenericMenuPopup(title);
+            var types = TypeUtils.GetSubClassTypes(baseType);
+            foreach (var t in types)
+            {
+                menu.AddItem(t.Name, () =>
+                {
+                    clickAction(t);
+                });
+            }
+
+            menu.Show();
+        }
+
+        public static void ShowChildTypeGenericMenu(Type baseType, Action<Type> clickAction)
+        {
+            ShowChildTypeGenericMenu(baseType.Name, baseType, clickAction);
+        }
+
+        public static void ShowSameInPortGenericMenu(Type baseType, Action<Type> clickAction)
+        {
+            var menu = new GenericMenuPopup(baseType.Name);
+            var types = TypeUtils.GetSubClassTypes(baseType);
+            foreach (var type in types)
+            {
+                
+            }
+            
         }
     }
 }

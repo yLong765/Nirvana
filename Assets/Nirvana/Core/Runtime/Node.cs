@@ -128,13 +128,13 @@ namespace Nirvana
 
         public void Create()
         {
-            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart").DeclaringType == typeof(Node));
+            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart")?.DeclaringType == typeof(Node));
             OnCreate();
         }
         
         public void Refresh()
         {
-            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart").DeclaringType == typeof(Node));
+            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart")?.DeclaringType == typeof(Node));
             OnRefresh();
         }
         

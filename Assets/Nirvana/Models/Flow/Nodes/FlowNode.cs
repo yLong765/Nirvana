@@ -210,6 +210,10 @@ namespace Nirvana
                         {
                             graph.AddLink(_clickLink.sourcePort, _clickLink.targetPort);
                         }
+                        else
+                        {
+                            //EditorUtils.ShowChildTypeGenericMenu();
+                        }
 
                         _clickLink = null;
                         e.Use();
