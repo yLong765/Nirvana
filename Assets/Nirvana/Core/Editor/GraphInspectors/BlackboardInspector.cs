@@ -43,20 +43,23 @@ namespace Nirvana.Editor
                 
                 menu.Show();
             }
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(16);
-            GUI.color = ColorUtils.orange1;
-            GUILayout.Label("Name", GUILayout.MaxWidth(75), GUILayout.ExpandWidth(true), GUILayout.MinHeight(18));
-            GUILayout.Label("Value", _options);
-            GUI.color = Color.white;
-            GUILayout.EndHorizontal();
-
+            
             if (_tempVariablesList == null || !_tempVariablesList.SequenceEqual(bbSource.variables.Values))
             {
                 _tempVariablesList = bbSource.variables.Values.ToList();
             }
 
+            if (_tempVariablesList != null && _tempVariablesList.Count > 0)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(16);
+                GUI.color = ColorUtils.orange1;
+                GUILayout.Label("Name", GUILayout.MaxWidth(75), GUILayout.ExpandWidth(true), GUILayout.MinHeight(18));
+                GUILayout.Label("Value", _options);
+                GUI.color = Color.white;
+                GUILayout.EndHorizontal();
+            }
+            
             var options = new EditorUtils.ReorderableListOptions {context = graph, customItemMenu = i => GetCustomMenuItem(_tempVariablesList[i], i)};
             EditorUtils.ReorderableList(_tempVariablesList, options, i =>
             {

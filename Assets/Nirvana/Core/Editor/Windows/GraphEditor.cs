@@ -503,25 +503,39 @@ namespace Nirvana.Editor
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Blackboard", EditorStyles.toolbarButton, GUILayout.MaxWidth(80)))
             {
-                GraphUtils.showBlackboardPanel = !GraphUtils.showBlackboardPanel;
+                Prefs.showBlackboardPanel = !Prefs.showBlackboardPanel;
             }
 
             GUILayout.EndHorizontal();
         }
 
         private static float _nodeInspectorHeight = 200f;
+        private static bool _isResizingNodeInspectorPanel = false;
 
         private static Rect DrawInspector()
         {
             var rect = default(Rect);
             if (GraphUtils.activeNodes.Count == 0 && GraphUtils.activeLink == null) return rect;
 
-            var nodeInspectorWidth = 300f;
+            var nodeInspectorWidth = Prefs.nodeInspectorPanelWidth;
             rect.x = _graphRect.xMin;
             rect.y = _graphRect.y;
             rect.width = nodeInspectorWidth;
             rect.height = _nodeInspectorHeight;
             var areaRect = Rect.MinMaxRect(2, 2, rect.width - 2, rect.height);
+            
+            // 拖拽面版大小
+            var resizeRect = Rect.MinMaxRect(rect.xMax - 4, rect.yMin + 2, rect.xMax, rect.yMax);
+            EditorGUIUtility.AddCursorRect(resizeRect, MouseCursor.ResizeHorizontal);
+            if (_e.type == EventType.MouseDown && resizeRect.Contains(_e.mousePosition))
+            {
+                _isResizingNodeInspectorPanel = true;
+                _e.Use();
+            }
+
+            if (_isResizingNodeInspectorPanel && _e.type == EventType.Layout) Prefs.nodeInspectorPanelWidth += _e.delta.x;
+            if (_e.rawType == EventType.MouseUp) _isResizingNodeInspectorPanel = false;
+            
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
 
@@ -542,19 +556,33 @@ namespace Nirvana.Editor
         }
 
         private static float _blackboardHeight = 50f;
+        private static bool _isResizingBlackboardPanel = false;
 
         private static Rect DrawBlackboard()
         {
             var rect = default(Rect);
             if (currentGraph.bbSource == null) return rect;
-            if (!GraphUtils.showBlackboardPanel) return rect;
+            if (!Prefs.showBlackboardPanel) return rect;
 
-            var blackboardWidth = 300f;
+            var blackboardWidth = Prefs.blackboardWidth;
             rect.x = _graphRect.xMax - blackboardWidth;
             rect.y = _graphRect.y;
             rect.width = blackboardWidth;
             rect.height = _blackboardHeight;
             var areaRect = Rect.MinMaxRect(0, 2, rect.width - 2, rect.height);
+            
+            // 拖拽面版大小
+            var resizeRect = Rect.MinMaxRect(rect.xMin, rect.yMin + 2, rect.xMin + 4, rect.yMax);
+            EditorGUIUtility.AddCursorRect(resizeRect, MouseCursor.ResizeHorizontal);
+            if (_e.type == EventType.MouseDown && resizeRect.Contains(_e.mousePosition))
+            {
+                _isResizingBlackboardPanel = true;
+                _e.Use();
+            }
+
+            if (_isResizingBlackboardPanel && _e.type == EventType.Layout) Prefs.blackboardWidth -= _e.delta.x;
+            if (_e.rawType == EventType.MouseUp) _isResizingBlackboardPanel = false;
+            
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
 

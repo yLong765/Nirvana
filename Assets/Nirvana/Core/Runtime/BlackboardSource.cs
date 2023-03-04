@@ -16,6 +16,8 @@ namespace Nirvana
         
         public Variable AddVariable(Type type, string varName)
         {
+            while (variables.ContainsKey(varName)) varName += ".";
+            
             var variableType = typeof(Variable<>).MakeGenericType(type);
             var newVariable = (Variable) Activator.CreateInstance(variableType);
             newVariable.name = varName;

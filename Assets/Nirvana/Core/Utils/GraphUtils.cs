@@ -10,7 +10,6 @@ namespace Nirvana
         public static bool willSetDirty = false;
         public static bool willRepaint = false;
         public static bool allowClick = true;
-        public static bool showBlackboardPanel = true;
 
         //------Node相关------
         
