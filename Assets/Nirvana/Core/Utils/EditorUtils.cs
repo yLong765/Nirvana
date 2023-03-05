@@ -83,7 +83,7 @@ namespace Nirvana
                 {
                     GUILayout.Space(18);
                     var buttonRect = Rect.MinMaxRect(lastRect.xMax + 1, lastRect.yMin - 1, lastRect.xMax + 19, lastRect.yMax);
-                    if (GUI.Button(buttonRect, "⊙", StyleUtils.variableSettingText))
+                    if (GUI.Button(buttonRect, new GUIContent(StyleUtils.settingIconTexture), StyleUtils.variableSettingIcon))
                     {
                         Undo.RecordObject(options.context, "Menu Item");
                         options.customItemMenu(i).ShowAsContext();

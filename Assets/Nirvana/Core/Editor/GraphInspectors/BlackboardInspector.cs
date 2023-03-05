@@ -52,9 +52,9 @@ namespace Nirvana.Editor
             if (_tempVariablesList != null && _tempVariablesList.Count > 0)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Space(16);
-                GUI.color = ColorUtils.orange1;
-                GUILayout.Label("Name", GUILayout.MaxWidth(75), GUILayout.ExpandWidth(true), GUILayout.MinHeight(18));
+                GUILayout.Space(14);
+                GUI.color = ColorUtils.gold;
+                GUILayout.Label("Name", GUILayout.MaxWidth(80), GUILayout.ExpandWidth(true), GUILayout.MinHeight(18));
                 GUILayout.Label("Value", _options);
                 GUI.color = Color.white;
                 GUILayout.EndHorizontal();
@@ -70,13 +70,13 @@ namespace Nirvana.Editor
             {
                 try
                 {
-                    Undo.RecordObject(_context, "Drag Sort Variable");
+                    Undo.RecordObject(_context, "change or drag sort Variable");
                     bbSource.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);
                     EditorUtility.SetDirty(_context);
                 }
                 catch
                 {
-                    Debug.LogError("To Dictionary Error!");
+                    LogUtils.Error("Blackboard has duplicate names!");
                 }
             }
 
@@ -87,16 +87,29 @@ namespace Nirvana.Editor
         }
         
         private static void DrawVariableItem(Variable variable, int id)
-        { 
+        {
+            if (_tempVariablesList.Where(v => v != variable).Select(v => v.name).Contains(variable.name))
+            {
+                GUI.color = Color.red;
+            }
+            
             GUILayout.BeginHorizontal();
             variable.name = GUILayout.TextField(variable.name, _options);
             variable.value = EditorUtils.TypeField(GUIContent.none, variable.value, variable.type, _options);
             GUILayout.EndHorizontal();
+            
+            GUI.color = Color.white;
         }
 
         private static GenericMenu GetCustomMenuItem(Variable variable, int id)
         {
             var menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Copy New Variable"), false, () =>
+            {
+                Undo.RecordObject(_context, "Copy New Variable");
+                _bbSource.AddVariable(variable.type, variable.name);
+                EditorUtility.SetDirty(_context);
+            });
             menu.AddItem(new GUIContent("Delete Variable"), false, () =>
             {
                 Undo.RecordObject(_context, "Delete Variable");

@@ -113,7 +113,6 @@ namespace Nirvana.Editor
         {
             var window = GetWindow<GraphEditor>();
             window.InitData(data, bbSource);
-            window.titleContent = new GUIContent("Graph Canvas");
             window.Focus();
             window.Show();
             return window;
@@ -139,6 +138,8 @@ namespace Nirvana.Editor
         private void OnEnable()
         {
             current = this;
+            titleContent = new GUIContent($"{rootGraph.GetType().Name} Canvas", StyleUtils.flowIconTexture);
+            
             Undo.undoRedoPerformed -= UndoRedoPerformed;
             Undo.undoRedoPerformed += UndoRedoPerformed;
         }
@@ -211,10 +212,7 @@ namespace Nirvana.Editor
 
             NodesWindowPostEvent();
             DrawToolbar(currentGraph);
-            var inspectorRect = DrawInspector();
-            var blackboardRect = DrawBlackboard();
-            GraphUtils.allowClick = !inspectorRect.Contains(_realMousePosition) && !blackboardRect.Contains(_realMousePosition);
-
+            DrawPanels();
             DrawLogger();
 
             if (GraphUtils.willSetDirty)
@@ -238,10 +236,6 @@ namespace Nirvana.Editor
         {
             if (rootGraph == null)
             {
-                // var graphCenter = _graphRect.center;
-                // var size = StyleUtils.symbolText.CalcSize("Please Select One Graph Editor Data!");
-                // var popup = new Rect(graphCenter.x - size.x / 2f, graphCenter.y - size.y / 2f, size.x, size.y);
-                // EditorGUI.LabelField(popup, "Please Select One Graph Editor Data!", StyleUtils.symbolText);
                 ShowNotification(new GUIContent("Please Select One Graph Editor Data!"));
                 return false;
             }
@@ -498,15 +492,30 @@ namespace Nirvana.Editor
                 menu.ShowAsContext();
             }
 
+            GUILayout.Space(6);
+            
+            if (GUILayout.Button("Select Graph", EditorStyles.toolbarButton))
+            {
+                Selection.activeObject = graph;
+            }
+
             GUILayout.FlexibleSpace();
             GUILayout.Label(graph.title, StyleUtils.graphTitle);
-            GUILayout.FlexibleSpace();
+            //GUILayout.FlexibleSpace();
             if (GUILayout.Button("Blackboard", EditorStyles.toolbarButton, GUILayout.MaxWidth(80)))
             {
                 Prefs.showBlackboardPanel = !Prefs.showBlackboardPanel;
             }
 
             GUILayout.EndHorizontal();
+        }
+
+        private static void DrawPanels()
+        {
+            var inspectorRect = DrawInspector();
+            var blackboardRect = DrawBlackboard();
+            GraphUtils.allowClick = !inspectorRect.Contains(_realMousePosition) && !blackboardRect.Contains(_realMousePosition);
+
         }
 
         private static float _nodeInspectorHeight = 200f;

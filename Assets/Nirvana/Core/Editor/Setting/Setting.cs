@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,6 @@ namespace Nirvana
             }
         }
 
-        public bool debugMode = false;
+        [SerializeField] public bool debugMode = false;
     }
 }

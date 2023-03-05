@@ -53,18 +53,21 @@ namespace Nirvana
         {
             CheckAllLog();
             _logs.Add(new Log(value, LogType.Error, duration));
+            Debug.LogError(value);
         }
 
         public static void Warning(string value, float duration = 5f)
         {
             CheckAllLog();
             _logs.Add(new Log(value, LogType.Warning, duration));
+            Debug.LogWarning(value);
         }
 
         public static void Normal(string value, float duration = 5f)
         {
             CheckAllLog();
             _logs.Add(new Log(value, LogType.Normal, duration));
+            Debug.Log(value);
         }
     }
 }

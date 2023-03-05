@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -30,19 +31,9 @@ namespace Nirvana
 
         #region Texture
 
-        private static Dictionary<string, Texture2D> _cacheTexture = new Dictionary<string, Texture2D>();
-        
-        public static Texture2D LoadTexture2D(string path)
-        {
-            if (_cacheTexture.ContainsKey(path))
-            {
-                return _cacheTexture[path];
-            }
-
-            var texture = Resources.Load<Texture2D>(path);
-            _cacheTexture.Add(path, texture);
-            return texture;
-        }
+        public static Texture2D bezierTexture => IconResources.Instance.icon.bezierTexture;
+        public static Texture flowIconTexture => IconResources.Instance.icon.flowIconTexture;
+        public static Texture settingIconTexture => IconResources.Instance.icon.settingIconTexture;
 
         #endregion
 
@@ -219,22 +210,19 @@ namespace Nirvana
             }
         }
         
-        private static GUIStyle _variableSettingText;
-        public static GUIStyle variableSettingText
+        private static GUIStyle _variableSettingIcon;
+        public static GUIStyle variableSettingIcon
         {
             get
             {
-                if (_variableSettingText == null)
+                if (_variableSettingIcon == null)
                 {
-                    _variableSettingText = new GUIStyle(EditorStyles.label);
-                    _variableSettingText.fontSize = 16;
-                    _variableSettingText.alignment = TextAnchor.MiddleCenter;
-                    _variableSettingText.margin = new RectOffset(0, 0, 0, 0);
-                    _variableSettingText.border = new RectOffset(0, 0, 0, 0);
-                    _variableSettingText.padding = new RectOffset(0, 0, -2, 0);
+                    _variableSettingIcon = new GUIStyle();
+                    _variableSettingIcon.alignment = TextAnchor.MiddleCenter;
+                    _variableSettingIcon.padding = new RectOffset(1, 1, 1, 1);
                 }
 
-                return _variableSettingText;
+                return _variableSettingIcon;
             }
         }
 

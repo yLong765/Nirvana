@@ -226,9 +226,7 @@ namespace Nirvana
             if (_clickLink != null)
             {
                 GraphUtils.willRepaint = true;
-                var texture = StyleUtils.LoadTexture2D("Textures/Bezier");
-                Handles.DrawBezier(_clickLink.sourcePort.rect.center, e.mousePosition, _clickLink.sourcePort.rect.center, e.mousePosition,
-                    ColorUtils.orange1, texture, 3);
+                Handles.DrawBezier(_clickLink.sourcePort.rect.center, e.mousePosition, _clickLink.sourcePort.rect.center, e.mousePosition, ColorUtils.orange1, StyleUtils.bezierTexture, 3);
             }
 
             // ------绘制已经链接的线------
@@ -242,9 +240,7 @@ namespace Nirvana
                     if (sourcePort != null && targetPort != null)
                     {
                         var height = GraphUtils.activeLink == link ? 5 : 3;
-                        var texture = StyleUtils.LoadTexture2D("Textures/Bezier");
-                        Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center,
-                            ColorUtils.orange1, texture, height);
+                        Handles.DrawBezier(sourcePort.rect.center, targetPort.rect.center, sourcePort.rect.center, targetPort.rect.center, ColorUtils.orange1, StyleUtils.bezierTexture, height);
                         if (e.type == EventType.MouseDown && e.button == 0)
                         {
                             if (CurveUtils.IsPosInCurve(e.mousePosition, sourcePort.rect.center, targetPort.rect.center, 5))
