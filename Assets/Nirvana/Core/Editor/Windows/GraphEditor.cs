@@ -13,14 +13,14 @@ namespace Nirvana.Editor
     {
         private static Event _e;
         private static Vector2 _realMousePosition;
-        private static Rect _graphRect;
+        private static Rect _canvasRect;
 
         private static float _lastUpdateTime;
         private static Vector2? _smoothOffset;
         private static Vector2 _offsetVelocity = Vector2.one;
         private static float? _smoothZoom;
         private static float _zoomVelocity = 1;
-        public static Rect graphtRect => _graphRect;
+        public static Rect graphtRect => _canvasRect;
 
         private const float GRAPH_TOP = 21;
         private const float GRAPH_LEFT = 2;
@@ -102,6 +102,7 @@ namespace Nirvana.Editor
             var target = EditorUtility.InstanceIDToObject(instanceID) as Graph;
             if (target != null)
             {
+                target.title = target.name;
                 OpenWindow(target);
                 return true;
             }
@@ -113,6 +114,11 @@ namespace Nirvana.Editor
         {
             var window = GetWindow<GraphEditor>();
             window.InitData(data, bbSource);
+            if (data != null)
+            {
+                window.titleContent = new GUIContent($"{data.GetType().Name} Canvas", StyleUtils.flowIconTexture);
+            }
+
             window.Focus();
             window.Show();
             return window;
@@ -138,7 +144,6 @@ namespace Nirvana.Editor
         private void OnEnable()
         {
             current = this;
-            titleContent = new GUIContent($"{rootGraph.GetType().Name} Canvas", StyleUtils.flowIconTexture);
             
             Undo.undoRedoPerformed -= UndoRedoPerformed;
             Undo.undoRedoPerformed += UndoRedoPerformed;
@@ -174,7 +179,7 @@ namespace Nirvana.Editor
 
         private void OnGUI()
         {
-            _graphRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
+            _canvasRect = Rect.MinMaxRect(GRAPH_LEFT, GRAPH_TOP, position.width - GRAPH_RIGHT, position.height - GRAPH_BOTTOM);
 
             if (!CheckGraph()) return;
 
@@ -186,28 +191,30 @@ namespace Nirvana.Editor
                 GraphUtils.willRepaint = true;
             }
 
-            EditorUtils.DrawBox(_graphRect, ColorUtils.gray13, StyleUtils.normalBG);
-            DrawGrid(_graphRect, graphOffset);
+            EditorUtils.DrawBox(_canvasRect, ColorUtils.gray13, StyleUtils.normalBG);
+            DrawGrid(_canvasRect, graphOffset);
             NodesWindowPrevEvent();
 
-            var originalGraphRect = _graphRect;
+            var originalGraphRect = _canvasRect;
             var originalMatrix = default(Matrix4x4);
             if (graphZoom != 1)
             {
-                _graphRect = BeginZoomArea(_graphRect, graphZoom, out originalMatrix);
+                _canvasRect = BeginZoomArea(_canvasRect, graphZoom, out originalMatrix);
             }
 
-            GUI.BeginClip(_graphRect, graphOffset / graphZoom, default, false);
-            BeginWindows();
-            DrawNodesGUI(currentGraph);
-            EndWindows();
-            DrawGraphSelection();
+            GUI.BeginClip(_canvasRect, graphOffset / graphZoom, default, false);
+            {
+                BeginWindows();
+                DrawNodesGUI(currentGraph);
+                EndWindows();
+                DrawGraphSelection();
+            }
             GUI.EndClip();
 
             if (graphZoom != 1 && originalMatrix != default)
             {
                 EndZoomArea(originalMatrix);
-                _graphRect = originalGraphRect;
+                _canvasRect = originalGraphRect;
             }
 
             NodesWindowPostEvent();
@@ -306,7 +313,7 @@ namespace Nirvana.Editor
         {
             if (GraphUtils.allowClick)
             {
-                if (_graphRect.Contains(_e.mousePosition) && _e.type == EventType.MouseDrag && _e.button == 2)
+                if (_canvasRect.Contains(_e.mousePosition) && _e.type == EventType.MouseDrag && _e.button == 2)
                 {
                     graphOffset += _e.delta;
                     _smoothOffset = null;
@@ -388,7 +395,7 @@ namespace Nirvana.Editor
 
         private static void DrawGraphSelection()
         {
-            if (GraphUtils.allowClick && _graphRect.Contains(CanvasToGUIView(_e.mousePosition)) && _e.type == EventType.MouseDown && _e.button == 0)
+            if (GraphUtils.allowClick && _canvasRect.Contains(CanvasToGUIView(_e.mousePosition)) && _e.type == EventType.MouseDown && _e.button == 0)
             {
                 if (_e.clickCount == 1)
                 {
@@ -456,7 +463,7 @@ namespace Nirvana.Editor
         {
             foreach (var node in graph.allNodes)
             {
-                NodeWindow.DrawNodeGUI(node);
+                NodeWindow.DrawNodeGUI(node, _e);
             }
         }
 
@@ -527,8 +534,8 @@ namespace Nirvana.Editor
             if (GraphUtils.activeNodes.Count == 0 && GraphUtils.activeLink == null) return rect;
 
             var nodeInspectorWidth = Prefs.nodeInspectorPanelWidth;
-            rect.x = _graphRect.xMin;
-            rect.y = _graphRect.y;
+            rect.x = _canvasRect.xMin;
+            rect.y = _canvasRect.y;
             rect.width = nodeInspectorWidth;
             rect.height = _nodeInspectorHeight;
             var areaRect = Rect.MinMaxRect(2, 2, rect.width - 2, rect.height);
@@ -574,8 +581,8 @@ namespace Nirvana.Editor
             if (!Prefs.showBlackboardPanel) return rect;
 
             var blackboardWidth = Prefs.blackboardWidth;
-            rect.x = _graphRect.xMax - blackboardWidth;
-            rect.y = _graphRect.y;
+            rect.x = _canvasRect.xMax - blackboardWidth;
+            rect.y = _canvasRect.y;
             rect.width = blackboardWidth;
             rect.height = _blackboardHeight;
             var areaRect = Rect.MinMaxRect(0, 2, rect.width - 2, rect.height);
@@ -615,8 +622,8 @@ namespace Nirvana.Editor
         {
             var rect = default(Rect);
             var loggerWidth = 250f;
-            rect.x = _graphRect.xMin;
-            rect.y = _graphRect.yMax - _loggerHeight;
+            rect.x = _canvasRect.xMin;
+            rect.y = _canvasRect.yMax - _loggerHeight;
             rect.width = loggerWidth;
             rect.height = _loggerHeight;
             var areaRect = Rect.MinMaxRect(2, 0, rect.width, rect.height);

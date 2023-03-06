@@ -13,6 +13,7 @@ namespace Nirvana
         
         private class PreferenceData
         {
+            public bool showDebugMode = false;
             public bool showBlackboardPanel = true;
             public float blackboardWidth = 300f;
             public float nodeInspectorWidth = 300f;
@@ -37,6 +38,16 @@ namespace Nirvana
             _data ??= new PreferenceData();
         }
 
+        public static bool showDebugModel
+        {
+            get => data.showDebugMode;
+            set
+            {
+                data.showDebugMode = value;
+                Save();
+            }
+        }
+        
         public static bool showBlackboardPanel
         {
             get => data.showBlackboardPanel;

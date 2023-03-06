@@ -20,10 +20,10 @@ namespace Nirvana.Editor
         {
             if (GUILayout.Button("Debug"))
             {
-                Setting.Instance.debugMode = !Setting.Instance.debugMode;
+                Prefs.showDebugModel = !Prefs.showDebugModel;
             }
 
-            if (Setting.Instance.debugMode)
+            if (Prefs.showDebugModel)
             {
                 EditorGUI.BeginDisabledGroup(true);
                 EditorGUILayout.Vector2Field("拖拽原点偏移量", _asset.offset);

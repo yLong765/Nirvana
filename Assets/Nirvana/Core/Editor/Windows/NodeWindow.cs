@@ -7,7 +7,7 @@ namespace Nirvana.Editor
 {
     public class NodeWindow
     {
-        public static void DrawNodeGUI(Node node)
+        public static void DrawNodeGUI(Node node, Event e)
         {
             node.rect = EditorUtils.Window(node.ID, node.rect, id => { DrawNodeWindowGUI(id, node); }, ColorUtils.gray21, StyleUtils.normalBG,
                 GUILayout.MaxWidth(Node.MIN_SIZE.x), GUILayout.MaxHeight(Node.MIN_SIZE.y));
