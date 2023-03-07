@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Nirvana
 {
+    /// <summary>
+    /// 标题特性
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field)]
     public class TitleAttribute : Attribute
     {
@@ -16,6 +19,9 @@ namespace Nirvana
         }
     }
 
+    /// <summary>
+    /// 端口特性
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
     public class PortAttribute : Attribute
     {
@@ -43,6 +49,9 @@ namespace Nirvana
         }
     }
 
+    /// <summary>
+    /// NodeInspector忽略属性
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
     public class IgnoreInNodeInspectorAttribute : Attribute
     {
