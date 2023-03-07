@@ -12,12 +12,6 @@ namespace Nirvana
     {
         protected bool isOverwriteOnGraphStartMethod = false;
         
-        public static Vector2 MIN_SIZE = new(80, 38);
-        
-        private string _title;
-        private string _tag;
-        private Vector2 _position;
-        private Vector2 _size = MIN_SIZE;
         private Graph _graph;
 
         private List<Link> _inLinks = new List<Link>();
@@ -26,14 +20,35 @@ namespace Nirvana
         private Dictionary<string, Port> _inPorts = new Dictionary<string, Port>();
         private Dictionary<string, Port> _outPorts = new Dictionary<string, Port>();
         
+        /// <summary>
+        /// 所有的入Link
+        /// </summary>
         public List<Link> inLinks => _inLinks;
+        /// <summary>
+        /// 所有的出Link
+        /// </summary>
         public List<Link> outLinks => _outLinks;
 
+        /// <summary>
+        /// 所有的入端口字典
+        /// </summary>
         [JsonIgnore] public Dictionary<string, Port> inPorts => _inPorts;
+        /// <summary>
+        /// 所有的出端口字典
+        /// </summary>
         [JsonIgnore] public Dictionary<string, Port> outPorts => _outPorts;
+        /// <summary>
+        /// 所有的入端口List
+        /// </summary>
         [JsonIgnore] public List<Port> inPortList => _inPorts.Values.ToList();
+        /// <summary>
+        /// 所有的出端口List
+        /// </summary>
         [JsonIgnore] public List<Port> outPortList => _outPorts.Values.ToList();
 
+        /// <summary>
+        /// 所有的端口
+        /// </summary>
         [JsonIgnore]
         public List<Port> allPorts
         {
@@ -46,98 +61,56 @@ namespace Nirvana
             }
         }
 
-        public string title
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_title))
-                {
-                    
-                    if (GetType().TryGetAttribute<TitleAttribute>(out var titleAttribute))
-                    {
-                        _title = titleAttribute.title;
-                    }
-                    else
-                    {
-                        _title = GetType().Name;
-                        if (_title.EndsWith("Node"))
-                        {
-                            _title = _title[.._title.LastIndexOf("Node", StringComparison.Ordinal)];
-                        }
-
-                        if (isOverwriteOnGraphStartMethod)
-                        {
-                            _title = $"➦ {_title}";
-                        }
-                    }
-                }
-
-                return _title;
-            }
-        }
-
-        public string tag
-        {
-            get => _tag;
-            set => _tag = value;
-        }
-
+        /// <summary>
+        /// 关联的Graph
+        /// </summary>
         [JsonIgnore] public Graph graph
         {
             get => _graph;
             set => _graph = value;
         }
 
-        [JsonIgnore] public Vector2 position
-        {
-            get => _position;
-            set => _position = value;
-        }
-
-        public Rect rect
-        {
-            get => new(_position.x, _position.y, _size.x, _size.y);
-            set
-            {
-                _position.x = value.x;
-                _position.y = value.y;
-                _size.x = Mathf.Max(value.width, MIN_SIZE.x);
-                _size.y = Mathf.Max(value.height, MIN_SIZE.y);
-            }
-        }
-        
+        /// <summary>
+        /// 通过端口ID获取入端口
+        /// </summary>
         public Port GetInPort(string ID)
         {
             return _inPorts.ContainsKey(ID) ? _inPorts[ID] : null;
         }
         
+        /// <summary>
+        /// 通过端口ID获取出端口
+        /// </summary>
         public Port GetOutPort(string ID)
         {
             return _outPorts.ContainsKey(ID) ? _outPorts[ID] : null;
         }
 
+        /// <summary>
+        /// 通过端口获取入Link
+        /// </summary>
         public Link GetInLink(Port port)
         {
             return inLinks.FirstOrDefault(link => link.targetPortId == port.ID);
         }
         
+        /// <summary>
+        /// 通过端口获取出Link
+        /// </summary>
         public Link GetOutLink(Port port)
         {
             return outLinks.FirstOrDefault(link => link.sourcePortId == port.ID);
         }
 
+        /// <summary>
+        /// Node创建时调用
+        /// </summary>
         public void Create()
         {
             isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart")?.DeclaringType == typeof(Node));
             OnCreate();
         }
-        
-        public void Refresh()
-        {
-            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart")?.DeclaringType == typeof(Node));
-            OnRefresh();
-        }
-        
+
         #region Virtual
 
         protected virtual void OnCreate() { }
@@ -173,6 +146,9 @@ namespace Nirvana
         
         #endregion
 
+        /// <summary>
+        /// 创建Node
+        /// </summary>
         public static Node Create(Graph graph, Type type, Vector2 pos)
         {
             var newNode = (Node) Activator.CreateInstance(type);
@@ -182,6 +158,9 @@ namespace Nirvana
             return newNode;
         }
 
+        /// <summary>
+        /// 是否允许新Link创建
+        /// </summary>
         public static bool IsNewLinkAllowed(Port sourcePort, Port targetPort)
         {
             if (sourcePort.linkCount == sourcePort.maxLinkCount)

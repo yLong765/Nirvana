@@ -9,6 +9,9 @@ public static class RectUtils
         return new Rect(rect.x, rect.y, value, rect.height);
     }
 
+    /// <summary>
+    /// 根据两个点构建Rect
+    /// </summary>
     public static Rect GetBoundRect(Vector2 p1, Vector2 p2)
     {
         var minX = Mathf.Min(p1.x, p2.x);

@@ -35,6 +35,9 @@ namespace Nirvana.Editor
         private Graph _rootGraph;
         private int _rootGraphID;
 
+        /// <summary>
+        /// 根Graph
+        /// </summary>
         public Graph rootGraph
         {
             get
@@ -50,6 +53,9 @@ namespace Nirvana.Editor
             }
         }
 
+        /// <summary>
+        /// 偏移值
+        /// </summary>
         private static Vector2 graphOffset
         {
             get => currentGraph.offset;
@@ -69,6 +75,9 @@ namespace Nirvana.Editor
             }
         }
 
+        /// <summary>
+        /// 缩放值
+        /// </summary>
         private static float graphZoom
         {
             get => currentGraph != null ? Mathf.Clamp(currentGraph.zoom, ZOOM_MIN, ZOOM_MAX) : ZOOM_MAX;
@@ -81,13 +90,23 @@ namespace Nirvana.Editor
             }
         }
 
-        //window width. Handles retina
+        /// <summary>
+        /// 窗口宽度
+        /// </summary>
         private static float screenWidth => Screen.width / EditorGUIUtility.pixelsPerPoint;
 
-        //window height. Handles retina
+        /// <summary>
+        /// 窗口高度
+        /// </summary>
         private static float screenHeight => Screen.height / EditorGUIUtility.pixelsPerPoint;
 
+        /// <summary>
+        /// 当前Graph的引用
+        /// </summary>
         public static Graph currentGraph { get; private set; }
+        /// <summary>
+        /// 当前GraphEditor的引用
+        /// </summary>
         public static GraphEditor current { get; private set; }
 
         private void InitData(Graph graph, BlackboardSource bbSource)
@@ -110,6 +129,9 @@ namespace Nirvana.Editor
             return false;
         }
 
+        /// <summary>
+        /// 打开Canvas窗口
+        /// </summary>
         public static GraphEditor OpenWindow(Graph data = null, BlackboardSource bbSource = null)
         {
             var window = GetWindow<GraphEditor>();
@@ -144,7 +166,6 @@ namespace Nirvana.Editor
         private void OnEnable()
         {
             current = this;
-            
             Undo.undoRedoPerformed -= UndoRedoPerformed;
             Undo.undoRedoPerformed += UndoRedoPerformed;
         }
@@ -239,6 +260,9 @@ namespace Nirvana.Editor
             }
         }
 
+        /// <summary>
+        /// 检查Graph是否更替
+        /// </summary>
         private bool CheckGraph()
         {
             if (rootGraph == null)
@@ -255,6 +279,9 @@ namespace Nirvana.Editor
             return true;
         }
 
+        /// <summary>
+        /// 缩放区域开始
+        /// </summary>
         static Rect BeginZoomArea(Rect container, float zoomFactor, out Matrix4x4 oldMatrix)
         {
             GUI.EndClip();
@@ -268,7 +295,9 @@ namespace Nirvana.Editor
             return container;
         }
 
-        //Ends the zoom area
+        /// <summary>
+        /// 缩放区域结束，还原GUI.matrix
+        /// </summary>
         static void EndZoomArea(Matrix4x4 oldMatrix)
         {
             GUI.matrix = oldMatrix;
@@ -276,6 +305,9 @@ namespace Nirvana.Editor
             GUI.BeginClip(recover);
         }
 
+        /// <summary>
+        /// 拖拽平滑过度
+        /// </summary>
         bool UpdateSmoothOffset(float deltaTime)
         {
             if (_smoothOffset == null) return false;
@@ -292,6 +324,9 @@ namespace Nirvana.Editor
             return true;
         }
 
+        /// <summary>
+        /// 缩放平滑过度
+        /// </summary>
         private static bool UpdateSmoothZoom(float deltaTime)
         {
             if (_smoothZoom == null) return false;
@@ -309,6 +344,9 @@ namespace Nirvana.Editor
             return true;
         }
 
+        /// <summary>
+        /// Node绘制前事件处理
+        /// </summary>
         private static void NodesWindowPrevEvent()
         {
             if (GraphUtils.allowClick)
@@ -342,6 +380,9 @@ namespace Nirvana.Editor
             }
         }
 
+        /// <summary>
+        /// Node绘制后事件处理
+        /// </summary>
         private static void NodesWindowPostEvent()
         {
             if (GUIUtility.keyboardControl == 0)
@@ -393,6 +434,9 @@ namespace Nirvana.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制多选框
+        /// </summary>
         private static void DrawGraphSelection()
         {
             if (GraphUtils.allowClick && _canvasRect.Contains(CanvasToGUIView(_e.mousePosition)) && _e.type == EventType.MouseDown && _e.button == 0)
@@ -430,6 +474,9 @@ namespace Nirvana.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制背景格
+        /// </summary>
         private static void DrawGrid(Rect rect, Vector2 offset)
         {
             float step = 20f;
@@ -459,14 +506,20 @@ namespace Nirvana.Editor
             Handles.color = Color.white;
         }
 
+        /// <summary>
+        /// 绘制所有的Node
+        /// </summary>
         private static void DrawNodesGUI(Graph graph)
         {
             foreach (var node in graph.allNodes)
             {
-                NodeWindow.DrawNodeGUI(node, _e);
+                NodeWindow.DrawNodeGUI(node);
             }
         }
 
+        /// <summary>
+        /// 绘制Toolbar
+        /// </summary>
         private static void DrawToolbar(Graph graph)
         {
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
@@ -519,7 +572,7 @@ namespace Nirvana.Editor
 
         private static void DrawPanels()
         {
-            var inspectorRect = DrawInspector();
+            var inspectorRect = DrawNodeInspector();
             var blackboardRect = DrawBlackboard();
             GraphUtils.allowClick = !inspectorRect.Contains(_realMousePosition) && !blackboardRect.Contains(_realMousePosition);
 
@@ -528,7 +581,10 @@ namespace Nirvana.Editor
         private static float _nodeInspectorHeight = 200f;
         private static bool _isResizingNodeInspectorPanel = false;
 
-        private static Rect DrawInspector()
+        /// <summary>
+        /// 绘制Node编辑面版
+        /// </summary>
+        private static Rect DrawNodeInspector()
         {
             var rect = default(Rect);
             if (GraphUtils.activeNodes.Count == 0 && GraphUtils.activeLink == null) return rect;
@@ -574,6 +630,9 @@ namespace Nirvana.Editor
         private static float _blackboardHeight = 50f;
         private static bool _isResizingBlackboardPanel = false;
 
+        /// <summary>
+        /// 绘制Blackboard面版
+        /// </summary>
         private static Rect DrawBlackboard()
         {
             var rect = default(Rect);
@@ -618,6 +677,9 @@ namespace Nirvana.Editor
 
         private static float _loggerHeight = 0;
 
+        /// <summary>
+        /// 绘制Log
+        /// </summary>
         private static void DrawLogger()
         {
             var rect = default(Rect);

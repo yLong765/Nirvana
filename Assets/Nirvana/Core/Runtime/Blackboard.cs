@@ -18,6 +18,9 @@ namespace Nirvana
         [SerializeField] private string _serializedData = string.Empty;
         private BlackboardSource _bbSource;
 
+        /// <summary>
+        /// variable字典
+        /// </summary>
         public Dictionary<string, Variable> variables
         {
             get => _bbSource.variables;

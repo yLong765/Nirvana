@@ -8,6 +8,9 @@ namespace Nirvana
 {
     public static class LinkInspector
     {
+        /// <summary>
+        /// 绘制Link Inspector内容
+        /// </summary>
         public static void DrawInspector(Rect rect, Link link)
         {
             EditorGUI.BeginChangeCheck();

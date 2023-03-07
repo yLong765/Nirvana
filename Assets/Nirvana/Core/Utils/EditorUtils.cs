@@ -12,6 +12,9 @@ namespace Nirvana
 {
     public static class EditorUtils
     {
+        /// <summary>
+        /// 绘制Box
+        /// </summary>
         public static void DrawBox(Rect rect, Color color, GUIStyle style)
         {
             GUI.color = color;
@@ -19,6 +22,9 @@ namespace Nirvana
             GUI.color = Color.white;
         }
 
+        /// <summary>
+        /// 绘制Window
+        /// </summary>
         public static Rect Window(int id, Rect rect, GUI.WindowFunction func, Color color, GUIStyle style, params GUILayoutOption[] layoutOptions)
         {
             GUI.color = color;
@@ -27,6 +33,9 @@ namespace Nirvana
             return newRect;
         }
 
+        /// <summary>
+        /// 绘制搜索窗口
+        /// </summary>
         public static string SearchField(string search)
         {
             GUILayout.BeginHorizontal();
@@ -41,6 +50,9 @@ namespace Nirvana
             return search;
         }
 
+        /// <summary>
+        /// 绘制有默认文字的文本框
+        /// </summary>
         public static string DefaultTextField(string value, string defaultText)
         {
             var check = EditorGUILayout.TextField(value);
@@ -62,7 +74,7 @@ namespace Nirvana
             public Graph context;
             public GetCustomItemMenu customItemMenu;
         }
-
+        
         public static void ReorderableList(IList list, ReorderableListOptions options, System.Action<int> itemGUI)
         {
             if (list == null) return;
@@ -350,17 +362,6 @@ namespace Nirvana
         public static void ShowChildTypeGenericMenu(Type baseType, Action<Type> clickAction)
         {
             ShowChildTypeGenericMenu(baseType.Name, baseType, clickAction);
-        }
-
-        public static void ShowSameInPortGenericMenu(Type baseType, Action<Type> clickAction)
-        {
-            var menu = new GenericMenuPopup(baseType.Name);
-            var types = TypeUtils.GetSubClassTypes(baseType);
-            foreach (var type in types)
-            {
-                
-            }
-            
         }
     }
 }

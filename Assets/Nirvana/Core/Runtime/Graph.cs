@@ -14,19 +14,32 @@ namespace Nirvana
     {
         #region abstract
 
+        /// <summary>
+        /// Node基类型
+        /// </summary>
         public abstract Type baseNodeType { get; }
 
         #endregion
         
         private GraphSource _graphSource = new GraphSource();
+        
+        /// <summary>
+        /// 全部Node
+        /// </summary>
         [JsonIgnore] public List<Node> allNodes => _graphSource.nodes;
         
+        /// <summary>
+        /// blackboard元数据
+        /// </summary>
         public BlackboardSource bbSource
         {
             get => _graphSource.bbSource;
             set => _graphSource.bbSource = value;
         }
 
+        /// <summary>
+        /// 初始化Graph
+        /// </summary>
         private void InitGraph()
         {
             foreach (var link in allNodes.SelectMany(node => node.inLinks))
@@ -35,6 +48,9 @@ namespace Nirvana
             }
         }
         
+        /// <summary>
+        /// 运行时执行Graph
+        /// </summary>
         public void StartGraph()
         {
             InitGraph();
@@ -45,6 +61,9 @@ namespace Nirvana
             }
         }
 
+        /// <summary>
+        /// 添加Node
+        /// </summary>
         public Node AddNode(Type type, Vector2 pos)
         {
             var newNode = Node.Create(this, type, pos);
@@ -58,6 +77,9 @@ namespace Nirvana
             return newNode;
         }
 
+        /// <summary>
+        /// 删除Node
+        /// </summary>
         public void RemoveNode(Node node)
         {
             Undo.RecordObject(this, "Remove Node");
@@ -72,6 +94,9 @@ namespace Nirvana
             EditorUtility.SetDirty(this);
         }
 
+        /// <summary>
+        /// 添加Link
+        /// </summary>
         public Link AddLink(Port sourcePort, Port targetPort)
         {
             if (!Node.IsNewLinkAllowed(sourcePort, targetPort)) return null;
@@ -84,6 +109,9 @@ namespace Nirvana
             return newLink;
         }
 
+        /// <summary>
+        /// 删除Link
+        /// </summary>
         public void RemoveLink(Link link)
         {
             Undo.RecordObject(this, "Remove Link");
@@ -94,6 +122,9 @@ namespace Nirvana
             EditorUtility.SetDirty(this);
         }
 
+        /// <summary>
+        /// 更新Node ID保证界面Node显示正确性
+        /// </summary>
         public void UpdateNodeIDs()
         {
             for (int i = 0; i < allNodes.Count; i++)
@@ -147,7 +178,7 @@ namespace Nirvana
             {
                 _graphSource.nodes[i].ID = i;
                 _graphSource.nodes[i].graph = this;
-                _graphSource.nodes[i].Refresh();
+                _graphSource.nodes[i].EditorRefresh();
             }
         }
 

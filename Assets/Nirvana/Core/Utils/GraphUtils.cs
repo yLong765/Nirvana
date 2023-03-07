@@ -7,8 +7,17 @@ namespace Nirvana
 {
     public static class GraphUtils
     {
+        /// <summary>
+        /// 是否需要SetDirty
+        /// </summary>
         public static bool willSetDirty = false;
+        /// <summary>
+        /// 是否需要刷新
+        /// </summary>
         public static bool willRepaint = false;
+        /// <summary>
+        /// 是否允许点击
+        /// </summary>
         public static bool allowClick = true;
 
         //------Node相关------

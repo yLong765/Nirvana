@@ -8,6 +8,9 @@ namespace Nirvana
 {
     public static class FileUtils
     {
+        /// <summary>
+        /// 写文件
+        /// </summary>
         public static void Write(string path, string value)
         {
             FileStream fs = null;
@@ -30,6 +33,9 @@ namespace Nirvana
             }
         }
 
+        /// <summary>
+        /// 读文件
+        /// </summary>
         public static string Read(string path)
         {
             string result;

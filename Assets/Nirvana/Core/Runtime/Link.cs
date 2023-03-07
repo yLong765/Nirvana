@@ -18,6 +18,9 @@ namespace Nirvana
         private Port _sourcePort;
         private Port _targetPort;
 
+        /// <summary>
+        /// 源头Port
+        /// </summary>
         [JsonIgnore]
         public Port sourcePort
         {
@@ -25,6 +28,9 @@ namespace Nirvana
             set => _sourcePort = value;
         }
 
+        /// <summary>
+        /// 目标Port
+        /// </summary>
         [JsonIgnore]
         public Port targetPort
         {
@@ -32,30 +38,45 @@ namespace Nirvana
             set => _targetPort = value;
         }
 
+        /// <summary>
+        /// 源头Node
+        /// </summary>
         public Node sourceNode
         {
             get => _sourceNode;
             set => _sourceNode = value;
         }
 
+        /// <summary>
+        /// 目标Node
+        /// </summary>
         public Node targetNode
         {
             get => _targetNode;
             set => _targetNode = value;
         }
 
+        /// <summary>
+        /// 源头Port的Id
+        /// </summary>
         public string sourcePortId
         {
             get => _sourcePort != null ? _sourcePort.ID : _sourcePortID;
             set => _sourcePortID = value;
         }
 
+        /// <summary>
+        /// 目标Port的Id
+        /// </summary>
         public string targetPortId
         {
             get => _targetPort != null ? _targetPort.ID : _targetPortID;
             set => _targetPortID = value;
         }
 
+        /// <summary>
+        /// 设置源头Port数据
+        /// </summary>
         public void SetSourcePort(Port port)
         {
             sourcePort = port;
@@ -65,6 +86,9 @@ namespace Nirvana
             sourcePort.linkCount++;
         }
 
+        /// <summary>
+        /// 设置目标Port数据
+        /// </summary>
         public void SetTargetPort(Port port)
         {
             targetPort = port;
@@ -74,6 +98,9 @@ namespace Nirvana
             targetPort.linkCount++;
         }
 
+        /// <summary>
+        /// 刷新源头Port数据（加载后数据丢失，还原数据）
+        /// </summary>
         public void RefreshSourcePort()
         {
             _sourcePort = null;
@@ -83,6 +110,9 @@ namespace Nirvana
             }
         }
 
+        /// <summary>
+        /// 刷新目标Port数据（加载后数据丢失，还原数据）
+        /// </summary>
         public void RefreshTargetPort()
         {
             _targetPort = null;
@@ -92,6 +122,9 @@ namespace Nirvana
             }
         }
 
+        /// <summary>
+        /// 运行时初始化绑定所有的Port
+        /// </summary>
         public void BindPorts()
         {
             switch (sourcePort)
@@ -105,6 +138,9 @@ namespace Nirvana
             }
         }
 
+        /// <summary>
+        /// 创建Link
+        /// </summary>
         public static Link Create(Port sourcePort, Port targetPort)
         {
             var newLink = new Link();
@@ -118,6 +154,9 @@ namespace Nirvana
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// 绘制Link的InspectorGUI
+        /// </summary>
         public void DrawInspectorGUI()
         {
             GUILayout.Label("Link Node: " + sourcePort.node.title + " link to " + sourcePort.node.title);

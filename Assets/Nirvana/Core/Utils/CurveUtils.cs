@@ -11,6 +11,13 @@ namespace Nirvana
             return (p2.x - p1.x) * (p.y - p1.y) - (p.x - p1.x) * (p2.y - p1.y);
         }
         
+        /// <summary>
+        /// 点是否在Curve中
+        /// </summary>
+        /// <param name="pos">点</param>
+        /// <param name="leftCenter">左边中间点</param>
+        /// <param name="rightCenter">右边中间点</param>
+        /// <param name="height">高度</param>
         public static bool IsPosInCurve(Vector3 pos, Vector3 leftCenter, Vector3 rightCenter, float height)
         {
             var offset = new Vector3(0, height * 0.5f, 0);

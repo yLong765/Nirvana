@@ -7,6 +7,9 @@ namespace Nirvana.Editor
 {
     public class NodeInspector
     {
+        /// <summary>
+        /// 绘制Node Inspector内容（单选）
+        /// </summary>
         public static void DrawGUI(Rect rect, Node node)
         {
             if (node == null)
@@ -36,6 +39,9 @@ namespace Nirvana.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制Node Inspector内容（多选）
+        /// </summary>
         public static void DrawGUI(Rect rect, List<Node> nodes)
         {
             if (nodes == null || nodes.Count == 0)

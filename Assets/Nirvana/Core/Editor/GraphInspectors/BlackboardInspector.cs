@@ -13,6 +13,9 @@ namespace Nirvana.Editor
         private static Graph _context;
         private static BlackboardSource _bbSource;
         
+        /// <summary>
+        /// 绘制Blackboard Inspector内容
+        /// </summary>
         public static void DrawGUI(Rect rect, BlackboardSource bbSource, Graph graph)
         {
             _context = graph;
@@ -86,6 +89,11 @@ namespace Nirvana.Editor
             }
         }
         
+        /// <summary>
+        /// 绘制Variable
+        /// </summary>
+        /// <param name="variable"></param>
+        /// <param name="id"></param>
         private static void DrawVariableItem(Variable variable, int id)
         {
             if (_tempVariablesList.Where(v => v != variable).Select(v => v.name).Contains(variable.name))
@@ -101,6 +109,9 @@ namespace Nirvana.Editor
             GUI.color = Color.white;
         }
 
+        /// <summary>
+        /// 点击Variable设置按钮弹出的功能菜单
+        /// </summary>
         private static GenericMenu GetCustomMenuItem(Variable variable, int id)
         {
             var menu = new GenericMenu();

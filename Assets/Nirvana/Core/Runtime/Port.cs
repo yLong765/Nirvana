@@ -15,30 +15,45 @@ namespace Nirvana
         private int _linkCount;
         private int _maxLinkCount;
 
+        /// <summary>
+        /// 端口ID
+        /// </summary>
         public string ID
         {
             get => _ID;
             set => _ID = value;
         }
 
+        /// <summary>
+        /// 端口名
+        /// </summary>
         public virtual string name
         {
             get => _name;
             set => _name = value;
         }
 
+        /// <summary>
+        /// 端口依附的Node
+        /// </summary>
         public Node node
         {
             get => _node;
             set => _node = value;
         }
 
+        /// <summary>
+        /// 端口的连接数
+        /// </summary>
         public int linkCount
         {
             get => _linkCount;
             set => _linkCount = value;
         }
 
+        /// <summary>
+        /// 端口的最大连接数
+        /// </summary>
         public int maxLinkCount
         {
             get => _maxLinkCount;
