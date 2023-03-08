@@ -10,8 +10,6 @@ namespace Nirvana
 {
     public abstract partial class Node
     {
-        protected bool isOverwriteOnGraphStartMethod = false;
-        
         private Graph _graph;
 
         private List<Link> _inLinks = new List<Link>();
@@ -107,7 +105,9 @@ namespace Nirvana
         /// </summary>
         public void Create()
         {
-            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart")?.DeclaringType == typeof(Node));
+#if UNITY_EDITOR
+            EditorRefresh();
+#endif
             OnCreate();
         }
 
@@ -115,8 +115,6 @@ namespace Nirvana
 
         protected virtual void OnCreate() { }
 
-        protected virtual void OnRefresh() { }
-        
         public virtual void OnGraphStart() {}
 
         public virtual void OnGraphStop() { }

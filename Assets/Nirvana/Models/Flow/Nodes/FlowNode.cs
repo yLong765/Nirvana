@@ -19,19 +19,6 @@ namespace Nirvana
         private Port[] _guiOutPorts;
 #endif
 
-        protected override void OnCreate()
-        {
-            RegisterPorts();
-            RefreshEditorPort();
-        }
-
-        protected override void OnRefresh()
-        {
-            RegisterPorts();
-            RefreshLinks();
-            RefreshEditorPort();
-        }
-
         protected abstract void RegisterPorts();
 
         private string GetPortID(string name, string ID, IDictionary dict)
@@ -57,7 +44,7 @@ namespace Nirvana
         {
             return AddOutPort(name, "", getValue);
         }
-        
+
         public OutPort<T> AddOutPort<T>(string name, string ID, Func<T> getValue)
         {
             ID = GetPortID(name, ID, outPorts);
@@ -66,11 +53,11 @@ namespace Nirvana
             return newPort;
         }
 
-        public FlowInPort AddFlowInPort(string name ,Action flowFunc)
+        public FlowInPort AddFlowInPort(string name, Action flowFunc)
         {
             return AddFlowInPort(name, "", flowFunc);
         }
-        
+
         public FlowInPort AddFlowInPort(string name, string ID, Action flowFunc)
         {
             ID = GetPortID(name, ID, inPorts);
@@ -93,13 +80,13 @@ namespace Nirvana
             {
                 link.RefreshSourcePort();
             }
-            
+
             foreach (var link in inLinks)
             {
                 link.RefreshTargetPort();
             }
         }
-        
+
         private void RefreshEditorPort()
         {
 #if UNITY_EDITOR
@@ -143,23 +130,23 @@ namespace Nirvana
                 var portHeight = StyleUtils.inPortLabel.CalcSize(port.name).y - 3;
                 port.rect = new Rect(rect.x - portWidth, yStart + i * portHeight, portWidth, portHeight);
             }
-            
+
             for (int i = 0; i < _guiFlowOutPorts.Length; i++)
             {
                 var port = _guiFlowOutPorts[i];
                 var portHeight = StyleUtils.inPortLabel.CalcSize(port.name).y - 3;
                 port.rect = new Rect(rect.x + rect.width, yStart + i * portHeight, portWidth, portHeight);
             }
-            
+
             int id = Mathf.Max(_guiFlowInPorts.Length, _guiFlowOutPorts.Length);
-            
+
             for (int i = 0; i < _guiInPorts.Length; i++)
             {
                 var port = _guiInPorts[i];
                 var portHeight = StyleUtils.inPortLabel.CalcSize(port.name).y - 3;
                 port.rect = new Rect(rect.x - portWidth, yStart + (id + i) * portHeight, portWidth, portHeight);
             }
-            
+
             for (int i = 0; i < _guiOutPorts.Length; i++)
             {
                 var port = _guiOutPorts[i];
@@ -252,9 +239,9 @@ namespace Nirvana
                     }
                 }
             }
-            
+
             // ------绘制Port圆点------
-            
+
             DrawPortsGUI(allPorts.ToArray(), e);
         }
 
@@ -265,7 +252,7 @@ namespace Nirvana
                 DrawPortGUI(port, e);
             }
         }
-        
+
         private void DrawPortGUI(Port port, Event e)
         {
             if (e.type == EventType.MouseDown && e.button == 0 && port.rect.Contains(e.mousePosition))
@@ -340,7 +327,7 @@ namespace Nirvana
                 GUILayout.Label(inPorts[i].name, StyleUtils.inPortLabel);
                 GUILayout.EndHorizontal();
             }
-            
+
             for (int i = minL; i < outPorts.Length; i++)
             {
                 GUILayout.BeginHorizontal();
@@ -349,7 +336,7 @@ namespace Nirvana
                 GUILayout.EndHorizontal();
             }
         }
-        
+
         public override void DrawWindowGUI()
         {
             DrawPort(_guiFlowInPorts, _guiFlowOutPorts);
@@ -364,11 +351,11 @@ namespace Nirvana
         }
 
         private static bool _flowInPortHeaderGroup = true;
-        
+
         public override void DrawInspectorGUI()
         {
             base.DrawInspectorGUI();
-            
+
             _flowInPortHeaderGroup = EditorGUILayout.BeginFoldoutHeaderGroup(_flowInPortHeaderGroup, "InPorts");
             if (_flowInPortHeaderGroup)
             {
@@ -401,6 +388,13 @@ namespace Nirvana
             }
 
             EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+
+        protected override void OnEditorRefresh()
+        {
+            RegisterPorts();
+            RefreshLinks();
+            RefreshEditorPort();
         }
 #endif
     }

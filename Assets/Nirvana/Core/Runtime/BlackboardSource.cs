@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Nirvana
 {
+    /// <summary>
+    /// 黑板元数据。只有这里的数据会被序列化保存
+    /// </summary>
     public class BlackboardSource
     {
         private Dictionary<string, Variable> _variables = new Dictionary<string, Variable>();

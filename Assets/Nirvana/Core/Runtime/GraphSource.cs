@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Nirvana
 {
+    /// <summary>
+    /// Graph元数据。只有这里的数据会被序列化保存
+    /// </summary>
     public class GraphSource
     {
         private List<Node> _nodes;

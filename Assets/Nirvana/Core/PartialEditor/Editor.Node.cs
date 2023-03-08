@@ -23,6 +23,7 @@ namespace Nirvana
         private string _tag;
         private Vector2 _position;
         private Vector2 _size = MIN_SIZE;
+        private bool _isOverwriteOnGraphStartMethod = false;
         
         /// <summary>
         /// Editor.Id
@@ -55,7 +56,7 @@ namespace Nirvana
                             _title = _title[.._title.LastIndexOf("Node", StringComparison.Ordinal)];
                         }
 
-                        if (isOverwriteOnGraphStartMethod)
+                        if (_isOverwriteOnGraphStartMethod)
                         {
                             _title = $"➦ {_title}";
                         }
@@ -118,8 +119,8 @@ namespace Nirvana
         /// </summary>
         public void EditorRefresh()
         {
-            isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart")?.DeclaringType == typeof(Node));
-            OnRefresh();
+            _isOverwriteOnGraphStartMethod = !(GetType().GetMethod("OnGraphStart")?.DeclaringType == typeof(Node));
+            OnEditorRefresh();
         }
 
         /// <summary>
@@ -154,6 +155,8 @@ namespace Nirvana
         /// 绘制Link线
         /// </summary>
         public virtual void DrawLinkGUI() { }
+        
+        protected virtual void OnEditorRefresh() { }
     }
 }
 #endif
