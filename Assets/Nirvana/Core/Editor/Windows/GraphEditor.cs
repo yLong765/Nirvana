@@ -265,7 +265,7 @@ namespace Nirvana.Editor
         {
             if (rootGraph == null)
             {
-                ShowNotification(new GUIContent("Please Select One Graph Editor Data!"));
+                ShowNotification(new GUIContent("Please Select One Graph Editor Data!"), 0f);
                 return false;
             }
 

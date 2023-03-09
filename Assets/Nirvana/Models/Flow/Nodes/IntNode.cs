@@ -5,13 +5,10 @@ using UnityEngine;
 
 public class IntNode : FlowNode
 {
-    public int value;
+    public Variable<int> value;
     
     protected override void RegisterPorts()
     {
-        AddOutPort("value", () =>
-        {
-            return value;
-        });
+        AddOutPort("value", () => value.value);
     }
 }

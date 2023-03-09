@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Nirvana.PartialEditor;
 using UnityEditor;
 using UnityEngine;
 
@@ -132,10 +133,12 @@ namespace Nirvana
             if (_nodeInspectorHeaderGroup)
             {
                 var fields = GetAllFieldInfos();
-                foreach (var info in fields.Where(info => !info.HasAttribute<IgnoreInNodeInspectorAttribute>()))
+                foreach (var info in fields.Where(info => !info.HasAttribute<HideInInspectorAttribute>()))
                 {
                     EditorGUI.BeginChangeCheck();
-                    var value = EditorUtils.TypeField(info.Name, info.GetValue(this), info.FieldType);
+                    var value = info.FieldType == typeof(Variable) ? 
+                        EditorDrawer<VariableDrawer>.Get().DrawGUI(new GUIContent(info.Name), info.GetValue(this), info) : 
+                        EditorUtils.TypeField(info.Name, info.GetValue(this), info.FieldType);
                     if (EditorGUI.EndChangeCheck())
                     {
                         info.SetValue(this, value);

@@ -53,7 +53,7 @@ namespace Nirvana
     /// NodeInspector忽略属性
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class IgnoreInNodeInspectorAttribute : Attribute
+    public class HideInInspectorAttribute : Attribute
     {
         
     }
