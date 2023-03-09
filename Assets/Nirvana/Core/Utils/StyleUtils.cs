@@ -172,22 +172,23 @@ namespace Nirvana
             }
         }
 
-        private static GUIStyle _panelTitle;
-        public static GUIStyle panelTitle
+        private static GUIStyle _panelTitleBox;
+        public static GUIStyle panelTitleBox
         {
             get
             {
-                if (_panelTitle == null)
+                if (_panelTitleBox == null)
                 {
-                    _panelTitle = new GUIStyle(EditorStyles.label);
-                    _panelTitle.fontSize = 16;
-                    _panelTitle.fontStyle = FontStyle.Bold;
-                    _panelTitle.normal.textColor = ColorUtils.orange1;
-                    _panelTitle.hover.textColor = ColorUtils.orange1;
-                    _panelTitle.alignment = TextAnchor.MiddleCenter;
+                    _panelTitleBox = new GUIStyle(EditorStyles.label);
+                    _panelTitleBox.fontSize = 16;
+                    _panelTitleBox.fontStyle = FontStyle.Bold;
+                    _panelTitleBox.alignment = TextAnchor.MiddleCenter;
+                    _panelTitleBox.normal.textColor = ColorUtils.orange1;
+                    _panelTitleBox.hover.textColor = ColorUtils.orange1;
+                    _panelTitleBox.normal.background = Texture2D.whiteTexture;
                 }
 
-                return _panelTitle;
+                return _panelTitleBox;
             }
         }
 

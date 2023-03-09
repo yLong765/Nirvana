@@ -18,7 +18,7 @@ namespace Nirvana
         }
         
         /// <summary>
-        /// Editor.便宜
+        /// Editor.偏移
         /// </summary>
         public Vector2 offset
         {

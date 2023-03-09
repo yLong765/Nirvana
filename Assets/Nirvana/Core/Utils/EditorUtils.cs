@@ -22,6 +22,13 @@ namespace Nirvana
             GUI.color = Color.white;
         }
 
+        public static void DrawBox(Rect rect, string title, Color backboardColor, GUIStyle style)
+        {
+            GUI.backgroundColor = backboardColor;
+            GUI.Box(rect, title, style);
+            GUI.backgroundColor = Color.white;
+        }
+
         /// <summary>
         /// 绘制Window
         /// </summary>

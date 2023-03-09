@@ -12,7 +12,7 @@ namespace Nirvana
         Warning,
         Normal,
     }
-    
+
     public class Log
     {
         public string value;
@@ -31,12 +31,21 @@ namespace Nirvana
             return endTime <= DateTime.Now;
         }
     }
-    
+
     public static class LogUtils
     {
+        public static List<Log> allLogs => _logs;
         private static List<Log> _logs = new List<Log>();
 
-        public static List<Log> allLogs => _logs;
+        public static string GetLogIconName(LogType logType)
+        {
+            return logType switch
+            {
+                LogType.Normal => "console.infoicon",
+                LogType.Warning => "console.warnicon",
+                _ => "console.erroricon"
+            };
+        }
 
         public static void CheckAllLog()
         {
@@ -48,7 +57,7 @@ namespace Nirvana
                 }
             }
         }
-        
+
         public static void Error(string value, float duration = 5f)
         {
             CheckAllLog();

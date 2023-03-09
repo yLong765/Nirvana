@@ -552,7 +552,7 @@ namespace Nirvana.Editor
 
             GUILayout.FlexibleSpace();
 
-            GUI.color = ColorUtils.darkOrang1;
+            GUI.color = ColorUtils.gray76;
             if (GUILayout.Button($"{graph.name} @ Nirvana Core", EditorStyles.toolbarButton))
             {
                 Selection.activeObject = graph;
@@ -578,6 +578,14 @@ namespace Nirvana.Editor
         private static float _nodeInspectorHeight = 200f;
         private static bool _isResizingNodeInspectorPanel = false;
 
+        private static void BeginNodeInspectorArea(Rect rect, string title)
+        {
+            var titleHeight = StyleUtils.panelTitleBox.CalcSize(title).y;
+            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), title, ColorUtils.gray19, StyleUtils.panelTitleBox);
+            EditorUtils.DrawBox(new Rect(0, titleHeight, rect.width, rect.width), ColorUtils.gray21, StyleUtils.normalBG);
+            GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 4, rect.xMax - 4, rect.yMax - 2));
+        }
+
         /// <summary>
         /// 绘制Node编辑面版
         /// </summary>
@@ -601,21 +609,46 @@ namespace Nirvana.Editor
                 _isResizingNodeInspectorPanel = true;
                 _e.Use();
             }
-
             if (_isResizingNodeInspectorPanel && _e.type == EventType.Layout) Prefs.nodeInspectorPanelWidth += _e.delta.x;
             if (_e.rawType == EventType.MouseUp) _isResizingNodeInspectorPanel = false;
             
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
 
-            if (GraphUtils.activeNodes.Count == 1) NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes[0]);
-            else NodeInspector.DrawGUI(areaRect, GraphUtils.activeNodes);
-            if (GraphUtils.activeLink != null) LinkInspector.DrawInspector(areaRect, GraphUtils.activeLink);
-
-            if (_e.type == EventType.Repaint)
+            if (GraphUtils.activeNodes.Count == 1)
             {
-                _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 32;
+                var node = GraphUtils.activeNodes[0];
+                if (node == null)
+                {
+                    GUILayout.BeginArea(Rect.MinMaxRect(2, 2, areaRect.xMax - 2, areaRect.yMax - 2));
+                    EditorGUILayout.HelpBox("No select one node in graph!", MessageType.Info);
+                }
+                else
+                {
+                    BeginNodeInspectorArea(areaRect, node.title);
+                    NodeInspector.DrawGUI(node);
+                }
             }
+            else if (GraphUtils.activeNodes.Count > 1)
+            {
+                var nodes = GraphUtils.activeNodes;
+                if (nodes == null || nodes.Count == 0)
+                {
+                    GUILayout.BeginArea(Rect.MinMaxRect(2, 2, areaRect.xMax - 2, areaRect.yMax - 2));
+                    EditorGUILayout.HelpBox("No select one node in graph!", MessageType.Info);
+                }
+                else
+                {
+                    BeginNodeInspectorArea(areaRect, "Multi-select");
+                    NodeInspector.DrawGUI(nodes);
+                }
+            }
+            else if (GraphUtils.activeLink != null)
+            {
+                BeginNodeInspectorArea(areaRect, "Link");
+                LinkInspector.DrawGUI(GraphUtils.activeLink);
+            }
+            if (_e.type == EventType.Repaint) _nodeInspectorHeight = GUILayoutUtility.GetLastRect().yMax + 32;
 
             GUILayout.EndArea();
             GUILayout.EndArea();
@@ -651,20 +684,20 @@ namespace Nirvana.Editor
                 _isResizingBlackboardPanel = true;
                 _e.Use();
             }
-
             if (_isResizingBlackboardPanel && _e.type == EventType.Layout) Prefs.blackboardWidth -= _e.delta.x;
             if (_e.rawType == EventType.MouseUp) _isResizingBlackboardPanel = false;
             
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
 
-            BlackboardInspector.DrawGUI(areaRect, currentGraph.bbSource, currentGraph);
-
-            if (_e.type == EventType.Repaint)
-            {
-                _blackboardHeight = GUILayoutUtility.GetLastRect().yMax + 30;
-            }
-
+            var titleHeight = StyleUtils.panelTitleBox.CalcSize("Blackboard").y;
+            EditorUtils.DrawBox(new Rect(0, 0, areaRect.width, titleHeight), "Blackboard", ColorUtils.gray17, StyleUtils.panelTitleBox);
+            EditorUtils.DrawBox(new Rect(0, titleHeight, areaRect.width, areaRect.height), ColorUtils.gray21, StyleUtils.normalBG);
+            GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 2, areaRect.xMax - 2, areaRect.yMax - 2));
+            
+            BlackboardInspector.DrawGUI(currentGraph);
+            if (_e.type == EventType.Repaint) _blackboardHeight = GUILayoutUtility.GetLastRect().yMax + 30;
+            
             GUILayout.EndArea();
             GUILayout.EndArea();
             GUI.EndClip();
@@ -686,8 +719,10 @@ namespace Nirvana.Editor
             rect.width = loggerWidth;
             rect.height = _loggerHeight;
             var areaRect = Rect.MinMaxRect(2, 0, rect.width, rect.height);
+            
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
+            
             LogUtils.CheckAllLog();
             var heightCount = 0.0f;
             foreach (var log in LogUtils.allLogs)
@@ -696,24 +731,14 @@ namespace Nirvana.Editor
                 EditorUtils.DrawBox(new Rect(0, heightCount, loggerWidth, height), ColorUtils.gray21, StyleUtils.normalBG);
                 heightCount += height + 2f;
 
-                var iconName = log.type switch
-                {
-                    LogType.Normal => "console.infoicon",
-                    LogType.Warning => "console.warnicon",
-                    _ => "console.erroricon"
-                };
-
                 GUILayout.BeginHorizontal();
-                GUILayout.Label(EditorGUIUtility.IconContent(iconName), GUILayout.MaxWidth(35));
+                GUILayout.Label(EditorGUIUtility.IconContent(LogUtils.GetLogIconName(log.type)), GUILayout.MaxWidth(35));
                 GUILayout.Label(log.value, StyleUtils.loggerBox);
                 GUILayout.EndHorizontal();
                 GUILayout.Space(2f);
             }
 
-            if (_e.type == EventType.Repaint)
-            {
-                _loggerHeight = heightCount;
-            }
+            if (_e.type == EventType.Repaint) _loggerHeight = heightCount;
 
             GUILayout.EndArea();
             GUI.EndClip();

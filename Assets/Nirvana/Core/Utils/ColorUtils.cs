@@ -17,8 +17,10 @@ namespace Nirvana
         public static Color gray19 => new Color(0.19f, 0.19f, 0.19f, 1f);
         public static Color gray21 => new Color(0.21f, 0.21f, 0.21f, 1f);
         public static Color gray51 => new Color(0.51f, 0.51f, 0.51f, 1f);
-        public static Color gray66 => new Color(0.66f, 0.66f, 0.66f, 1f);
+        public static Color gray76 => new Color(0.76f, 0.76f, 0.76f, 1f);
         public static Color deepSkyBlue => new Color(0f, 0.749f, 1f, 1f);
+        public static Color sienna1 => new Color(1f, 0.51f, 0.278f, 1f);
+        public static Color lightSalmon => new Color(1f, 0.627f, 0.478f, 1f);
         public static Color orange1 => new Color(1f, 0.647f, 0f, 1f);
         public static Color darkOrang1 => new Color(1f, 0.498f, 0f, 1f);
         public static Color darkOrang2 => new Color(0.933f, 0.463f, 0f, 1f);

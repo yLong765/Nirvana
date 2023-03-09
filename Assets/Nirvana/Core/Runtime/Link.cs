@@ -159,7 +159,7 @@ namespace Nirvana
         /// </summary>
         public void DrawInspectorGUI()
         {
-            GUILayout.Label("Link Node: " + sourcePort.node.title + " link to " + sourcePort.node.title);
+            GUILayout.Label("Link Node: " + sourcePort.node.title + " link to " + targetPort.node.title);
         }
 #endif
     }

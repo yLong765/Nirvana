@@ -16,19 +16,13 @@ namespace Nirvana.Editor
         /// <summary>
         /// 绘制Blackboard Inspector内容
         /// </summary>
-        public static void DrawGUI(Rect rect, BlackboardSource bbSource, Graph graph)
+        public static void DrawGUI(Graph graph)
         {
             _context = graph;
-            _bbSource = bbSource;
+            _bbSource = graph.bbSource;
             
             EditorGUI.BeginChangeCheck();
-            
-            EditorUtils.DrawBox(new Rect(0, 0, rect.width, rect.height), ColorUtils.gray21, StyleUtils.normalBG);
-            var titleHeight = StyleUtils.panelTitle.CalcSize("Blackboard").y;
-            EditorUtils.DrawBox(new Rect(0, 0, rect.width, titleHeight), ColorUtils.gray17, StyleUtils.normalBG);
-            GUILayout.Label("Blackboard", StyleUtils.panelTitle);
-            GUILayout.BeginArea(Rect.MinMaxRect(2, titleHeight + 2, rect.xMax - 2, rect.yMax - 2));
-            
+
             if (GUILayout.Button("Add Variable"))
             {
                 var menu = new GenericMenuPopup("Fields");
@@ -38,7 +32,7 @@ namespace Nirvana.Editor
                     menu.AddItem(t.Name, () =>
                     {
                         Undo.RecordObject(_context, "New Variable");
-                        bbSource.AddVariable(t, t.Name);
+                        _bbSource.AddVariable(t, t.Name);
                         EditorUtility.SetDirty(_context);
                         GraphUtils.willSetDirty = true;
                     });
@@ -47,9 +41,9 @@ namespace Nirvana.Editor
                 menu.Show();
             }
             
-            if (_tempVariablesList == null || !_tempVariablesList.SequenceEqual(bbSource.variables.Values))
+            if (_tempVariablesList == null || !_tempVariablesList.SequenceEqual(_bbSource.variables.Values))
             {
-                _tempVariablesList = bbSource.variables.Values.ToList();
+                _tempVariablesList = _bbSource.variables.Values.ToList();
             }
 
             if (_tempVariablesList != null && _tempVariablesList.Count > 0)
@@ -74,7 +68,7 @@ namespace Nirvana.Editor
                 try
                 {
                     Undo.RecordObject(_context, "change or drag sort Variable");
-                    bbSource.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);
+                    _bbSource.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);
                     EditorUtility.SetDirty(_context);
                 }
                 catch
@@ -83,10 +77,7 @@ namespace Nirvana.Editor
                 }
             }
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                GraphUtils.willSetDirty = true;
-            }
+            if (EditorGUI.EndChangeCheck()) GraphUtils.willSetDirty = true;
         }
         
         /// <summary>
