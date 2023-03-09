@@ -1,9 +1,7 @@
-#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
@@ -121,7 +119,6 @@ namespace Nirvana.Editor
             var target = EditorUtility.InstanceIDToObject(instanceID) as Graph;
             if (target != null)
             {
-                target.title = target.name;
                 OpenWindow(target);
                 return true;
             }
@@ -525,11 +522,11 @@ namespace Nirvana.Editor
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
             if (GUILayout.Button("File", EditorStyles.toolbarButton, GUILayout.MaxWidth(50)))
             {
-                GenericMenu menu = new GenericMenu();
+                var menu = new GenericMenu();
                 menu.AddItem(new GUIContent("Export Json"), false, () =>
                 {
-                    var json = currentGraph.Serialize(Formatting.Indented);
-                    var selectPath = EditorUtility.SaveFilePanel("Select Export Path", "Assets", currentGraph.title, "json");
+                    var json = graph.Serialize(Formatting.Indented);
+                    var selectPath = EditorUtility.SaveFilePanel("Select Export Path", "Assets", graph.name, "json");
                     if (!string.IsNullOrEmpty(selectPath))
                     {
                         FileUtils.Write(selectPath, json);
@@ -543,8 +540,8 @@ namespace Nirvana.Editor
                     if (!string.IsNullOrEmpty(selectPath))
                     {
                         var json = FileUtils.Read(selectPath);
-                        currentGraph.Deserialize(json);
-                        currentGraph.offset = Vector2.zero;
+                        graph.Deserialize(json);
+                        graph.offset = Vector2.zero;
                         AssetDatabase.SaveAssets();
                         AssetDatabase.Refresh();
                     }
@@ -552,16 +549,15 @@ namespace Nirvana.Editor
                 menu.ShowAsContext();
             }
 
-            GUILayout.Space(6);
-            
-            if (GUILayout.Button("Select Graph", EditorStyles.toolbarButton))
+            GUILayout.FlexibleSpace();
+
+            GUI.color = ColorUtils.darkOrang1;
+            if (GUILayout.Button($"{graph.name} @ Nirvana Core", EditorStyles.toolbarButton))
             {
                 Selection.activeObject = graph;
             }
-
-            GUILayout.FlexibleSpace();
-            GUILayout.Label(graph.title, StyleUtils.graphTitle);
-            //GUILayout.FlexibleSpace();
+            GUI.color = Color.white;
+            
             if (GUILayout.Button("Blackboard", EditorStyles.toolbarButton, GUILayout.MaxWidth(80)))
             {
                 Prefs.showBlackboardPanel = !Prefs.showBlackboardPanel;
@@ -728,4 +724,3 @@ namespace Nirvana.Editor
         }
     }
 }
-#endif

@@ -234,8 +234,10 @@ namespace Nirvana
                 if (_graphTitle == null)
                 {
                     _graphTitle = new GUIStyle(EditorStyles.label);
-                    _graphTitle.fontSize = 14;
+                    _graphTitle.fontSize = 12;
+                    _graphTitle.fontStyle = FontStyle.Bold;
                     _graphTitle.alignment = TextAnchor.MiddleCenter;
+                    _graphTitle.padding = new RectOffset(0, 6, 0, 0);
                 }
 
                 return _graphTitle;

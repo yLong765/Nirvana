@@ -10,7 +10,6 @@ namespace Nirvana
         [SerializeField] private string _serializedData;
         [SerializeField] private Vector2 _offset;
         [SerializeField] private float _zoom = 1;
-        [SerializeField] private string _title;
 
         public string serializedData
         {
@@ -34,15 +33,6 @@ namespace Nirvana
         {
             get => _zoom;
             set => _zoom = value;
-        }
-        
-        /// <summary>
-        /// Editor.标题
-        /// </summary>
-        public string title
-        {
-            get => _title;
-            set => _title = value;
         }
     }
 }
