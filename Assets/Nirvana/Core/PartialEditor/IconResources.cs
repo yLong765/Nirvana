@@ -28,6 +28,7 @@ namespace Nirvana
             public Texture2D bezierTexture;
             public Texture flowIconTexture;
             public Texture settingIconTexture;
+            public Texture fixIconTexture;
         }
 
         [SerializeField] public Icon icon;

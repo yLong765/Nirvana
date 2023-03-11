@@ -34,6 +34,7 @@ namespace Nirvana
         public static Texture2D bezierTexture => IconResources.Instance.icon.bezierTexture;
         public static Texture flowIconTexture => IconResources.Instance.icon.flowIconTexture;
         public static Texture settingIconTexture => IconResources.Instance.icon.settingIconTexture;
+        public static Texture fixIconTexture => IconResources.Instance.icon.fixIconTexture;
 
         #endregion
 
@@ -224,6 +225,24 @@ namespace Nirvana
                 }
 
                 return _variableSettingIcon;
+            }
+        }
+        
+        private static GUIStyle _fixIcon;
+        public static GUIStyle fixIcon
+        {
+            get
+            {
+                if (_fixIcon == null)
+                {
+                    _fixIcon = new GUIStyle();
+                    _fixIcon.fixedWidth = 18;
+                    _fixIcon.fixedHeight = 18;
+                    _fixIcon.alignment = TextAnchor.MiddleCenter;
+                    _fixIcon.padding = new RectOffset(1, 1, 3, 1);
+                }
+
+                return _fixIcon;
             }
         }
 

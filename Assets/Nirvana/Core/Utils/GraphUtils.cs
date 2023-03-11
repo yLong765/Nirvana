@@ -20,6 +20,8 @@ namespace Nirvana
         /// </summary>
         public static bool allowClick = true;
 
+        public static Graph currentGraph { get; set; }
+
         //------Node相关------
         
         private static List<WeakReference<Node>> _activeNodes = new List<WeakReference<Node>>();
@@ -40,6 +42,7 @@ namespace Nirvana
             }
             set
             {
+                GUIUtility.keyboardControl = 0;
                 if (value != null)
                 {
                     _activeNodes = new List<WeakReference<Node>>(value.Count);
@@ -84,7 +87,11 @@ namespace Nirvana
 
                 return null;
             }
-            set => _activeLink = new WeakReference<Link>(value);
+            set
+            {
+                GUIUtility.keyboardControl = 0;
+                _activeLink = new WeakReference<Link>(value);
+            }
         }
 
         public static void Select<T>(T select)

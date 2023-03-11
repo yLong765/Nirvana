@@ -272,6 +272,7 @@ namespace Nirvana.Editor
             if (currentGraph != rootGraph)
             {
                 currentGraph = rootGraph;
+                GraphUtils.currentGraph = currentGraph;
             }
 
             return true;

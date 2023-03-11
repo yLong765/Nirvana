@@ -7,6 +7,16 @@ namespace Nirvana
 {
     public abstract class BBVaribale
     {
+        private int _linkID;
+        private Variable _linkVariable;
+
+        public int linkID => _linkID;
+        
+        public Variable linkVariable
+        {
+            get => _linkVariable;
+        }
+        
         public abstract object GetObjValue();
         public abstract void SetObjValue(object value);
         public abstract Type type { get; }

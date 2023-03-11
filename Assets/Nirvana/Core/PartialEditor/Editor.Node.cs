@@ -136,17 +136,11 @@ namespace Nirvana
                 foreach (var info in fields.Where(info => !info.HasAttribute<HideInInspectorAttribute>()))
                 {
                     EditorGUI.BeginChangeCheck();
-                    var v = info.GetValue(this);
-                    if (v == null)
+                    var oldValue = info.GetValue(this);
+                    var newValue = ObjectDrawer.Get(info.FieldType).DrawGUI(new GUIContent(info.Name), oldValue, info);
+                    if (oldValue != newValue || EditorGUI.EndChangeCheck())
                     {
-                        v = Activator.CreateInstance(info.FieldType);
-                    }
-                    var value = info.FieldType == typeof(Variable<int>) ? 
-                        EditorDrawer<VariableDrawer>.Get().DrawGUI(new GUIContent(info.Name), v, info) : 
-                        EditorUtils.TypeField(info.Name, info.GetValue(this), info.FieldType);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        info.SetValue(this, value);
+                        info.SetValue(this, newValue);
                     }
                 }
             }

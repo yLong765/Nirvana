@@ -10,6 +10,8 @@ namespace Nirvana
     {
         [SerializeField] private string _name;
 
+        [SerializeField] private bool _useBlackboard;
+
         /// <summary>
         /// 变量名
         /// </summary>
@@ -26,6 +28,15 @@ namespace Nirvana
         {
             get => GetValue();
             set => SetValue(value);
+        }
+
+        /// <summary>
+        /// 是否使用Blackboard数据
+        /// </summary>
+        public bool useBlackboard
+        {
+            get => _useBlackboard;
+            set => _useBlackboard = value;
         }
         
         public abstract Type type { get; }

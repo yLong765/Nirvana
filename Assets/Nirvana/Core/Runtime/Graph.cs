@@ -36,6 +36,12 @@ namespace Nirvana
             get => _graphSource.bbSource;
             set => _graphSource.bbSource = value;
         }
+        
+        public Dictionary<string, Variable> variables
+        {
+            get => bbSource.variables;
+            set => bbSource.variables = value;
+        }
 
         /// <summary>
         /// 初始化Graph
