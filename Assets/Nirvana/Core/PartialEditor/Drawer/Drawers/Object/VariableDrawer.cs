@@ -8,26 +8,19 @@ using UnityEngine;
 
 namespace Nirvana.PartialEditor
 {
-    public class VariableDrawer : ObjectDrawer<Variable>
+    public class VariableDrawer : ObjectDrawer<BBVariable>
     {
-        private static Variable _selectVariable;
-
-        protected override Variable OnGUI(GUIContent content, Variable variable)
+        protected override BBVariable OnGUI(GUIContent content, BBVariable variable)
         {
-            if (_selectVariable != null)
-            {
-                variable = _selectVariable;
-                _selectVariable = null;
-                return variable;
-            }
+            variable ??= Activator.CreateInstance(info.FieldType) as BBVariable;
 
-            if (variable != null && !variable.useBlackboard)
+            if (!variable.linkBlackboard)
             {
                 GUILayout.BeginHorizontal();
                 variable.value = EditorUtils.TypeField(content, variable.value, variable.type);
                 if (GUILayout.Button(StyleUtils.fixIconTexture, StyleUtils.fixIcon))
                 {
-                    variable = null;
+                    variable.LinkToBlackboard(true);
                 }
                 GUILayout.EndHorizontal();
             }
@@ -39,12 +32,12 @@ namespace Nirvana.PartialEditor
                     EditorGUILayout.PrefixLabel(content, GUI.skin.button);
                 }
                 
-                var selectVariableName = variable == null ? "[NONE]" : variable.name;
+                var selectVariableName = variable.isNone ? "[NONE]" : variable.name;
                 var rect = EditorGUILayout.GetControlRect(false);
                 if (GUI.Button(rect, selectVariableName, EditorStyles.popup))
                 {
                     var menu = new GenericMenu();
-                    menu.AddItem(new GUIContent("[NONE]"), false, () => { _selectVariable = null; });
+                    menu.AddItem(new GUIContent("[NONE]"), false, () => { variable.LinkToBlackboard(); });
 
                     Type genericType = null;
                     if (info.FieldType.IsGenericType)
@@ -56,13 +49,16 @@ namespace Nirvana.PartialEditor
                     {
                         foreach (var pair in GraphUtils.currentGraph.variables.Where(pair => pair.Value.type == genericType))
                         {
-                            menu.AddItem(new GUIContent($"Graph/{pair.Key}"), false, () => { _selectVariable = pair.Value; });
+                            menu.AddItem(new GUIContent($"Graph/{pair.Key}"), false, () =>
+                            {
+                                variable.LinkToBlackboard(pair.Value);
+                            });
                         }
                     }
                     
                     menu.AddItem(new GUIContent("(Custom Value)"), false, () =>
                     {
-                        _selectVariable = Activator.CreateInstance(info.FieldType) as Variable;
+                        variable.LinkToBlackboard();
                     });
 
                     menu.DropDown(rect);

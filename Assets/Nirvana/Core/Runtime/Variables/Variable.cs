@@ -1,17 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Nirvana
 {
-    [Serializable]
     public abstract class Variable
     {
-        [SerializeField] private string _name;
+        private string _id;
+        private string _name;
 
-        [SerializeField] private bool _useBlackboard;
-
+        public string ID => string.IsNullOrEmpty(_id) ? _id = Guid.NewGuid().ToString() : _id;
+        
         /// <summary>
         /// 变量名
         /// </summary>
@@ -30,24 +31,14 @@ namespace Nirvana
             set => SetValue(value);
         }
 
-        /// <summary>
-        /// 是否使用Blackboard数据
-        /// </summary>
-        public bool useBlackboard
-        {
-            get => _useBlackboard;
-            set => _useBlackboard = value;
-        }
-        
-        public abstract Type type { get; }
+        [JsonIgnore] public abstract Type type { get; }
         public abstract object GetValue();
         public abstract void SetValue(object value);
     }
 
-    [Serializable]
     public class Variable<T> : Variable
     {
-        [SerializeField] private T _value;
+        private T _value;
 
         /// <summary>
         /// 变量值

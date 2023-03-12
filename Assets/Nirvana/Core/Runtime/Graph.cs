@@ -27,6 +27,8 @@ namespace Nirvana
         /// 全部Node
         /// </summary>
         [JsonIgnore] public List<Node> allNodes => _graphSource.nodes;
+
+        public List<BBVariable> allBBVariables => _graphSource.bbVariables;
         
         /// <summary>
         /// blackboard元数据
@@ -48,9 +50,16 @@ namespace Nirvana
         /// </summary>
         private void InitGraph()
         {
+            // 初始化绑定Port
             foreach (var link in allNodes.SelectMany(node => node.inLinks))
             {
                 link.BindPorts();
+            }
+            
+            // 初始化Blackboard的Variable
+            foreach (var bbVariable in allBBVariables)
+            {
+                bbVariable
             }
         }
         
