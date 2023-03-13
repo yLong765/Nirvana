@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class IntNode : FlowNode
 {
-    public BBVariable<int> value;
+    public BBVar<int> value;
     
     protected override void RegisterPorts()
     {

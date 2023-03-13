@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Nirvana
@@ -34,6 +35,11 @@ namespace Nirvana
             return newVariable;
         }
 
+        public Variable GetVariableByID(string ID)
+        {
+           return variables.Values.First(variable => variable.ID == ID);
+        }
+        
         /// <summary>
         /// 删除变量
         /// </summary>

@@ -8,11 +8,11 @@ using UnityEngine;
 
 namespace Nirvana.PartialEditor
 {
-    public class VariableDrawer : ObjectDrawer<BBVariable>
+    public class VariableDrawer : ObjectDrawer<BBVar>
     {
-        protected override BBVariable OnGUI(GUIContent content, BBVariable variable)
+        protected override BBVar OnGUI(GUIContent content, BBVar variable)
         {
-            variable ??= Activator.CreateInstance(info.FieldType) as BBVariable;
+            variable ??= Activator.CreateInstance(info.FieldType) as BBVar;
 
             if (!variable.linkBlackboard)
             {
@@ -51,7 +51,7 @@ namespace Nirvana.PartialEditor
                         {
                             menu.AddItem(new GUIContent($"Graph/{pair.Key}"), false, () =>
                             {
-                                variable.LinkToBlackboard(pair.Value);
+                                variable.LinkToBlackboard(GraphUtils.currentGraph.bbSource, pair.Value);
                             });
                         }
                     }

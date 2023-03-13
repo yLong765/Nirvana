@@ -34,6 +34,11 @@ namespace Nirvana
             get => _zoom;
             set => _zoom = value;
         }
+
+        public void EditorRefresh()
+        {
+            UpdateBBVar();
+        }
     }
 }
 #endif

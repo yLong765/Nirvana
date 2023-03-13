@@ -28,7 +28,7 @@ namespace Nirvana
         /// </summary>
         [JsonIgnore] public List<Node> allNodes => _graphSource.nodes;
 
-        public List<BBVariable> allBBVariables => _graphSource.bbVariables;
+        public List<BBVar> allBBVars => _graphSource.bbVars;
         
         /// <summary>
         /// blackboard元数据
@@ -46,6 +46,17 @@ namespace Nirvana
         }
 
         /// <summary>
+        /// 初始化Blackboard的Variable
+        /// </summary>
+        private void UpdateBBVar()
+        {
+            foreach (var bbVariable in allBBVars)
+            {
+                bbVariable.LinkToBlackboard(bbSource);
+            }
+        }
+        
+        /// <summary>
         /// 初始化Graph
         /// </summary>
         private void InitGraph()
@@ -55,12 +66,8 @@ namespace Nirvana
             {
                 link.BindPorts();
             }
-            
-            // 初始化Blackboard的Variable
-            foreach (var bbVariable in allBBVariables)
-            {
-                bbVariable.Bind();
-            }
+
+            UpdateBBVar();
         }
         
         /// <summary>
@@ -189,6 +196,7 @@ namespace Nirvana
         public void Deserialize(string json)
         {
             _graphSource = JsonConvert.DeserializeObject<GraphSource>(json, Settings) ?? new GraphSource();
+            EditorRefresh();
             for (int i = 0; i < _graphSource.nodes.Count; i++)
             {
                 _graphSource.nodes[i].ID = i;

@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public abstract class BBVariable
+    public abstract class BBVar
     {
         protected Variable _linkVariable;
         private bool _linkBlackboard;
         private string _linkID;
-        private BlackboardSource bbSource;
+        private BlackboardSource _linkBBSource;
 
         public bool linkBlackboard
         {
@@ -25,6 +25,20 @@ namespace Nirvana
             protected set => _linkID = value;
         }
 
+        public BlackboardSource linkBBSource
+        {
+            get => _linkBBSource;
+            set
+            {
+                if (value != null)
+                {
+                    Bind(value.GetVariableByID(linkID));
+                }
+
+                _linkBBSource = value;
+            }
+        }
+
         [JsonIgnore]
         public object value
         {
@@ -32,8 +46,9 @@ namespace Nirvana
             set => SetObjValue(value);
         }
 
-        public virtual void LinkToBlackboard(Variable variable = null)
+        public virtual void LinkToBlackboard(BlackboardSource bbSource = null, Variable variable = null)
         {
+            _linkBBSource = bbSource;
             _linkID = variable?.ID;
             _linkVariable = variable;
             linkBlackboard = variable != null;
@@ -52,7 +67,7 @@ namespace Nirvana
         [JsonIgnore] public abstract Type type { get; }
     }
 
-    public class BBVariable<T> : BBVariable
+    public class BBVar<T> : BBVar
     {
         private T _value;
         private Func<T> getter;
@@ -78,9 +93,9 @@ namespace Nirvana
             }
         }
 
-        public override void LinkToBlackboard( Variable variable = null)
+        public override void LinkToBlackboard(BlackboardSource bbSource = null, Variable variable = null)
         {
-            base.LinkToBlackboard(variable);
+            base.LinkToBlackboard(bbSource, variable);
             Bind(variable);
         }
 

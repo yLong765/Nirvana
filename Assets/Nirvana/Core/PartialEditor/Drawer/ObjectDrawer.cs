@@ -84,7 +84,7 @@ namespace Nirvana.PartialEditor
             return result;
         }
 
-        protected abstract T OnGUI(GUIContent content, T value);
+        protected abstract T OnGUI(GUIContent content, T variable);
     }
 }
 #endif

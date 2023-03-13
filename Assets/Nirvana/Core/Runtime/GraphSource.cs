@@ -31,7 +31,7 @@ namespace Nirvana
             set => _bbSource = value;
         }
         
-        public List<BBVariable> bbVariables { get; private set; }
+        public List<BBVar> bbVars { get; private set; }
 
         public GraphSource()
         {

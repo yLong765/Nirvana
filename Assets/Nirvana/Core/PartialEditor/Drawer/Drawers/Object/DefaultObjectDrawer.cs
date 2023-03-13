@@ -7,9 +7,9 @@ namespace Nirvana.PartialEditor
 {
     public class DefaultObjectDrawer : ObjectDrawer<object>
     {
-        protected override object OnGUI(GUIContent content, object value)
+        protected override object OnGUI(GUIContent content, object variable)
         {
-            return EditorUtils.TypeField(info.Name, value, info.FieldType);
+            return EditorUtils.TypeField(info.Name, variable, info.FieldType);
         }
     }
 }

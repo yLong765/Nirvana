@@ -17,7 +17,9 @@ namespace Nirvana
 
         private Dictionary<string, Port> _inPorts = new Dictionary<string, Port>();
         private Dictionary<string, Port> _outPorts = new Dictionary<string, Port>();
-        
+
+        private List<BBVar> _allBBVars = new List<BBVar>();
+
         /// <summary>
         /// 所有的入Link
         /// </summary>
@@ -43,6 +45,11 @@ namespace Nirvana
         /// 所有的出端口List
         /// </summary>
         [JsonIgnore] public List<Port> outPortList => _outPorts.Values.ToList();
+
+        /// <summary>
+        /// 所有的BBVar
+        /// </summary>
+        [JsonIgnore] public List<BBVar> allBBVars => _allBBVars;
 
         /// <summary>
         /// 所有的端口
@@ -115,7 +122,7 @@ namespace Nirvana
 
         protected virtual void OnCreate() { }
 
-        public virtual void OnGraphStart() {}
+        public virtual void OnGraphStart() { }
 
         public virtual void OnGraphStop() { }
 
@@ -144,6 +151,15 @@ namespace Nirvana
         
         #endregion
 
+        private void UpdateBBVar()
+        {
+            var allFieldInfos = GetAllFieldInfos();
+            foreach (var fieldInfo in allFieldInfos)
+            {
+                fieldInfo.
+            }
+        }
+        
         /// <summary>
         /// 创建Node
         /// </summary>
