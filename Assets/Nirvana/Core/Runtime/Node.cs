@@ -18,8 +18,6 @@ namespace Nirvana
         private Dictionary<string, Port> _inPorts = new Dictionary<string, Port>();
         private Dictionary<string, Port> _outPorts = new Dictionary<string, Port>();
 
-        private List<BBVar> _allBBVars = new List<BBVar>();
-
         /// <summary>
         /// 所有的入Link
         /// </summary>
@@ -45,11 +43,6 @@ namespace Nirvana
         /// 所有的出端口List
         /// </summary>
         [JsonIgnore] public List<Port> outPortList => _outPorts.Values.ToList();
-
-        /// <summary>
-        /// 所有的BBVar
-        /// </summary>
-        [JsonIgnore] public List<BBVar> allBBVars => _allBBVars;
 
         /// <summary>
         /// 所有的端口
@@ -151,15 +144,6 @@ namespace Nirvana
         
         #endregion
 
-        private void UpdateBBVar()
-        {
-            var allFieldInfos = GetAllFieldInfos();
-            foreach (var fieldInfo in allFieldInfos)
-            {
-                fieldInfo.
-            }
-        }
-        
         /// <summary>
         /// 创建Node
         /// </summary>
@@ -179,25 +163,25 @@ namespace Nirvana
         {
             if (sourcePort.linkCount == sourcePort.maxLinkCount)
             {
-                LogUtils.Error($"Port [{sourcePort.node.title}.{sourcePort.ID}] link is full");
+                NLog.Error($"Port [{sourcePort.node.title}.{sourcePort.ID}] link is full");
                 return false;
             }
             
             if (targetPort.linkCount == targetPort.maxLinkCount)
             {
-                LogUtils.Error($"Port [{targetPort.node.title}.{targetPort.ID}] link is full");
+                NLog.Error($"Port [{targetPort.node.title}.{targetPort.ID}] link is full");
                 return false;
             }
 
             if (!(sourcePort is FlowOutPort && targetPort is FlowInPort) && !targetPort.type.IsAssignableFrom(sourcePort.type))
             {
-                LogUtils.Error("Non-identical or inherited types");
+                NLog.Error("Non-identical or inherited types");
                 return false;
             }
 
             if (sourcePort.node == targetPort.node)
             {
-                LogUtils.Error($"Cannot connect to the same node [{sourcePort.node.title}]");
+                NLog.Error($"Cannot connect to the same node [{sourcePort.node.title}]");
                 return false;
             }
 

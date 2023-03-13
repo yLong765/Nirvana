@@ -724,16 +724,16 @@ namespace Nirvana.Editor
             GUI.BeginClip(rect);
             GUILayout.BeginArea(areaRect);
             
-            LogUtils.CheckAllLog();
+            NLog.CheckAllLog();
             var heightCount = 0.0f;
-            foreach (var log in LogUtils.allLogs)
+            foreach (var log in NLog.allLogs)
             {
                 var height = Mathf.Max(35f, StyleUtils.loggerBox.CalcHeight(log.value, 165f));
                 EditorUtils.DrawBox(new Rect(0, heightCount, loggerWidth, height), ColorUtils.gray21, StyleUtils.normalBG);
                 heightCount += height + 2f;
 
                 GUILayout.BeginHorizontal();
-                GUILayout.Label(EditorGUIUtility.IconContent(LogUtils.GetLogIconName(log.type)), GUILayout.MaxWidth(35));
+                GUILayout.Label(EditorGUIUtility.IconContent(NLog.GetLogIconName(log.type)), GUILayout.MaxWidth(35));
                 GUILayout.Label(log.value, StyleUtils.loggerBox);
                 GUILayout.EndHorizontal();
                 GUILayout.Space(2f);

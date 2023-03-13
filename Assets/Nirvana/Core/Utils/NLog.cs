@@ -32,7 +32,7 @@ namespace Nirvana
         }
     }
 
-    public static class LogUtils
+    public static class NLog
     {
         public static List<Log> allLogs => _logs;
         private static List<Log> _logs = new List<Log>();

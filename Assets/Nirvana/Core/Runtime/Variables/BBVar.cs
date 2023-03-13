@@ -8,23 +8,24 @@ namespace Nirvana
 {
     public abstract class BBVar
     {
-        protected Variable _linkVariable;
         private bool _linkBlackboard;
         private string _linkID;
         private BlackboardSource _linkBBSource;
+        protected Variable _linkVariable;
 
         public bool linkBlackboard
         {
             get => _linkBlackboard;
-            protected set => _linkBlackboard = value;
+            set => _linkBlackboard = value;
         }
 
         public string linkID
         {
             get => _linkID;
-            protected set => _linkID = value;
+            set => _linkID = value;
         }
 
+        [JsonIgnore]
         public BlackboardSource linkBBSource
         {
             get => _linkBBSource;
@@ -39,7 +40,6 @@ namespace Nirvana
             }
         }
 
-        [JsonIgnore]
         public object value
         {
             get => GetObjValue();
@@ -72,8 +72,7 @@ namespace Nirvana
         private T _value;
         private Func<T> getter;
         private Action<T> setter;
-
-        [JsonIgnore]
+        
         public new T value
         {
             get
@@ -88,8 +87,10 @@ namespace Nirvana
             set
             {
                 setter?.Invoke(value);
-                if (isNone) return;
-                _value = value;
+                if (!linkBlackboard)
+                {
+                    _value = value;
+                }
             }
         }
 

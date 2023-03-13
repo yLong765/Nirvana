@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public abstract partial class Node
+    public abstract partial class Node : ISerializationCallbackReceiverExtend
     {
         /// <summary>
         /// Node最小Size
@@ -159,6 +159,9 @@ namespace Nirvana
         public virtual void DrawLinkGUI() { }
         
         protected virtual void OnEditorRefresh() { }
+        
+        public virtual void OnBeforeSerialize() { }
+        public virtual void OnAfterDeserialize() { }
     }
 }
 #endif

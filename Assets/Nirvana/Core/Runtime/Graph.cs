@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Nirvana
 {
     [Serializable]
-    public abstract partial class Graph : ScriptableObject, ISerializationCallbackReceiver, ISerialize
+    public abstract partial class Graph : ScriptableObject, ISerializationCallbackReceiver
     {
         #region abstract
 
@@ -195,6 +195,7 @@ namespace Nirvana
 
         public void Deserialize(string json)
         {
+            
             _graphSource = JsonConvert.DeserializeObject<GraphSource>(json, Settings) ?? new GraphSource();
             EditorRefresh();
             for (int i = 0; i < _graphSource.nodes.Count; i++)

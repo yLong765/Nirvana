@@ -10,9 +10,13 @@ namespace Nirvana
     {
         private string _id;
         private string _name;
-
-        public string ID => string.IsNullOrEmpty(_id) ? _id = Guid.NewGuid().ToString() : _id;
         
+        public string ID
+        {
+            get => string.IsNullOrEmpty(_id) ? _id = Guid.NewGuid().ToString() : _id;
+            set => _id = value;
+        }
+
         /// <summary>
         /// 变量名
         /// </summary>

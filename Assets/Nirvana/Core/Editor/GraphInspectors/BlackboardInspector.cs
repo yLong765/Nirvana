@@ -73,7 +73,7 @@ namespace Nirvana.Editor
                 }
                 catch
                 {
-                    LogUtils.Error("Blackboard has duplicate names!");
+                    NLog.Error("Blackboard has duplicate names!");
                 }
             }
 
