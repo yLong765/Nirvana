@@ -59,7 +59,7 @@ namespace Nirvana
             // 初始化Blackboard的Variable
             foreach (var bbVariable in allBBVariables)
             {
-                bbVariable
+                bbVariable.Bind();
             }
         }
         

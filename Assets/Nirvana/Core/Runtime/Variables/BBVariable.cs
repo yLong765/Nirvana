@@ -78,7 +78,7 @@ namespace Nirvana
             }
         }
 
-        public override void LinkToBlackboard(Variable variable = null)
+        public override void LinkToBlackboard( Variable variable = null)
         {
             base.LinkToBlackboard(variable);
             Bind(variable);
