@@ -37,7 +37,7 @@ namespace Nirvana
 
         public Variable GetVariableByID(string ID)
         {
-           return variables.Values.First(variable => variable.ID == ID);
+            return variables?.Values.First(variable => variable.ID == ID);
         }
         
         /// <summary>

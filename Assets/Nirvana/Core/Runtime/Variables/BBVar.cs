@@ -30,10 +30,12 @@ namespace Nirvana
         {
             get => _linkBBSource;
             set
-            {
-                if (value != null)
+            { 
+                if (value != null && !string.IsNullOrEmpty(linkID))
                 {
-                    Bind(value.GetVariableByID(linkID));
+                    var variable = value.GetVariableByID(linkID);
+                    _linkVariable = variable;
+                    Bind(variable);
                 }
 
                 _linkBBSource = value;
@@ -51,7 +53,7 @@ namespace Nirvana
             _linkBBSource = bbSource;
             _linkID = variable?.ID;
             _linkVariable = variable;
-            linkBlackboard = variable != null;
+            linkBlackboard = bbSource != null;
         }
 
         public void LinkToBlackboard(bool isLink)
@@ -60,11 +62,11 @@ namespace Nirvana
         }
         
         [JsonIgnore] public bool isNone => string.IsNullOrEmpty(name);
+        [JsonIgnore] public abstract string name { get; }
+        [JsonIgnore] public abstract Type type { get; }
         public abstract object GetObjValue();
         public abstract void SetObjValue(object value);
         public abstract void Bind(Variable variable);
-        [JsonIgnore] public abstract string name { get; }
-        [JsonIgnore] public abstract Type type { get; }
     }
 
     public class BBVar<T> : BBVar
@@ -93,6 +95,7 @@ namespace Nirvana
                 }
             }
         }
+        
 
         public override void LinkToBlackboard(BlackboardSource bbSource = null, Variable variable = null)
         {

@@ -52,7 +52,7 @@ namespace Nirvana
         {
             foreach (var bbVariable in allBBVars)
             {
-                bbVariable.LinkToBlackboard(bbSource);
+                bbVariable.linkBBSource = bbSource;
             }
         }
         

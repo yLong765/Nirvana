@@ -44,7 +44,7 @@ namespace Nirvana.PartialEditor
                     if (GUI.Button(rect, selectVariableName, EditorStyles.popup))
                     {
                         var menu = new GenericMenu();
-                        menu.AddItem(new GUIContent("[NONE]"), false, () => { variable.LinkToBlackboard(); });
+                        menu.AddItem(new GUIContent("[NONE]"), false, () => { variable.LinkToBlackboard(GraphUtils.currentGraph.bbSource); });
 
                         Type genericType = null;
                         if (info.FieldType.IsGenericType)
