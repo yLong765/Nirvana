@@ -18,6 +18,20 @@ namespace Nirvana
             this.title = title;
         }
     }
+    
+    /// <summary>
+    /// 描述特性
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class DescriptionAttribute : Attribute
+    {
+        public string description;
+
+        public DescriptionAttribute(string description)
+        {
+            this.description = description;
+        }
+    }
 
     /// <summary>
     /// 端口特性

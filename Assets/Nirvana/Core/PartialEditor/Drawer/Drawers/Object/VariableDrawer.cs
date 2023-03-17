@@ -54,11 +54,9 @@ namespace Nirvana.PartialEditor
 
                         if (genericType != null)
                         {
-                            foreach (var pair in GraphUtils.currentGraph.variables.Where(pair =>
-                                pair.Value.type == genericType))
+                            foreach (var pair in GraphUtils.currentGraph.variables.Where(pair => pair.Value.type == genericType))
                             {
-                                menu.AddItem(new GUIContent($"Graph/{pair.Key}"), false,
-                                    () => { variable.LinkToBlackboard(GraphUtils.currentGraph.bbSource, pair.Value); });
+                                menu.AddItem(new GUIContent($"Graph/{pair.Key}"), false, () => { variable.LinkToBlackboard(GraphUtils.currentGraph.bbSource, pair.Value); });
                             }
                         }
 

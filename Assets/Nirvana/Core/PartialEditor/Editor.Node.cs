@@ -56,11 +56,11 @@ namespace Nirvana
                         {
                             _title = _title[.._title.LastIndexOf("Node", StringComparison.Ordinal)];
                         }
-
-                        if (_isOverwriteOnGraphStartMethod)
-                        {
-                            _title = $"➦ {_title}";
-                        }
+                    }
+                    
+                    if (_isOverwriteOnGraphStartMethod)
+                    {
+                        _title = $"➦ {_title}";
                     }
                 }
 
