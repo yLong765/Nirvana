@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Nirvana
 {
-    public enum LogType
+    public enum LogTag
     {
         Error,
         Warning,
@@ -16,13 +16,13 @@ namespace Nirvana
     public class Log
     {
         public string value;
-        public LogType type;
+        public LogTag tag;
         private DateTime endTime;
 
-        public Log(string value, LogType type, float duration)
+        public Log(string value, LogTag tag, float duration)
         {
             this.value = value;
-            this.type = type;
+            this.tag = tag;
             this.endTime = DateTime.Now.AddSeconds(duration);
         }
 
@@ -37,12 +37,12 @@ namespace Nirvana
         public static List<Log> allLogs => _logs;
         private static List<Log> _logs = new List<Log>();
 
-        public static string GetLogIconName(LogType logType)
+        public static string GetLogIconName(LogTag logTag)
         {
-            return logType switch
+            return logTag switch
             {
-                LogType.Normal => "console.infoicon",
-                LogType.Warning => "console.warnicon",
+                LogTag.Normal => "console.infoicon",
+                LogTag.Warning => "console.warnicon",
                 _ => "console.erroricon"
             };
         }
@@ -61,21 +61,21 @@ namespace Nirvana
         public static void Error(string value, float duration = 5f)
         {
             CheckAllLog();
-            _logs.Add(new Log(value, LogType.Error, duration));
+            _logs.Add(new Log(value, LogTag.Error, duration));
             Debug.LogError(value);
         }
 
         public static void Warning(string value, float duration = 5f)
         {
             CheckAllLog();
-            _logs.Add(new Log(value, LogType.Warning, duration));
+            _logs.Add(new Log(value, LogTag.Warning, duration));
             Debug.LogWarning(value);
         }
 
         public static void Normal(string value, float duration = 5f)
         {
             CheckAllLog();
-            _logs.Add(new Log(value, LogType.Normal, duration));
+            _logs.Add(new Log(value, LogTag.Normal, duration));
             Debug.Log(value);
         }
     }

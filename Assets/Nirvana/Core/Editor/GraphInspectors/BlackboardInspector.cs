@@ -31,9 +31,9 @@ namespace Nirvana.Editor
                 {
                     menu.AddItem(t.Name, () =>
                     {
-                        Undo.RecordObject(_context, "New Variable");
+                        UndoUtils.RecordObject(_context, "New Variable");
                         _bbSource.AddVariable(t, t.Name);
-                        EditorUtility.SetDirty(_context);
+                        UndoUtils.SetDirty(_context);
                         GraphUtils.willSetDirty = true;
                     });
                 }
@@ -67,9 +67,9 @@ namespace Nirvana.Editor
             {
                 try
                 {
-                    Undo.RecordObject(_context, "change or drag sort Variable");
+                    UndoUtils.RecordObject(_context, "change or drag sort Variable");
                     _bbSource.variables = _tempVariablesList.ToDictionary(d => d.name, d => d);
-                    EditorUtility.SetDirty(_context);
+                    UndoUtils.SetDirty(_context);
                 }
                 catch
                 {
@@ -108,15 +108,15 @@ namespace Nirvana.Editor
             var menu = new GenericMenu();
             menu.AddItem(new GUIContent("Copy New Variable"), false, () =>
             {
-                Undo.RecordObject(_context, "Copy New Variable");
+                UndoUtils.RecordObject(_context, "Copy New Variable");
                 _bbSource.AddVariable(variable.type, variable.name);
-                EditorUtility.SetDirty(_context);
+                UndoUtils.SetDirty(_context);
             });
             menu.AddItem(new GUIContent("Delete Variable"), false, () =>
             {
-                Undo.RecordObject(_context, "Delete Variable");
+                UndoUtils.RecordObject(_context, "Delete Variable");
                 _bbSource.DelVariable(variable.name);
-                EditorUtility.SetDirty(_context);
+                UndoUtils.SetDirty(_context);
             });
             return menu;
         }

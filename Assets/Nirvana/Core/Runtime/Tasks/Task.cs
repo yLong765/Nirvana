@@ -49,5 +49,16 @@ namespace Nirvana
                 return _description;
             }
         }
+
+        public virtual string nodeInfo => title;
+
+        protected virtual void OnCreate() { }
+
+        public static Task Create(Type type)
+        {
+            var newTask = (Task) Activator.CreateInstance(type);
+            newTask.OnCreate();
+            return newTask;
+        }
     }
 }

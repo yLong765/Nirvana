@@ -13,6 +13,7 @@ namespace Nirvana
         private List<Node> _nodes;
         private BlackboardSource _bbSource;
         private List<BBVar> _bbVars;
+        private List<Task> _tasks;
 
         /// <summary>
         /// Graph里全部的Node
@@ -36,6 +37,12 @@ namespace Nirvana
         {
             get => _bbVars;
             set => _bbVars = value;
+        }
+
+        public List<Task> tasks
+        {
+            get => _tasks;
+            set => _tasks = value;
         }
 
         public GraphSource()

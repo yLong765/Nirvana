@@ -29,6 +29,8 @@ namespace Nirvana
         [JsonIgnore] public List<Node> allNodes => _graphSource.nodes;
 
         public List<BBVar> allBBVars => _graphSource.bbVars;
+
+        public List<Task> allTasks => _graphSource.tasks;
         
         /// <summary>
         /// blackboard元数据
@@ -90,12 +92,9 @@ namespace Nirvana
         {
             var newNode = Node.Create(this, type, pos);
             newNode.ID = allNodes.Count;
-            
-            Undo.RecordObject(this, "New Node");
-            
+            UndoUtils.RecordObject(this, "New Node");
             allNodes.Add(newNode);
-            
-            EditorUtility.SetDirty(this);
+            UndoUtils.SetDirty(this);
             return newNode;
         }
 
@@ -104,8 +103,7 @@ namespace Nirvana
         /// </summary>
         public void RemoveNode(Node node)
         {
-            Undo.RecordObject(this, "Remove Node");
-            
+            UndoUtils.RecordObject(this, "Remove Node");
             if (allNodes.Contains(node))
             {
                 node.OnDestroy();
@@ -113,7 +111,7 @@ namespace Nirvana
             }
 
             UpdateNodeIDs();
-            EditorUtility.SetDirty(this);
+            UndoUtils.SetDirty(this);
         }
 
         /// <summary>
@@ -123,11 +121,9 @@ namespace Nirvana
         {
             if (!Node.IsNewLinkAllowed(sourcePort, targetPort)) return null;
             
-            Undo.RecordObject(this, "New Link");
-            
+            UndoUtils.RecordObject(this, "New Link");
             var newLink = Link.Create(sourcePort, targetPort);
-            
-            EditorUtility.SetDirty(this);
+            UndoUtils.SetDirty(this);
             return newLink;
         }
 
@@ -136,12 +132,32 @@ namespace Nirvana
         /// </summary>
         public void RemoveLink(Link link)
         {
-            Undo.RecordObject(this, "Remove Link");
+            UndoUtils.RecordObject(this, "Remove Link");
             link.sourceNode.outLinks.Remove(link);
             link.targetNode.inLinks.Remove(link);
             link.sourcePort.linkCount--;
             link.targetPort.linkCount--;
-            EditorUtility.SetDirty(this);
+            UndoUtils.SetDirty(this);
+        }
+
+        public Task AddTask(Type type)
+        {
+            var newTask = Task.Create(type);
+            
+            UndoUtils.RecordObject(this, "New Task");
+            allTasks.Add(newTask);
+            UndoUtils.SetDirty(this);
+            return newTask;
+        }
+
+        public void RemoveTask(Task task)
+        {
+            UndoUtils.RecordObject(this, "Remove Task");
+            if (allTasks.Contains(task))
+            {
+                allTasks.Remove(task);
+            }
+            UndoUtils.SetDirty(this);
         }
 
         /// <summary>
