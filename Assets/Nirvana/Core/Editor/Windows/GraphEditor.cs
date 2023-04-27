@@ -554,7 +554,7 @@ namespace Nirvana.Editor
             GUILayout.FlexibleSpace();
 
             GUI.color = ColorUtils.gray76;
-            if (GUILayout.Button($"{graph.name} @ Nirvana Core", EditorStyles.toolbarButton))
+            if (GUILayout.Button($"{graph.name} @Nirvana Core", EditorStyles.toolbarButton))
             {
                 Selection.activeObject = graph;
             }

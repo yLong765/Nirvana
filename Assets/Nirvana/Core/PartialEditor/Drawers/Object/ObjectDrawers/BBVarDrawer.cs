@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Nirvana.PartialEditor
 {
-    public class VariableDrawer : ObjectDrawer<BBVar>
+    public class BBVarDrawer : ObjectDrawer<BBVar>
     {
         protected override BBVar OnGUI(GUIContent content, BBVar variable)
         {
@@ -19,7 +19,6 @@ namespace Nirvana.PartialEditor
             }
             else
             {
-
                 if (!variable.linkBlackboard)
                 {
                     GUILayout.BeginHorizontal();

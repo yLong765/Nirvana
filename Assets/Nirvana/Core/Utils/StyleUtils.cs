@@ -239,7 +239,7 @@ namespace Nirvana
                     _fixIcon.fixedWidth = 18;
                     _fixIcon.fixedHeight = 18;
                     _fixIcon.alignment = TextAnchor.MiddleCenter;
-                    _fixIcon.padding = new RectOffset(1, 1, 3, 1);
+                    _fixIcon.padding = new RectOffset(1, 1, 5, 2);
                 }
 
                 return _fixIcon;
