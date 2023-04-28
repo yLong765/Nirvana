@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Nirvana
+namespace Nirvana.HTN
 {
     public abstract class HTN_Node : Node
     {
