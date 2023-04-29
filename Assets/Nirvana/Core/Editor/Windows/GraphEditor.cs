@@ -733,7 +733,7 @@ namespace Nirvana.Editor
                 heightCount += height + 2f;
 
                 GUILayout.BeginHorizontal();
-                GUILayout.Label(EditorGUIUtility.IconContent(NLog.GetLogIconName(log.tag)), GUILayout.MaxWidth(35));
+                GUILayout.Label(EditorGUIUtility.IconContent(NLog.GetLogIconName(log.type)), GUILayout.MaxWidth(35));
                 GUILayout.Label(log.value, StyleUtils.loggerBox);
                 GUILayout.EndHorizontal();
                 GUILayout.Space(2f);

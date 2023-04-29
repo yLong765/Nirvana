@@ -56,10 +56,27 @@ namespace Nirvana.HTN
             return status;
         }
 
+        private void ExecuteEffect()
+        {
+            foreach (var effect in effects)
+            {
+                effect.Execute();
+            }
+        }
+
         protected void Stop(bool success = true)
         {
-            status = success ? HTNTaskStatus.Success : HTNTaskStatus.Failure;
-            OnStopAction();
+            if (success)
+            {
+                status = HTNTaskStatus.Success;
+                ExecuteEffect();
+            }
+            else
+            {
+                status = HTNTaskStatus.Failure;
+            }
+            
+            OnStop();
         }
 
         protected void Error(string message)
@@ -78,7 +95,7 @@ namespace Nirvana.HTN
         {
         }
 
-        protected virtual void OnStopAction()
+        protected virtual void OnStop()
         {
         }
 
